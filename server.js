@@ -3,7 +3,7 @@ var argv = require("yargs").argv;
 var fs = require("fs");
 var app = express();
 
-var port = argv.port || 8090;
+var port = process.env.PORT || 5000;
 var resourcePath = argv.path || "default";
 
 var identity = function(x){return x; };
