@@ -19,11 +19,12 @@ CREATE TABLE clients (
 	id serial primary key, 
 	name varchar(255),
 	lastname varchar(255),
-	picture varchar(255),
+	avatar varchar(255),
+	thumbnail varchar(255),
 	cuil varchar(255),
 	address varchar(255),
-	phone varchar(255),
+	phone_number varchar(32),
 	email varchar(255),
-	latitude real,
-	longitude real
+	lat real,
+	lon real
 );
