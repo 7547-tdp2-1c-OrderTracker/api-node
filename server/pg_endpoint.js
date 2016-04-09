@@ -3,7 +3,7 @@ var pg = require("pg");
 var q = require("q");
 
 var identity = function(obj){return obj; };
-module.exports = function(tableName, listWrapper, getWrapper) {
+module.exports = function(tableName, queryList, queryGet, listWrapper, getWrapper) {
 	var app = express();
 
 	app.get("/:id", function(req, res) {
@@ -16,7 +16,7 @@ module.exports = function(tableName, listWrapper, getWrapper) {
 
 		pg.connect(process.env.DATABASE_URL, function(err, client, done) {
 			var query = q.denodeify(client.query.bind(client));
-			query("SELECT * FROM " + tableName + " WHERE id = $1::int", [req.params.id]).then(function(result) {
+			query(queryGet, [req.params.id]).then(function(result) {
 				res.send(wrapperInstance(result.rows[0]));
 			}).catch(function(err) {
 				console.error(err);
@@ -38,7 +38,8 @@ module.exports = function(tableName, listWrapper, getWrapper) {
 
 		pg.connect(process.env.DATABASE_URL, function(err, client, done) {
 			var query = q.denodeify(client.query.bind(client));
-			var rows = query("SELECT * FROM "+tableName+" OFFSET $1::int LIMIT $2::int", [offset, limit]);
+
+			var rows = query(queryList, [offset, limit]);
 			var total = query("SELECT COUNT(*) FROM "+tableName);
 
 			q.all([rows, total])

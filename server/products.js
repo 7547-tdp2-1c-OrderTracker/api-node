@@ -15,6 +15,8 @@ var mapList = function(req, res) {
 		return {
 			id: product.id,
 			name: product.name,
+			brand: product.brand_name,
+			brand_id: product.brand_id,
 			description: product.description,
 			thumbnail: product.thumbnail,
 			picture: product.picture,
@@ -26,5 +28,7 @@ var mapList = function(req, res) {
 };
 
 var mapGet = mapList;
+var queryList = "SELECT products.id, products.name, products.code, products.picture, products.thumbnail, products.description, products.stock, products.retail_price, products.wholesale_price, products.currency, products.brand_id, brands.name as brand_name FROM products JOIN brands ON brands.id = products.brand_id OFFSET $1::int LIMIT $2::int";
+var queryGet = "SELECT products.id, products.name, products.code, products.picture, products.thumbnail, products.description, products.stock, products.retail_price, products.wholesale_price, products.currency, products.brand_id, brands.name as brand_name FROM products JOIN brands ON brands.id = products.brand_id WHERE products.id = $1::int";
 
-module.exports = pg_endpoint("products", mapList, mapGet);
+module.exports = pg_endpoint("products", queryList, queryGet, mapList, mapGet);
