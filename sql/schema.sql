@@ -11,7 +11,8 @@ CREATE TABLE products (
 	description varchar(255),
 	stock integer,
 	status integer,
-	price integer,
+	wholesale_price integer,
+	retail_price integer,
 	currency varchar(4)
 );
 
@@ -20,7 +21,6 @@ CREATE TABLE clients (
 	name varchar(255),
 	lastname varchar(255),
 	avatar varchar(255),
-	thumbnail varchar(255),
 	cuil varchar(255),
 	address varchar(255),
 	phone_number varchar(32),

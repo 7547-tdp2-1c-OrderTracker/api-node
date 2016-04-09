@@ -3,13 +3,13 @@ var pg = require("pg");
 var q = require("q");
 
 var identity = function(obj){return obj; };
-module.exports = function(tableName, wrapper) {
+module.exports = function(tableName, listWrapper, getWrapper) {
 	var app = express();
 
 	app.get("/:id", function(req, res) {
 		var wrapperInstance;
-		if (wrapper) {
-			wrapperInstance = wrapper(req, res);
+		if (getWrapper) {
+			wrapperInstance = getWrapper(req, res);
 		} else {
 			wrapperInstance = identity;
 		}
@@ -30,8 +30,8 @@ module.exports = function(tableName, wrapper) {
 		var limit = parseInt(req.query.limit || '20');
 
 		var wrapperInstance;
-		if (wrapper) {
-			wrapperInstance = wrapper(req, res);
+		if (listWrapper) {
+			wrapperInstance = listWrapper(req, res);
 		} else {
 			wrapperInstance = identity;
 		}
