@@ -1,17 +1,9 @@
 DROP TABLE products;
 DROP TABLE clients;
-DROP TABLE brands;
-
-CREATE TABLE brands (
-	id serial primary key,
-	name varchar(255),
-	code varchar(255),
-	picture varchar(255)
-);
 
 CREATE TABLE products (
 	id serial primary key, 
-	brand_id integer references brands (id),
+	brand varchar(255),
 	name varchar(255),
 	code varchar(255),
 	picture varchar(255),
@@ -19,8 +11,8 @@ CREATE TABLE products (
 	description varchar(255),
 	stock integer,
 	status integer,
-	retail_price integer,
-	wholesale_price integer
+	price integer,
+	currency varchar(4)
 );
 
 CREATE TABLE clients (

@@ -8,10 +8,10 @@ module.exports = pg_endpoint("products", function(req, res) {
 	fullUrl = fullUrl + "/images";
 
 	return function(product) {
-		if (product.thumbnail) {
+		if (product.thumbnail && product.thumbnail[0] === "/") {
 			product.thumbnail = fullUrl + product.thumbnail;
 		}
-		if (product.picture) {
+		if (product.picture && product.picture[0] === "/") {
 			product.picture = fullUrl + product.picture;
 		}
 		return product;
