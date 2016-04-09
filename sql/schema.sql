@@ -6,7 +6,7 @@ CREATE TABLE brands (
 	id serial primary key,
 	name varchar(255),
 	code varchar(255),
-	image_path varchar(255)
+	picture varchar(255)
 );
 
 CREATE TABLE products (
@@ -14,7 +14,8 @@ CREATE TABLE products (
 	brand_id integer references brands (id),
 	name varchar(255),
 	code varchar(255),
-	image_path varchar(255),
+	picture varchar(255),
+	thumbnail varchar(255),
 	description varchar(255),
 	stock integer,
 	status integer,
@@ -26,7 +27,7 @@ CREATE TABLE clients (
 	id serial primary key, 
 	name varchar(255),
 	lastname varchar(255),
-	image_path varchar(255),
+	picture varchar(255),
 	cuil varchar(255),
 	address varchar(255),
 	phone varchar(255),
