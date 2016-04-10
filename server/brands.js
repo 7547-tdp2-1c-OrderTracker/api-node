@@ -24,4 +24,4 @@ var mapGet = mapList;
 var queryList = "SELECT * FROM brands OFFSET $1::int LIMIT $2::int";
 var queryGet = "SELECT * FROM brands WHERE brands.id = $1::int";
 
-module.exports = pg_endpoint("brands", queryList, queryGet, mapList, mapGet);
+module.exports = pg_endpoint("brands", queryList, queryGet, mapList, mapGet, {default_limit: 99999999});

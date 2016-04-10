@@ -3,8 +3,9 @@ var pg = require("pg");
 var q = require("q");
 
 var identity = function(obj){return obj; };
-module.exports = function(tableName, queryList, queryGet, listWrapper, getWrapper) {
+module.exports = function(tableName, queryList, queryGet, listWrapper, getWrapper, options) {
 	var app = express();
+	options = options ||{};
 
 	app.get("/:id", function(req, res) {
 		var wrapperInstance;
@@ -27,7 +28,7 @@ module.exports = function(tableName, queryList, queryGet, listWrapper, getWrappe
 
 	app.get("/", function(req, res) {
 		var offset = parseInt(req.query.offset || '0');
-		var limit = parseInt(req.query.limit || '20');
+		var limit = parseInt(req.query.limit || options.default_limit || '20');
 
 		var wrapperInstance;
 		if (listWrapper) {
