@@ -3,7 +3,8 @@ var pg = require("pg");
 var q = require("q");
 
 var identity = function(obj){return obj; };
-module.exports = function(tableName, queryList, queryGet, listWrapper, getWrapper, options) {
+
+module.exports = function(tableName, queryList, queryCount, queryGet, listWrapper, getWrapper, options) {
 	var app = express();
 	options = options ||{};
 
@@ -17,7 +18,7 @@ module.exports = function(tableName, queryList, queryGet, listWrapper, getWrappe
 
 		pg.connect(process.env.DATABASE_URL, function(err, client, done) {
 			var query = q.denodeify(client.query.bind(client));
-			query(queryGet, [req.params.id]).then(function(result) {
+			query(queryGet(), [req.params.id]).then(function(result) {
 				res.send(wrapperInstance(result.rows[0]));
 			}).catch(function(err) {
 				console.error(err);
@@ -40,8 +41,8 @@ module.exports = function(tableName, queryList, queryGet, listWrapper, getWrappe
 		pg.connect(process.env.DATABASE_URL, function(err, client, done) {
 			var query = q.denodeify(client.query.bind(client));
 
-			var rows = query(queryList, [offset, limit]);
-			var total = query("SELECT COUNT(*) FROM "+tableName);
+			var rows = queryList(query, req, offset, limit); // query(queryList, [offset, limit]);
+			var total = queryCount(query, req); //query("SELECT COUNT(*) FROM "+tableName);
 
 			q.all([rows, total])
 				.spread(function(rows, total) {

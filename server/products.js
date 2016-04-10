@@ -28,7 +28,20 @@ var mapList = function(req, res) {
 };
 
 var mapGet = mapList;
-var queryList = "SELECT products.id, products.name, products.code, products.picture, products.thumbnail, products.description, products.stock, products.retail_price, products.wholesale_price, products.currency, products.brand_id, brands.name as brand_name FROM products JOIN brands ON brands.id = products.brand_id OFFSET $1::int LIMIT $2::int";
+var queryList = function(query, req, offset, limit) {
+	if (req.query.brand_id) {
+		return query("SELECT products.id, products.name, products.code, products.picture, products.thumbnail, products.description, products.stock, products.retail_price, products.wholesale_price, products.currency, products.brand_id, brands.name as brand_name FROM products JOIN brands ON brands.id = products.brand_id WHERE products.brand_id = $3::int OFFSET $1::int LIMIT $2::int", [offset, limit, req.query.brand_id]);
+	} else {
+		return query("SELECT products.id, products.name, products.code, products.picture, products.thumbnail, products.description, products.stock, products.retail_price, products.wholesale_price, products.currency, products.brand_id, brands.name as brand_name FROM products JOIN brands ON brands.id = products.brand_id OFFSET $1::int LIMIT $2::int", [offset, limit]);
+	}
+};
 var queryGet = "SELECT products.id, products.name, products.code, products.picture, products.thumbnail, products.description, products.stock, products.retail_price, products.wholesale_price, products.currency, products.brand_id, brands.name as brand_name FROM products JOIN brands ON brands.id = products.brand_id WHERE products.id = $1::int";
+var queryCount = function(query, req) {
+	if (req.query.brand_id) {
+		return query("SELECT COUNT(*) FROM products JOIN brands ON brands.id = products.brand_id WHERE products.brand_id = $1::int", [req.query.brand_id]);
+	} else {
+		return query("SELECT COUNT(*) FROM products JOIN brands ON brands.id = products.brand_id");
+	}
+};
 
-module.exports = pg_endpoint("products", queryList, queryGet, mapList, mapGet);
+module.exports = pg_endpoint("products", queryList, queryCount, queryGet, mapList, mapGet);

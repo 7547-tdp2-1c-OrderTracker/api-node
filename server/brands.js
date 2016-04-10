@@ -21,7 +21,12 @@ var mapList = function(req, res) {
 };
 
 var mapGet = mapList;
-var queryList = "SELECT * FROM brands OFFSET $1::int LIMIT $2::int";
+var queryList = function(query, req, offset, limit) {
+	return query("SELECT * FROM brands OFFSET $1::int LIMIT $2::int", [offset, limit]);
+};
+var queryCount = function(query, req) {
+	return query("SELECT COUNT(*) FROM brands");
+};
 var queryGet = "SELECT * FROM brands WHERE brands.id = $1::int";
 
-module.exports = pg_endpoint("brands", queryList, queryGet, mapList, mapGet, {default_limit: 99999999});
+module.exports = pg_endpoint("brands", queryList, queryCount, queryGet, mapList, mapGet, {default_limit: 99999999});
