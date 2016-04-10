@@ -22,7 +22,7 @@ var mapList = function(req, res) {
 			picture: product.picture,
 			stock: product.stock,
 			price: product.retail_price, // TODO: esto depende delcliente,
-			currency: product.curreny
+			currency: product.currency
 		};
 	}
 };
