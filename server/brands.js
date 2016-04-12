@@ -29,4 +29,7 @@ var queryCount = function(query, req) {
 };
 var queryGet = "SELECT * FROM brands WHERE brands.id = $1::int";
 
-module.exports = pg_endpoint("brands", queryList, queryCount, queryGet, mapList, mapGet, {default_limit: 99999999});
+module.exports = pg_endpoint("brands", queryList, queryCount, queryGet, mapList, mapGet, {
+	default_limit: 99999999,
+	fields: ["name", "picture"]
+});

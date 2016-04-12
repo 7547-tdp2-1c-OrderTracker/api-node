@@ -7,4 +7,6 @@ var queryCount = function(query, req) {
 };
 var queryGet = "SELECT * FROM clients WHERE id = $1::int";
 
-module.exports = pg_endpoint("clients", queryList, queryCount, queryGet);
+module.exports = pg_endpoint("clients", queryList, queryCount, queryGet, null, null, {
+	fields: ["name", "lastname", "avatar", "thumbnail", "cuil", "address", "phone_number", "email", "lat", "lon"]
+});

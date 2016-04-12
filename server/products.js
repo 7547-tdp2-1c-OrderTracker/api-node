@@ -44,4 +44,6 @@ var queryCount = function(query, req) {
 	}
 };
 
-module.exports = pg_endpoint("products", queryList, queryCount, queryGet, mapList, mapGet);
+module.exports = pg_endpoint("products", queryList, queryCount, queryGet, mapList, mapGet, {
+	fields: ["name", "brand_id", "description", "thumbnail", "picture", "stock", "retail_price", "wholesale_price", "currency"]
+});

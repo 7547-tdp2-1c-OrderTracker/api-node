@@ -1,11 +1,17 @@
 var express = require("express");
 var argv = require("yargs").argv;
 var fs = require("fs");
+var bodyParser = require('body-parser')
 var clients = require("./server/clients");
 var products = require("./server/products");
 var brands = require("./server/brands");
 
 var app = express();
+
+app.use( bodyParser.json() );       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+  extended: true
+})); 
 
 var port = process.env.PORT || 5000;
 var resourcePath = argv.path || "default";
