@@ -21,7 +21,7 @@ var mapList = function(req, res) {
 			thumbnail: product.thumbnail,
 			picture: product.picture,
 			stock: product.stock,
-			price: product.retail_price, // TODO: esto depende delcliente,
+			price: product.retail_price || 0.0, // TODO: esto depende delcliente,
 			currency: product.currency
 		};
 	}
