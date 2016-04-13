@@ -11,9 +11,11 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 	app.delete("/:id", function(req, res) {
 		pg.connect(process.env.DATABASE_URL, function(err, client, done) {
 			var query = q.denodeify(client.query.bind(client));
-			query("DELETE FROM " + tableName + " WHERE id = $1::int", [req.params.id]).then(function() {
+			query("DELETE FROM " + tableName + " WHERE id = $1::int", [req.params.id])
+			.finally(done)
+			.then(function() {
 				res.sendStatus(204);
-			}).finally(done);
+			});
 		});
 	});
 
@@ -31,12 +33,14 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 				var query = q.denodeify(client.query.bind(client));
 				query(queryText, currentFields.map(function(fieldName){
 					return req.body[fieldName];
-				})).then(function() {
+				}))
+				.finally(done)
+				.then(function() {
 					res.sendStatus(204);
 				}).catch(function(err) {
 					console.error(err);
 					res.status(500).send(err.toString());
-				}).finally(done);
+				});
 			});
 		});	
 
@@ -55,12 +59,14 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 					return req.body[fieldName];
 				}));
 				
-				query(queryText, queryParams).then(function() {
+				query(queryText, queryParams)
+				.finally(done)
+				.then(function() {
 					res.sendStatus(204);
 				}).catch(function(err) {
 					console.error(err);
 					res.status(500).send(err.toString());
-				}).finally(done);
+				});
 			});
 		});	
 
@@ -76,12 +82,14 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 
 		pg.connect(process.env.DATABASE_URL, function(err, client, done) {
 			var query = q.denodeify(client.query.bind(client));
-			query(queryGet, [req.params.id]).then(function(result) {
+			query(queryGet, [req.params.id])
+			.finally(done)
+			.then(function(result) {
 				res.send(wrapperInstance(result.rows[0]));
 			}).catch(function(err) {
 				console.error(err);
 				res.status(500).send(err.toString());
-			}).finally(done);
+			});
 		});
 	});
 
@@ -103,6 +111,7 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 			var total = queryCount(query, req); //query("SELECT COUNT(*) FROM "+tableName);
 
 			q.all([rows, total])
+				.finally(done)
 				.spread(function(rows, total) {
 					res.send({
 						paging: {
@@ -117,7 +126,7 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 				.catch(function(err) {
 					console.error(err);
 					res.status(500).send(err.toString());
-				}).finally(done);
+				});
 		});
 	});
 
