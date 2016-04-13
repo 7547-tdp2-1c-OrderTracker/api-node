@@ -20,7 +20,7 @@ var mapList = function(req, res) {
 			description: product.description,
 			thumbnail: product.thumbnail,
 			picture: product.picture,
-			stock: product.stock,
+			stock: product.stock || 0,
 			price: product.retail_price || 0.0, // TODO: esto depende delcliente,
 			currency: product.currency
 		};
