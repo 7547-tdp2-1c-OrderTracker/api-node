@@ -1,6 +1,8 @@
 var express = require("express");
 var argv = require("yargs").argv;
 var fs = require("fs");
+var cors = require("cors");
+
 var bodyParser = require('body-parser')
 var clients = require("./server/clients");
 var products = require("./server/products");
@@ -8,7 +10,8 @@ var brands = require("./server/brands");
 
 var app = express();
 
-app.use( bodyParser.json() );       // to support JSON-encoded bodies
+app.use(cors());
+app.use(bodyParser.json());       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 })); 
