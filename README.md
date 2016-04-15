@@ -12,6 +12,9 @@ $ npm start
 
 ## Uso
 
+En todos los casos, instalar las dependencias con npm
+npm install
+
 ### Correrlo directamente usando node
 
 Asignar la base de datos a una variable de entorno
