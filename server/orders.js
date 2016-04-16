@@ -1,4 +1,16 @@
 var pg_endpoint = require("./pg_endpoint");
+var express = require("express");
+var pg = require("pg");
+var q = require("q");
+
+var pgConnect = q.denodeify(function(url, callback) {
+	pg.connect(url, function(err, client, done) {
+		callback(err, {
+			client: client,
+			done: done
+		});
+	});
+});
 
 var mapList = function(req, res) {
 	return function(order) {
@@ -51,7 +63,35 @@ var order_entries = pg_endpoint("order_entries", queryList, queryCount, queryGet
 	base: "/:order_id/order_items"
 });
 
-var app = orders;
+var lock_order_items = function(req, res, next) {
+	if (req.method === "GET") return next();
+
+	pgConnect(process.env.DATABASE_URL).then(function(connection) {
+		var client = connection.client;
+		var query = q.denodeify(client.query.bind(client));
+		return query("SELECT * FROM orders WHERE id = $1::int", [req.params.order_id])
+			.finally(connection.done)
+			.then(function(result) {
+				if (result.rows && result.rows.length > 0) {
+					if (result.rows[0].status === "confirmed") {
+						throw new Error("Can't change confirmed order " + req.params.order_id + "\n");
+					}
+				}
+			});
+	})
+		.then(function() {
+			next();
+		}).catch(function(err) {
+			console.error(err);
+			res.status(401).send(err.toString());
+		});
+};
+
+var app = express();
+
+app.use("/:order_id", lock_order_items);
+app.use("/:order_id/order_items", lock_order_items);
+app.use(orders);
 app.use(order_entries);
 
 module.exports = app;
