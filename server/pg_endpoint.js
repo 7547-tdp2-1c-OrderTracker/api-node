@@ -8,15 +8,6 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 	var app = express();
 	options = options ||{};
 	var base = options.base||"";
-	var translateField = function(x) {
-		return x;
-	};
-
-	if (options.fields_mapping) {
-		translateField = function(fieldName) {
-			return options.fields_mapping[fieldName]||fieldName;
-		};
-	};
 
 	var pgConnect = q.denodeify(function(url, callback) {
 		pg.connect(url, function(err, client, done) {
@@ -79,7 +70,7 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 					currentFields = currentFields.concat(paramsFields);
 				}
 
-				var queryText = "INSERT INTO " + tableName + " (" + currentFields.map(translateField).join(",") + ") VALUES (" + currentFields.map(function(fieldName, index) {
+				var queryText = "INSERT INTO " + tableName + " (" + currentFields.join(",") + ") VALUES (" + currentFields.map(function(fieldName, index) {
 					return "$"+(index+1);
 				}).join(",") + ") RETURNING id";
 
@@ -117,7 +108,7 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 				}
 
 				var queryText = "UPDATE " + tableName + " SET " + currentFields.map(function(fieldName, index) {
-					return translateField(fieldName) + "=$"+(index+2);
+					return fieldName + "=$"+(index+2);
 				}).join(",") + " WHERE id = $1::int";
 
 				var client = connection.client;
@@ -130,7 +121,7 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 					.finally(connection.done)
 			})
 				.then(function() {
-					return returnById(req, res, req.params.idc);
+					return returnById(req, res, req.params.id);
 				}).catch(function(err) {
 					console.error(err);
 					res.status(500).send(err.toString());
