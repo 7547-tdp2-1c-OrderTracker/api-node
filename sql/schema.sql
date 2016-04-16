@@ -38,7 +38,7 @@ CREATE TABLE clients (
 	email varchar(255),
 	lat real,
 	lon real,
-	sellerType: varchar(8)
+	seller_type varchar(8)
 );
 
 CREATE TABLE orders (
