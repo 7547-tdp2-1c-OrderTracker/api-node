@@ -33,6 +33,24 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 			});
 	});
 
+	var returnById = function(req, res, id) {
+		var wrapperInstance;
+		if (getWrapper) {
+			wrapperInstance = getWrapper(req, res);
+		} else {
+			wrapperInstance = identity;
+		}
+
+		return pgConnect(process.env.DATABASE_URL).then(function(connection) {
+			var client = connection.client;
+			var query = q.denodeify(client.query.bind(client));
+			return query(queryGet, [id])
+				.finally(connection.done);
+		}).then(function(result) {
+			res.send(wrapperInstance(result.rows[0]));
+		});
+	};
+
 	if (options.fields) {
 		app.post(base + "/", function(req, res) {
 			pgConnect(process.env.DATABASE_URL).then(function(connection) {
@@ -53,7 +71,7 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 
 				var queryText = "INSERT INTO " + tableName + " (" + currentFields.join(",") + ") VALUES (" + currentFields.map(function(fieldName, index) {
 					return "$"+(index+1);
-				}).join(",") + ")";
+				}).join(",") + ") RETURNING id";
 
 				var client = connection.client;
 				var query = q.denodeify(client.query.bind(client));
@@ -63,8 +81,8 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 				}))
 					.finally(connection.done);
 			})
-				.then(function() {
-					res.sendStatus(204);
+				.then(function(result) {
+					return returnById(req, res, result.rows[0].id);
 				}).catch(function(err) {
 					console.error(err);
 					res.status(500).send(err.toString());
@@ -101,8 +119,8 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 				return query(queryText, queryParams)
 					.finally(connection.done)
 			})
-				.then(function() {
-					res.sendStatus(204);
+				.then(function(result) {
+					return returnById(req, res, req.params.id);
 				}).catch(function(err) {
 					console.error(err);
 					res.status(500).send(err.toString());
