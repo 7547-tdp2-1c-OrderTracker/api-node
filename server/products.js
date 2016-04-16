@@ -21,9 +21,7 @@ var mapList = function(req, res) {
 			thumbnail: product.thumbnail,
 			picture: product.picture,
 			stock: product.stock || 0,
-			retail_price: product.retail_price,
 			retailPrice: product.retail_price,
-			wholesale_price: product.wholesale_price,
 			wholesalePrice: product.wholesale_price,
 			currency: product.currency
 		};
@@ -48,5 +46,9 @@ var queryCount = function(query, req) {
 };
 
 module.exports = pg_endpoint("products", queryList, queryCount, queryGet, mapList, mapGet, {
-	fields: ["name", "brand_id", "description", "thumbnail", "picture", "stock", "retail_price", "wholesale_price", "currency"]
+	fields: ["name", "brand_id", "description", "thumbnail", "picture", "stock", "retail_price", "wholesale_price", "currency"],
+	fields_mapping: {
+		"retailPrice": "retail_price",
+		"wholesalePrice": "wholesale_price"
+	}
 });
