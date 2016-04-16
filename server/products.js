@@ -22,7 +22,9 @@ var mapList = function(req, res) {
 			picture: product.picture,
 			stock: product.stock || 0,
 			retail_price: product.retail_price,
+			retailPrice: product.retail_price,
 			wholesale_price: product.wholesale_price,
+			wholesalePrice: product.wholesale_price,
 			currency: product.currency
 		};
 	}
