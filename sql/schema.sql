@@ -21,8 +21,8 @@ CREATE TABLE products (
 	description varchar(255),
 	stock integer,
 	status integer,
-	wholesale_price integer,
-	retail_price integer,
+	wholesalePrice integer,
+	retailPrice integer,
 	currency varchar(4)
 );
 
@@ -38,7 +38,7 @@ CREATE TABLE clients (
 	email varchar(255),
 	lat real,
 	lon real,
-	sellerType: varchar(8)
+	sellerType varchar(8)
 );
 
 CREATE TABLE orders (
