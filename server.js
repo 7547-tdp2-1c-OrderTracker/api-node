@@ -7,6 +7,7 @@ var bodyParser = require('body-parser')
 var clients = require("./server/clients");
 var products = require("./server/products");
 var brands = require("./server/brands");
+var orders = require("./server/orders")
 
 var app = express();
 
@@ -22,6 +23,8 @@ var resourcePath = argv.path || "default";
 app.use("/v1/clients", clients);
 app.use("/v1/products", products);
 app.use("/v1/brands", brands);
+app.use("/v1/orders", orders);
+
 app.use("/images", express.static('images'));
 
 app.listen(port, function() {

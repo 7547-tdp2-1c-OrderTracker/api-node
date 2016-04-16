@@ -7,6 +7,7 @@ var identity = function(obj){return obj; };
 module.exports = function(tableName, queryList, queryCount, queryGet, listWrapper, getWrapper, options) {
 	var app = express();
 	options = options ||{};
+	var base = options.base||"";
 
 	var pgConnect = q.denodeify(function(url, callback) {
 		pg.connect(url, function(err, client, done) {
@@ -17,7 +18,7 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 		});
 	});
 
-	app.delete("/:id", function(req, res) {
+	app.delete(base + "/:id", function(req, res) {
 		pgConnect(process.env.DATABASE_URL).then(function(connection) {
 			var client = connection.client;
 			var query = q.denodeify(client.query.bind(client));
@@ -33,11 +34,22 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 	});
 
 	if (options.fields) {
-		app.post("/", function(req, res) {
+		app.post(base + "/", function(req, res) {
 			pgConnect(process.env.DATABASE_URL).then(function(connection) {
+				var values = {};
+
 				var currentFields = options.fields.filter(function(fieldName) {
+					values[fieldName] = req.body[fieldName];
 					return typeof req.body[fieldName] !== "undefined";
 				});
+
+				if (options.params_fields) {
+					var paramsFields = options.params_fields.filter(function(fieldName) {
+						values[fieldName] = req.params[fieldName];
+						return typeof req.params[fieldName] !== "undefined";
+					});
+					currentFields = currentFields.concat(paramsFields);
+				}
 
 				var queryText = "INSERT INTO " + tableName + " (" + currentFields.join(",") + ") VALUES (" + currentFields.map(function(fieldName, index) {
 					return "$"+(index+1);
@@ -45,8 +57,9 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 
 				var client = connection.client;
 				var query = q.denodeify(client.query.bind(client));
+
 				return query(queryText, currentFields.map(function(fieldName){
-					return req.body[fieldName];
+					return values[fieldName];
 				}))
 					.finally(connection.done);
 			})
@@ -58,11 +71,22 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 				});
 		});	
 
-		app.put("/:id", function(req, res) {
+		app.put(base + "/:id", function(req, res) {
 			pgConnect(process.env.DATABASE_URL).then(function(connection) {
+				var values = {};
+
 				var currentFields = options.fields.filter(function(fieldName) {
+					values[fieldName] = req.body[fieldName];
 					return typeof req.body[fieldName] !== "undefined";
 				});
+
+				if (options.params_fields) {
+					var paramsFields = options.params_fields.filter(function(fieldName) {
+						values[fieldName] = req.params[fieldName];
+						return typeof req.params[fieldName] !== "undefined";
+					});
+					currentFields = currentFields.concat(paramsFields);
+				}
 
 				var queryText = "UPDATE " + tableName + " SET " + currentFields.map(function(fieldName, index) {
 					return fieldName + "=$"+(index+2);
@@ -71,7 +95,7 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 				var client = connection.client;
 				var query = q.denodeify(client.query.bind(client));
 				var queryParams = [req.params.id].concat(currentFields.map(function(fieldName){
-					return req.body[fieldName];
+					return values[fieldName];
 				}));
 				
 				return query(queryText, queryParams)
@@ -87,7 +111,7 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 
 	}
 
-	app.get("/:id", function(req, res) {
+	app.get(base + "/:id", function(req, res) {
 		var wrapperInstance;
 		if (getWrapper) {
 			wrapperInstance = getWrapper(req, res);
@@ -108,7 +132,7 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 			});
 	});
 
-	app.get("/", function(req, res) {
+	app.get(base + "/", function(req, res) {
 		var offset = parseInt(req.query.offset || '0');
 		var limit = parseInt(req.query.limit || options.default_limit || '20');
 
