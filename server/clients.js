@@ -10,6 +10,7 @@ var queryGet = "SELECT * FROM clients WHERE id = $1::int";
 var clientMap = function(req, res) {
 	return function(client) {
 		client.sellerType = client.seller_type;
+		delete client.seller_type;
 		return client;
 	};
 };
