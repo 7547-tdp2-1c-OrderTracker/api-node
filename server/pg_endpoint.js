@@ -68,7 +68,7 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 
 				var currentFields = options.fields.filter(function(fieldName) {
 					values[fieldName] = req.body[fieldName];
-					return typeof req.body[fieldName] !== "undefined" || req.body[translateField(fieldName)] !== "undefined";
+					return typeof req.body[fieldName] !== "undefined";
 				});
 
 				if (options.params_fields) {
@@ -105,7 +105,7 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 
 				var currentFields = options.fields.filter(function(fieldName) {
 					values[fieldName] = req.body[fieldName];
-					return typeof req.body[fieldName] !== "undefined" || req.body[translateField(fieldName)] !== "undefined";
+					return typeof req.body[fieldName] !== "undefined";
 				});
 
 				if (options.params_fields) {
