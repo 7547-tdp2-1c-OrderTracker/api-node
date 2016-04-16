@@ -18,7 +18,9 @@ var mapList = function(req, res) {
 			id: order.id,
 			delivery_date: order.delivery_date,
 			status: order.status,
-			total_price: order.total_price
+			total_price: order.total_price,
+			client_id: order.client_id,
+			vendor_id: order.vendor_id
 		};
 	}
 };
@@ -33,7 +35,7 @@ var queryCount = function(query, req) {
 var queryGet = "SELECT * FROM orders WHERE orders.id = $1::int";
 
 var orders = pg_endpoint("orders", queryList, queryCount, queryGet, mapList, mapGet, {
-	fields: ["date", "status", "total_price"]
+	fields: ["client_id", "date", "status", "total_price"]
 });
 
 

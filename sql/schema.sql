@@ -44,7 +44,9 @@ CREATE TABLE orders (
 	id serial primary key, 
 	delivery_date date,
 	status varchar(32),
-	total_price integer
+	total_price integer,
+	client_id integer references clients(id),
+	vendor_id integer
 );
 
 CREATE TABLE order_entries (
