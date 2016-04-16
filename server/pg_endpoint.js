@@ -44,6 +44,7 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 		return pgConnect(process.env.DATABASE_URL).then(function(connection) {
 			var client = connection.client;
 			var query = q.denodeify(client.query.bind(client));
+
 			return query(queryGet, [id])
 				.finally(connection.done);
 		}).then(function(result) {
@@ -119,7 +120,7 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 				return query(queryText, queryParams)
 					.finally(connection.done)
 			})
-				.then(function(result) {
+				.then(function() {
 					return returnById(req, res, req.params.id);
 				}).catch(function(err) {
 					console.error(err);

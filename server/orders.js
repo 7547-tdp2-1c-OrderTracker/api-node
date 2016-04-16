@@ -57,7 +57,7 @@ queryList = function(query, req, offset, limit) {
 queryCount = function(query, req) {
 	return query("SELECT COUNT(*) FROM order_entries WHERE order_id = $1::int", [req.params.order_id]);
 };
-queryGet = "SELECT * FROM order_entries WHERE orders.id = $1::int";
+queryGet = "SELECT * FROM order_entries WHERE order_entries.id = $1::int";
 
 var order_entries = pg_endpoint("order_entries", queryList, queryCount, queryGet, mapList, mapGet, {
 	fields: ["product_id", "quantity", "price"],
@@ -91,8 +91,8 @@ var lock_order_items = function(req, res, next) {
 
 var app = express();
 
-app.use("/:order_id", lock_order_items);
-app.use("/:order_id/order_items", lock_order_items);
+//app.use("/:order_id", lock_order_items);
+//app.use("/:order_id/order_items", lock_order_items);
 app.use(orders);
 app.use(order_entries);
 
