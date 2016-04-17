@@ -69,7 +69,7 @@ var queryCount = function(query, req) {
 var queryGet = "SELECT * FROM orders WHERE orders.id = $1::int";
 
 var orders = pg_endpoint("orders", queryList, queryCount, queryGet, mapList, mapGet, {
-	fields: ["client_id", "date", "status", "total_price"]
+	fields: ["client_id", "date", "status"]
 });
 
 
