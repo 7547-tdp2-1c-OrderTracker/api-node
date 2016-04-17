@@ -27,10 +27,44 @@ var mapList = function(req, res) {
 
 var mapGet = mapList;
 var queryList = function(query, req, offset, limit) {
-	return query("SELECT * FROM orders OFFSET $1::int LIMIT $2::int", [offset, limit]);
+	var data = [offset, limit];
+	var conditions = [" 1=1 "];
+	var index = 3;
+	var filter_fields = [["status","varchar"], ["client_id","int"]];
+
+	filter_fields.forEach(function(field) {
+		var fieldName = field[0];
+		var type = field[1];
+		if (req.query[fieldName]) {
+			conditions.push(" " + fieldName + "= $" + index + "::"+type+" ");
+			data.push(req.query[fieldName]);
+			index++;
+		}
+	});
+
+	var strconditions = conditions.join(" AND ");
+	var text = "SELECT * FROM orders WHERE "+ strconditions + "OFFSET $1::int LIMIT $2::int";
+	return query(text, data);
 };
 var queryCount = function(query, req) {
-	return query("SELECT COUNT(*) FROM orders");
+	var data = [];
+	var conditions = [" 1=1 "];
+	var index = 1;
+	var filter_fields = [["status","varchar"], ["client_id","int"]];
+
+	filter_fields.forEach(function(field) {
+		var fieldName = field[0];
+		var type = field[1];
+		if (req.query[fieldName]) {
+			conditions.push(" " + fieldName + "= $" + index + "::"+type+" ");
+			data.push(req.query[fieldName]);
+			index++;
+		}
+	});
+
+	var strconditions = conditions.join(" AND ");
+	var text = "SELECT COUNT(*) FROM orders WHERE "+ strconditions;
+	return query(text, data);
 };
 var queryGet = "SELECT * FROM orders WHERE orders.id = $1::int";
 
