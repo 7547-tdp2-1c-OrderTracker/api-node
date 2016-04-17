@@ -117,6 +117,8 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 					currentFields = currentFields.concat(paramsFields);
 				}
 
+				if (!currentFields.length) return;
+
 				var queryText = "UPDATE " + tableName + " SET " + currentFields.map(function(fieldName, index) {
 					return fieldName + "=$"+(index+2);
 				}).join(",") + " WHERE id = $1::int";
