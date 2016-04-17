@@ -1,6 +1,6 @@
 var pg_endpoint = require("./pg_endpoint");
 var queryList = function(query, req, offset, limit) {
-	return query("SELECT * FROM clients OFFSET $1::int LIMIT $2::int", [offset,limit]);
+	return query("SELECT * FROM clients ORDER BY name OFFSET $1::int LIMIT $2::int", [offset,limit]);
 };
 var queryCount = function(query, req) {
 	return query("SELECT COUNT(*) FROM clients");

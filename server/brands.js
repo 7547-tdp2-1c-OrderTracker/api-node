@@ -22,7 +22,7 @@ var mapList = function(req, res) {
 
 var mapGet = mapList;
 var queryList = function(query, req, offset, limit) {
-	return query("SELECT * FROM brands OFFSET $1::int LIMIT $2::int", [offset, limit]);
+	return query("SELECT * FROM brands ORDER BY name OFFSET $1::int LIMIT $2::int", [offset, limit]);
 };
 var queryCount = function(query, req) {
 	return query("SELECT COUNT(*) FROM brands");
