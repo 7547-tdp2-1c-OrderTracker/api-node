@@ -31,7 +31,9 @@ var mapList = function(req, res) {
 var mapGet = mapList;
 var queryList = function(query, req, offset, limit) {
 	if (req.query.brand_id) {
-		return query("SELECT products.id, products.name, products.code, products.picture, products.thumbnail, products.description, products.stock, products.retail_price, products.wholesale_price, products.currency, products.brand_id, brands.name as brand_name FROM products JOIN brands ON brands.id = products.brand_id WHERE products.brand_id = $3::int OFFSET $1::int LIMIT $2::int", [offset, limit, req.query.brand_id]);
+		var p = function(x){return parseInt(x);}
+		var brand_ids = req.query.brand_id.split(",").map(p);
+		return query("SELECT products.id, products.name, products.code, products.picture, products.thumbnail, products.description, products.stock, products.retail_price, products.wholesale_price, products.currency, products.brand_id, brands.name as brand_name FROM products JOIN brands ON brands.id = products.brand_id WHERE products.brand_id = ANY($3) OFFSET $1::int LIMIT $2::int", [offset, limit, brand_ids]);
 	} else {
 		return query("SELECT products.id, products.name, products.code, products.picture, products.thumbnail, products.description, products.stock, products.retail_price, products.wholesale_price, products.currency, products.brand_id, brands.name as brand_name FROM products JOIN brands ON brands.id = products.brand_id OFFSET $1::int LIMIT $2::int", [offset, limit]);
 	}
@@ -39,7 +41,9 @@ var queryList = function(query, req, offset, limit) {
 var queryGet = "SELECT products.id, products.name, products.code, products.picture, products.thumbnail, products.description, products.stock, products.retail_price, products.wholesale_price, products.currency, products.brand_id, brands.name as brand_name FROM products JOIN brands ON brands.id = products.brand_id WHERE products.id = $1::int";
 var queryCount = function(query, req) {
 	if (req.query.brand_id) {
-		return query("SELECT COUNT(*) FROM products JOIN brands ON brands.id = products.brand_id WHERE products.brand_id = $1::int", [req.query.brand_id]);
+		var p = function(x){return parseInt(x);}
+		var brand_ids = req.query.brand_id.split(",").map(p);
+		return query("SELECT COUNT(*) FROM products JOIN brands ON brands.id = products.brand_id WHERE products.brand_id = ANY($1)", [brand_ids]);
 	} else {
 		return query("SELECT COUNT(*) FROM products JOIN brands ON brands.id = products.brand_id");
 	}
