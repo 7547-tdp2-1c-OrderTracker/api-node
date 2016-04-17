@@ -83,6 +83,16 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 					.finally(connection.done);
 			})
 				.then(function(result) {
+					if (options.afterCreate) {
+						return q(options.afterCreate(req, res))
+							.then(function() {
+								return result;
+							});
+					}
+
+					return result;
+				})
+				.then(function(result) {
 					return returnById(req, res, result.rows[0].id);
 				}).catch(function(err) {
 					console.error(err);
@@ -120,6 +130,11 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 				return query(queryText, queryParams)
 					.finally(connection.done)
 			})
+				.then(function() {
+					if (options.afterUpdate) {
+						return q(options.afterUpdate(req, res));
+					}
+				})
 				.then(function() {
 					return returnById(req, res, req.params.id);
 				}).catch(function(err) {

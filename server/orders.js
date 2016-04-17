@@ -93,10 +93,24 @@ queryCount = function(query, req) {
 };
 queryGet = "SELECT * FROM order_entries WHERE order_entries.id = $1::int";
 
+var updateOrderTotalPrice = function(req, res) {
+	return pgConnect(process.env.DATABASE_URL).then(function(connection) {
+		var client = connection.client;
+		var query = q.denodeify(client.query.bind(client));
+
+		var text = "UPDATE orders SET total_price=(SELECT sum(price) FROM order_entries WHERE order_id=$1::int) WHERE id=$1::int";
+		return query(text, [req.params.order_id])
+			.finally(connection.done);
+	});
+};
+
+
 var order_entries = pg_endpoint("order_entries", queryList, queryCount, queryGet, mapList, mapGet, {
 	fields: ["product_id", "quantity", "price"],
 	params_fields: ["order_id"],
-	base: "/:order_id/order_items"
+	base: "/:order_id/order_items",
+	afterCreate: updateOrderTotalPrice,
+	afterUpdate: updateOrderTotalPrice
 });
 
 var lock_order_items = function(req, res, next) {
