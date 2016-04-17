@@ -91,8 +91,8 @@ var lock_order_items = function(req, res, next) {
 
 var app = express();
 
-//app.use("/:order_id", lock_order_items);
-//app.use("/:order_id/order_items", lock_order_items);
+app.use("/:order_id", lock_order_items);
+app.use("/:order_id/order_items", lock_order_items);
 app.use(orders);
 app.use(order_entries);
 
