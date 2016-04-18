@@ -95,8 +95,7 @@ var orders = pg_endpoint("orders", queryList, queryCount, queryGet, orderMapList
 	fields: ["client_id", "vendor_id", "delivery_date", "status", "date_created"],
 	_default: {
 		status: function(){ return 'draft'; },
-		date_created: function(){ return new Date().toISOString(); },
-		total_price: function(){ return 0; }
+		date_created: function(){ return new Date().toISOString(); }
 	}
 });
 
