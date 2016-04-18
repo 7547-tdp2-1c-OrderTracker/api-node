@@ -54,6 +54,8 @@ CREATE TABLE order_entries (
 	id serial primary key, 
 	order_id integer references orders(id),
 	product_id integer references products(id),
+	name varchar(255), /* el nombre del producto */
 	quantity integer,
-	price integer
+	unit_price integer,
+	currency varchar(8)
 );

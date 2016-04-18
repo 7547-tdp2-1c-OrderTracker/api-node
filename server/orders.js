@@ -12,12 +12,13 @@ var pgConnect = q.denodeify(function(url, callback) {
 	});
 });
 
-var convertOrder = function(order) {
+var convertOrder = function(order_entry) {
 	return {
-		product_id: order.product_id,
-		name: order.name,
-		quantity: order.quantity,
-		unit_price: order.price
+		product_id: order_entry.product_id,
+		name: order_entry.name,
+		quantity: order_entry.quantity,
+		unit_price: order_entry.unit_price,
+		currency: order_entry.currency
 	};
 };
 
@@ -85,7 +86,7 @@ var queryCount = function(query, req) {
 	var text = "SELECT COUNT(*) FROM orders WHERE "+ strconditions;
 	return query(text, data);
 };
-var queryGet = "SELECT orders.id as id, delivery_date, orders.status as status, total_price, client_id, vendor_id, order_entries.id as oe_id, product_id, quantity, price, name FROM orders JOIN order_entries ON orders.id = order_entries.order_id JOIN products ON order_entries.product_id = products.id WHERE orders.id = $1::int";
+var queryGet = "SELECT orders.id as id, delivery_date, orders.status as status, total_price, client_id, vendor_id, order_entries.id as oe_id, product_id, name, quantity, unit_price, currency FROM orders JOIN order_entries ON orders.id = order_entries.order_id WHERE orders.id = $1::int";
 
 var orders = pg_endpoint("orders", queryList, queryCount, queryGet, mapList, mapGet, {
 	fields: ["client_id", "date", "status"]
@@ -95,13 +96,14 @@ var orders = pg_endpoint("orders", queryList, queryCount, queryGet, mapList, map
 mapList = function(req, res) {
 	return function(order_entry) {
 		return {
-			id: order_entry.id,
-			order_id: order_entry.order_id,
 			product_id: order_entry.product_id,
+			name: order_entry.name,
 			quantity: order_entry.quantity,
-			price: order_entry.price
+			unit_price: order_entry.unit_price,
+			currency: order_entry.currency,
+			order_id: order_entry.order_id
 		};
-	}
+	};
 };
 mapGet = mapList;
 queryList = function(query, req, offset, limit) {
@@ -125,7 +127,7 @@ var updateOrderTotalPrice = function(req, res) {
 
 
 var order_entries = pg_endpoint("order_entries", queryList, queryCount, queryGet, mapList, mapGet, {
-	fields: ["product_id", "quantity", "price"],
+	fields: ["product_id", "name", "quantity", "unit_price", "currency"],
 	params_fields: ["order_id"],
 	base: "/:order_id/order_items",
 	afterCreate: updateOrderTotalPrice,
