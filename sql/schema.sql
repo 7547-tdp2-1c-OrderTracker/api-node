@@ -41,12 +41,12 @@ CREATE TABLE clients (
 	seller_type varchar(16)
 );
 
-CREATE TABLE orders (
+CREATE TABLE ordersb (
 	id serial primary key, 
 	delivery_date timestamp,
 	date_created timestamp,
-	status varchar(32),
-	total_price integer,
+	status varchar(32) DEFAULT 'draft',
+	total_price integer DEFAULT 0,
 	client_id integer references clients(id),
 	vendor_id integer
 );
