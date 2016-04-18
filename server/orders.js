@@ -12,9 +12,18 @@ var pgConnect = q.denodeify(function(url, callback) {
 	});
 });
 
+var convertOrder = function(order) {
+	return {
+		product_id: order.product_id,
+		name: order.name,
+		quantity: order.quantity,
+		unit_price: order.price
+	};
+};
+
 var mapList = function(req, res) {
-	return function(order) {
-		return {
+	return function(order, orders) {
+		var ret = {
 			id: order.id,
 			delivery_date: order.delivery_date,
 			status: order.status,
@@ -22,6 +31,12 @@ var mapList = function(req, res) {
 			client_id: order.client_id,
 			vendor_id: order.vendor_id
 		};
+
+		if (orders) {
+			ret.order_items = orders.map(convertOrder);
+		}
+
+		return ret;
 	}
 };
 
@@ -66,7 +81,7 @@ var queryCount = function(query, req) {
 	var text = "SELECT COUNT(*) FROM orders WHERE "+ strconditions;
 	return query(text, data);
 };
-var queryGet = "SELECT * FROM orders WHERE orders.id = $1::int";
+var queryGet = "SELECT orders.id as id, delivery_date, orders.status as status, total_price, client_id, vendor_id, order_entries.id as oe_id, product_id, quantity, price, name FROM orders JOIN order_entries ON orders.id = order_entries.order_id JOIN products ON order_entries.product_id = products.id WHERE orders.id = $1::int";
 
 var orders = pg_endpoint("orders", queryList, queryCount, queryGet, mapList, mapGet, {
 	fields: ["client_id", "date", "status"]
