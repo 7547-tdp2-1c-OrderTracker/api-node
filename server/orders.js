@@ -20,7 +20,7 @@ var convertOrder = function(order_entry) {
 		brand_name: order_entry.brand_name,
 		quantity: order_entry.quantity,
 		unit_price: order_entry.unit_price,
-		currency: order_entry.currency,
+		currency: order_entry.oe_currency,
 		thumbnail: order_entry.thumbnail,
 		order_id: order_entry.id		
 	};
@@ -33,6 +33,7 @@ var orderMapList = function(req, res) {
 			delivery_date: order.delivery_date,
 			status: order.status,
 			total_price: order.total_price,
+			currency: order.currency,
 			client_id: order.client_id,
 			vendor_id: order.vendor_id,
 			date_created: order.date_created
@@ -92,7 +93,7 @@ var queryCount = function(query, req) {
 	var text = "SELECT COUNT(*) FROM orders WHERE "+ strconditions;
 	return query(text, data);
 };
-var queryGet = "SELECT orders.id as id, delivery_date, date_created, orders.status as status, total_price, client_id, vendor_id, order_entries.id as oe_id, product_id, name, quantity, unit_price, currency FROM orders LEFT JOIN order_entries ON orders.id = order_entries.order_id WHERE orders.id = $1::int";
+var queryGet = "SELECT orders.id as id, delivery_date, date_created, orders.status as status, total_price, client_id, vendor_id, order_entries.id as oe_id, product_id, name, quantity, unit_price, orders.currency as currency, order_entries.currency as oe_currency, thumbnail FROM orders LEFT JOIN order_entries ON orders.id = order_entries.order_id WHERE orders.id = $1::int";
 
 var orders = pg_endpoint("orders", queryList, queryCount, queryGet, orderMapList, orderMapGet, {
 	fields: ["client_id", "vendor_id", "delivery_date", "status", "date_created"],
@@ -153,7 +154,7 @@ var updateOrderTotalPrice = function(req, res, id) {
 
 				return query(denormalize, [id])
 					.then(function() {
-						var text = "UPDATE orders SET total_price=(SELECT sum(unit_price * quantity) FROM order_entries WHERE order_id=$1::int) WHERE id=$1::int";
+						var text = "UPDATE orders SET currency=(SELECT currency FROM order_entries WHERE order_id=$1::int LIMIT 1), total_price=(SELECT sum(unit_price * quantity) FROM order_entries WHERE order_id=$1::int) WHERE id=$1::int";
 						return query(text, [req.params.order_id]);
 					});
 			})

@@ -47,6 +47,7 @@ CREATE TABLE orders (
 	date_created timestamp,
 	status varchar(32) DEFAULT 'draft',
 	total_price integer DEFAULT 0,
+	currency varchar(4),
 	client_id integer references clients(id),
 	vendor_id integer
 );
