@@ -170,7 +170,8 @@ var order_entries = pg_endpoint("order_entries", queryList, queryCount, queryGet
 	params_fields: ["order_id"],
 	base: "/:order_id/order_items",
 	afterCreate: updateOrderTotalPrice,
-	afterUpdate: updateOrderTotalPrice
+	afterUpdate: updateOrderTotalPrice,
+	afterRemove: updateOrderTotalPrice
 });
 
 var lock_order_items = function(req, res, next) {

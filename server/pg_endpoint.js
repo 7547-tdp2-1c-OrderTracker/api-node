@@ -24,7 +24,11 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 			var query = q.denodeify(client.query.bind(client));
 			return query("DELETE FROM " + tableName + " WHERE id = $1::int", [req.params.id])
 				.finally(connection.done);
-		})
+		}).then(function() {
+				if (options.afterRemove) {
+					return q(options.afterRemove(req, res, req.params.id));
+				}
+			})
 			.then(function() {
 				res.sendStatus(204);
 			}).catch(function(err) {
