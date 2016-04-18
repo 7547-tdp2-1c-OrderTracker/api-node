@@ -22,8 +22,8 @@ var convertOrder = function(order) {
 };
 
 var mapList = function(req, res) {
-	return function(order, orders) {
-		var ret = {
+	return function(order) {
+		return {
 			id: order.id,
 			delivery_date: order.delivery_date,
 			status: order.status,
@@ -31,16 +31,20 @@ var mapList = function(req, res) {
 			client_id: order.client_id,
 			vendor_id: order.vendor_id
 		};
+	};
+};
 
+var mapGet = function(req, res) {
+	var f = mapList(req, res);
+	return function(order, orders) {
+		var ret = f(order);
 		if (orders) {
 			ret.order_items = orders.map(convertOrder);
 		}
-
 		return ret;
-	}
+	};
 };
 
-var mapGet = mapList;
 var queryList = function(query, req, offset, limit) {
 	var data = [offset, limit];
 	var conditions = [" 1=1 "];
