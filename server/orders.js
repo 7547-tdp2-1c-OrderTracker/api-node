@@ -134,7 +134,7 @@ var updateOrderTotalPrice = function(req, res, id) {
 
 
 var order_entries = pg_endpoint("order_entries", queryList, queryCount, queryGet, mapList, mapGet, {
-	fields: ["product_id", "name", "quantity", "unit_price", "currency"],
+	fields: ["product_id", "quantity"],
 	params_fields: ["order_id"],
 	base: "/:order_id/order_items",
 	afterCreate: updateOrderTotalPrice,
