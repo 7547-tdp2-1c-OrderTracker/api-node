@@ -41,7 +41,7 @@ CREATE TABLE clients (
 	seller_type varchar(16)
 );
 
-CREATE TABLE ordersb (
+CREATE TABLE orders (
 	id serial primary key, 
 	delivery_date timestamp,
 	date_created timestamp,
@@ -57,6 +57,7 @@ CREATE TABLE order_entries (
 	product_id integer references products(id),
 	name varchar(255), /* el nombre del producto */
 	brand_name varchar(255),
+	thumbnail varchar(255),
 	quantity integer,
 	unit_price integer,
 	currency varchar(8)

@@ -21,6 +21,7 @@ var convertOrder = function(order_entry) {
 		quantity: order_entry.quantity,
 		unit_price: order_entry.unit_price,
 		currency: order_entry.currency,
+		thumbnail: order_entry.thumbnail,
 		order_id: order_entry.id		
 	};
 };
@@ -112,6 +113,7 @@ mapList = function(req, res) {
 			quantity: order_entry.quantity,
 			unit_price: order_entry.unit_price,
 			currency: order_entry.currency,
+			thumbnail: order_entry.thumbnail,
 			order_id: order_entry.order_id
 		};
 	};
@@ -145,7 +147,7 @@ var updateOrderTotalPrice = function(req, res, id) {
 					return;
 				}
 
-				var denormalize = "update order_entries as oe set name = p.name, unit_price = p."+ price_column +", currency = p.currency," +
+				var denormalize = "update order_entries as oe set name = p.name, thumbnail = p.thumbnail, unit_price = p."+ price_column +", currency = p.currency," +
 				" brand_name = b.name from products as p join brands as b on b.id = p.brand_id" +
 				" where oe.id = $1::int and oe.product_id = p.id;";
 
