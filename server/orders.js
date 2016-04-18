@@ -22,7 +22,7 @@ var convertOrder = function(order_entry) {
 	};
 };
 
-var mapList = function(req, res) {
+var orderMapList = function(req, res) {
 	return function(order) {
 		return {
 			id: order.id,
@@ -35,12 +35,14 @@ var mapList = function(req, res) {
 	};
 };
 
-var mapGet = function(req, res) {
-	var f = mapList(req, res);
+var orderMapGet = function(req, res) {
+	var f = orderMapList(req, res);
 	return function(order, orders) {
 		var ret = f(order);
-		if (orders) {
+		if (orders && orders.length && orders[0].product_id) {
 			ret.order_items = orders.map(convertOrder);
+		} else {
+			ret.order_items = [];
 		}
 		return ret;
 	};
@@ -86,10 +88,10 @@ var queryCount = function(query, req) {
 	var text = "SELECT COUNT(*) FROM orders WHERE "+ strconditions;
 	return query(text, data);
 };
-var queryGet = "SELECT orders.id as id, delivery_date, orders.status as status, total_price, client_id, vendor_id, order_entries.id as oe_id, product_id, name, quantity, unit_price, currency FROM orders JOIN order_entries ON orders.id = order_entries.order_id WHERE orders.id = $1::int";
+var queryGet = "SELECT orders.id as id, delivery_date, orders.status as status, total_price, client_id, vendor_id, order_entries.id as oe_id, product_id, name, quantity, unit_price, currency FROM orders LEFT JOIN order_entries ON orders.id = order_entries.order_id WHERE orders.id = $1::int";
 
-var orders = pg_endpoint("orders", queryList, queryCount, queryGet, mapList, mapGet, {
-	fields: ["client_id", "date", "status"]
+var orders = pg_endpoint("orders", queryList, queryCount, queryGet, orderMapList, orderMapGet, {
+	fields: ["client_id", "vendor_id", "delivery_date", "status"]
 });
 
 
@@ -119,7 +121,7 @@ var updateOrderTotalPrice = function(req, res) {
 		var client = connection.client;
 		var query = q.denodeify(client.query.bind(client));
 
-		var text = "UPDATE orders SET total_price=(SELECT sum(price) FROM order_entries WHERE order_id=$1::int) WHERE id=$1::int";
+		var text = "UPDATE orders SET total_price=(SELECT sum(unit_price * quantity) FROM order_entries WHERE order_id=$1::int) WHERE id=$1::int";
 		return query(text, [req.params.order_id])
 			.finally(connection.done);
 	});
