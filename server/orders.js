@@ -48,11 +48,11 @@ var orderMapGet = function(req, res) {
 	};
 };
 
+var filter_fields = [["status","varchar"], ["client_id","int"], ["vendor_id","int"]];
 var queryList = function(query, req, offset, limit) {
 	var data = [offset, limit];
 	var conditions = [" 1=1 "];
 	var index = 3;
-	var filter_fields = [["status","varchar"], ["client_id","int"]];
 
 	filter_fields.forEach(function(field) {
 		var fieldName = field[0];
@@ -72,7 +72,6 @@ var queryCount = function(query, req) {
 	var data = [];
 	var conditions = [" 1=1 "];
 	var index = 1;
-	var filter_fields = [["status","varchar"], ["client_id","int"]];
 
 	filter_fields.forEach(function(field) {
 		var fieldName = field[0];
