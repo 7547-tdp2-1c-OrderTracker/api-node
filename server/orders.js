@@ -210,6 +210,9 @@ app.put("/:order_id/empty", function(req, res) {
 		var query = q.denodeify(client.query.bind(client));
 
 		return query("DELETE FROM order_entries WHERE order_id = $1::int", [req.params.order_id])
+			.then(function() {
+				return query("UPDATE orders SET currency=null, total_price=0 WHERE id=$1::int", [req.params.order_id]);
+			})
 			.finally(connection.done)
 			.then(function() {
 				res.sendStatus(204);
