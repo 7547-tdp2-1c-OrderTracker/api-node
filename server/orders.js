@@ -20,7 +20,8 @@ var convertOrder = function(order_entry) {
 		brand_name: order_entry.brand_name,
 		quantity: order_entry.quantity,
 		unit_price: order_entry.unit_price,
-		currency: order_entry.currency
+		currency: order_entry.currency,
+		order_id: order_entry.id		
 	};
 };
 
@@ -110,7 +111,8 @@ mapList = function(req, res) {
 			brand_name: order_entry.brand_name,
 			quantity: order_entry.quantity,
 			unit_price: order_entry.unit_price,
-			currency: order_entry.currency
+			currency: order_entry.currency,
+			order_id: order_entry.order_id
 		};
 	};
 };
