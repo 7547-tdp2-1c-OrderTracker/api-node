@@ -14,6 +14,7 @@ var pgConnect = q.denodeify(function(url, callback) {
 
 var convertOrder = function(order_entry) {
 	return {
+		id: order_entry.oe_id,
 		product_id: order_entry.product_id,
 		name: order_entry.name,
 		quantity: order_entry.quantity,
@@ -97,6 +98,7 @@ var orders = pg_endpoint("orders", queryList, queryCount, queryGet, orderMapList
 mapList = function(req, res) {
 	return function(order_entry) {
 		return {
+			id: order_entry.id,
 			product_id: order_entry.product_id,
 			name: order_entry.name,
 			quantity: order_entry.quantity,
