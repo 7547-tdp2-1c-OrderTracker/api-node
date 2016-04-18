@@ -17,6 +17,7 @@ var convertOrder = function(order_entry) {
 		id: order_entry.oe_id,
 		product_id: order_entry.product_id,
 		name: order_entry.name,
+		brand_name: order_entry.brand_name,
 		quantity: order_entry.quantity,
 		unit_price: order_entry.unit_price,
 		currency: order_entry.currency
@@ -106,10 +107,10 @@ mapList = function(req, res) {
 			id: order_entry.id,
 			product_id: order_entry.product_id,
 			name: order_entry.name,
+			brand_name: order_entry.brand_name,
 			quantity: order_entry.quantity,
 			unit_price: order_entry.unit_price,
-			currency: order_entry.currency,
-			order_id: order_entry.order_id
+			currency: order_entry.currency
 		};
 	};
 };
@@ -145,7 +146,7 @@ var updateOrderTotalPrice = function(req, res, id) {
 				var denormalize = "update order_entries as oe set name = p.name, unit_price = p."+ price_column +", currency = p.currency," +
 				" brand_name = b.name from products as p join brands as b on b.id = p.brand_id" +
 				" where oe.id = $1::int and oe.product_id = p.id;";
-				
+
 				return query(denormalize, [id])
 					.then(function() {
 						var text = "UPDATE orders SET total_price=(SELECT sum(unit_price * quantity) FROM order_entries WHERE order_id=$1::int) WHERE id=$1::int";
