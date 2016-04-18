@@ -117,13 +117,17 @@ queryCount = function(query, req) {
 };
 queryGet = "SELECT * FROM order_entries WHERE order_entries.id = $1::int";
 
-var updateOrderTotalPrice = function(req, res) {
+var updateOrderTotalPrice = function(req, res, id) {
 	return pgConnect(process.env.DATABASE_URL).then(function(connection) {
 		var client = connection.client;
 		var query = q.denodeify(client.query.bind(client));
 
-		var text = "UPDATE orders SET total_price=(SELECT sum(unit_price * quantity) FROM order_entries WHERE order_id=$1::int) WHERE id=$1::int";
-		return query(text, [req.params.order_id])
+		var denormalize = "update order_entries as oe set name = p.name, unit_price = p.retail_price, currency = p.currency from products as p where oe.id = $1::int and oe.product_id = p.id;"
+		return query(denormalize, [id])
+			.then(function() {
+				var text = "UPDATE orders SET total_price=(SELECT sum(unit_price * quantity) FROM order_entries WHERE order_id=$1::int) WHERE id=$1::int";
+				return query(text, [req.params.order_id]);
+			})
 			.finally(connection.done);
 	});
 };

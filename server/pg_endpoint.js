@@ -84,7 +84,7 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 			})
 				.then(function(result) {
 					if (options.afterCreate) {
-						return q(options.afterCreate(req, res))
+						return q(options.afterCreate(req, res, result.rows[0].id))
 							.then(function() {
 								return result;
 							});
@@ -134,7 +134,7 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 			})
 				.then(function() {
 					if (options.afterUpdate) {
-						return q(options.afterUpdate(req, res));
+						return q(options.afterUpdate(req, res, req.params.id));
 					}
 				})
 				.then(function() {
