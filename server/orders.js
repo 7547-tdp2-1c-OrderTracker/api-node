@@ -91,7 +91,10 @@ var queryCount = function(query, req) {
 var queryGet = "SELECT orders.id as id, delivery_date, orders.status as status, total_price, client_id, vendor_id, order_entries.id as oe_id, product_id, name, quantity, unit_price, currency FROM orders LEFT JOIN order_entries ON orders.id = order_entries.order_id WHERE orders.id = $1::int";
 
 var orders = pg_endpoint("orders", queryList, queryCount, queryGet, orderMapList, orderMapGet, {
-	fields: ["client_id", "vendor_id", "delivery_date", "status"]
+	fields: ["client_id", "vendor_id", "delivery_date", "status"],
+	_default: {
+		status: 'draft'
+	}
 });
 
 
