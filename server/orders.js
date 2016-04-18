@@ -94,7 +94,7 @@ var queryCount = function(query, req) {
 	var text = "SELECT COUNT(*) FROM orders WHERE "+ strconditions;
 	return query(text, data);
 };
-var queryGet = "SELECT orders.id as id, delivery_date, date_created, orders.status as status, total_price, client_id, vendor_id, order_entries.id as oe_id, product_id, name, quantity, unit_price, orders.currency as currency, order_entries.currency as oe_currency, thumbnail FROM orders LEFT JOIN order_entries ON orders.id = order_entries.order_id WHERE orders.id = $1::int";
+var queryGet = "SELECT orders.id as id, delivery_date, date_created, orders.status as status, total_price, client_id, vendor_id, order_entries.id as oe_id, product_id, name, quantity, unit_price, orders.currency as currency, order_entries.currency as oe_currency, thumbnail, brand_name FROM orders LEFT JOIN order_entries ON orders.id = order_entries.order_id WHERE orders.id = $1::int";
 
 var orders = pg_endpoint("orders", queryList, queryCount, queryGet, orderMapList, orderMapGet, {
 	fields: ["client_id", "vendor_id", "delivery_date", "status", "date_created"],
