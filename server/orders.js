@@ -196,6 +196,25 @@ var app = express();
 
 app.use("/:order_id", lock_order_items);
 app.use("/:order_id/order_items", lock_order_items);
+
+// PUT empty order
+app.put("/:order_id/empty", function(req, res) {
+
+	pgConnect(process.env.DATABASE_URL).then(function(connection) {
+		var client = connection.client;
+		var query = q.denodeify(client.query.bind(client));
+
+		return query("DELETE FROM order_entries WHERE order_id = $1::int", [req.params.order_id])
+			.finally(connection.done)
+			.then(function() {
+				res.sendStatus(204);
+			}).catch(function(err) {
+				console.error(err);
+				res.status(500).send(err.toString());
+			});
+	});
+});
+
 app.use(orders);
 app.use(order_entries);
 
