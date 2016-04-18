@@ -142,7 +142,10 @@ var updateOrderTotalPrice = function(req, res, id) {
 					return;
 				}
 
-				var denormalize = "update order_entries as oe set name = p.name, unit_price = p."+ price_column +", currency = p.currency from products as p where oe.id = $1::int and oe.product_id = p.id;"
+				var denormalize = "update order_entries as oe set name = p.name, unit_price = p."+ price_column +", currency = p.currency," +
+				" brand_name = b.name from products as p join brands as b on b.id = p.brand_id" +
+				" where oe.id = $1::int and oe.product_id = p.id;";
+				
 				return query(denormalize, [id])
 					.then(function() {
 						var text = "UPDATE orders SET total_price=(SELECT sum(unit_price * quantity) FROM order_entries WHERE order_id=$1::int) WHERE id=$1::int";

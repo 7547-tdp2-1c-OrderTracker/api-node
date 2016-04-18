@@ -56,6 +56,7 @@ CREATE TABLE order_entries (
 	order_id integer references orders(id),
 	product_id integer references products(id),
 	name varchar(255), /* el nombre del producto */
+	brand_name varchar(255),
 	quantity integer,
 	unit_price integer,
 	currency varchar(8)
