@@ -166,11 +166,15 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 			return query(queryGet, [req.params.id])
 				.finally(connection.done);
 		}).then(function(result) {
+			if (result.rows && result.rows.length) {
 				res.send(wrapperInstance(result.rows[0], result.rows));
-			}).catch(function(err) {
-				console.error(err);
-				res.status(500).send(err.toString());
-			});
+			} else {
+				res.status(404).send("Not found");
+			}
+		}).catch(function(err) {
+			console.error(err);
+			res.status(500).send(err.toString());
+		});
 	});
 
 	app.get(base + "/", function(req, res) {
