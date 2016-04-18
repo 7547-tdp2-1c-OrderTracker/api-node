@@ -58,7 +58,7 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 				var values = {};
 				var _default = options._default||{};
 				for (var k in _default) {
-					if (!req.body[k]) req.body[k] = _default[k];
+					if (!req.body[k]) req.body[k] = _default[k]();
 				};
 
 				var currentFields = options.fields.filter(function(fieldName) {

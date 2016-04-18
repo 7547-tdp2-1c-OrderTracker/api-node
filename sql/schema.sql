@@ -43,7 +43,8 @@ CREATE TABLE clients (
 
 CREATE TABLE orders (
 	id serial primary key, 
-	delivery_date date,
+	delivery_date timestamp,
+	date_created timestamp,
 	status varchar(32),
 	total_price integer,
 	client_id integer references clients(id),

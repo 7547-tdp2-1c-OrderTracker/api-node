@@ -1,6 +1,8 @@
 DELETE FROM products;
 DELETE FROM brands;
 DELETE FROM clients;
+DELETE FROM orders;
+DELETE FROM order_entries;
 
 INSERT INTO brands (id, name, code, picture)
 	VALUES (1, 'Nike', '001', 'https://lh5.googleusercontent.com/-Q8jolvY4uUw/AAAAAAAAAAI/AAAAAAAANyU/dGOPoGTrAAU/s0-c-k-no-ns/photo.jpg');
