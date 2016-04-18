@@ -94,9 +94,9 @@ var queryCount = function(query, req) {
 	var text = "SELECT COUNT(*) FROM orders WHERE "+ strconditions;
 	return query(text, data);
 };
-var queryGet = "SELECT orders.id as id, delivery_date, date_created, orders.status as status, total_price, client_id, vendor_id, order_entries.id as oe_id, product_id, name, quantity, unit_price, orders.currency as currency, order_entries.currency as oe_currency, thumbnail, brand_name FROM orders LEFT JOIN order_entries ON orders.id = order_entries.order_id WHERE orders.id = $1::int";
+var orderQueryGet = "SELECT orders.id as id, delivery_date, date_created, orders.status as status, total_price, client_id, vendor_id, order_entries.id as oe_id, product_id, name, quantity, unit_price, orders.currency as currency, order_entries.currency as oe_currency, thumbnail, brand_name FROM orders LEFT JOIN order_entries ON orders.id = order_entries.order_id WHERE orders.id = $1::int";
 
-var orders = pg_endpoint("orders", queryList, queryCount, queryGet, orderMapList, orderMapGet, {
+var orders = pg_endpoint("orders", queryList, queryCount, orderQueryGet, orderMapList, orderMapGet, {
 	fields: ["client_id", "vendor_id", "delivery_date", "status", "date_created"],
 	_default: {
 		status: function(){ return 'draft'; },
@@ -205,6 +205,7 @@ app.use("/:order_id/order_items", lock_order_items);
 // PUT empty order
 app.put("/:order_id/empty", function(req, res) {
 
+	var mapF = orderMapGet(req, res);
 	pgConnect(process.env.DATABASE_URL).then(function(connection) {
 		var client = connection.client;
 		var query = q.denodeify(client.query.bind(client));
@@ -213,9 +214,16 @@ app.put("/:order_id/empty", function(req, res) {
 			.then(function() {
 				return query("UPDATE orders SET currency=null, total_price=0 WHERE id=$1::int", [req.params.order_id]);
 			})
-			.finally(connection.done)
 			.then(function() {
-				res.sendStatus(204);
+				return query(orderQueryGet, [req.params.order_id]);
+			})
+			.finally(connection.done)
+			.then(function(result) {
+				if (result.rows && result.rows.length) {
+					res.send(mapF(result.rows[0], result.rows));
+				} else {
+					res.status(404).send("Not found");
+				}
 			}).catch(function(err) {
 				console.error(err);
 				res.status(500).send(err.toString());
