@@ -25,8 +25,6 @@ app.use("/v1/products", products);
 app.use("/v1/brands", brands);
 app.use("/v1/orders", orders);
 
-app.use("/images", express.static('images'));
-
 app.listen(port, function() {
 	console.log("log server listing on port " + port);
 });
