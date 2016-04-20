@@ -1,8 +1,8 @@
-DROP TABLE order_entries;
-DROP TABLE orders;
-DROP TABLE products;
-DROP TABLE clients;
-DROP TABLE brands;
+DROP TABLE IF EXISTS order_entries;
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS clients;
+DROP TABLE IF EXISTS brands;
 
 CREATE TABLE brands (
 	id serial primary key, 

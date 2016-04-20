@@ -25,6 +25,10 @@ app.use("/v1/products", products);
 app.use("/v1/brands", brands);
 app.use("/v1/orders", orders);
 
-app.listen(port, function() {
-	console.log("log server listing on port " + port);
-});
+if (require.main === module) {
+	app.listen(port, function() {
+		console.log("log server listing on port " + port);
+	});
+} else {
+	module.exports = app;
+}
