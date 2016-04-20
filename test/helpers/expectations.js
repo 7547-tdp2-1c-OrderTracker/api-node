@@ -1,10 +1,11 @@
 var assert = require("assert");
+var q = require("q");
 
 var responseShouldBe = function(options, element) {
 	describe("returned", function() {
 		beforeEach(function() {
 			var self = this;
-			element.bind(this)().then(function(x) {
+			return q(element.bind(this)()).then(function(x) {
 				self.obj = x;
 			});
 		});
@@ -16,19 +17,36 @@ var responseShouldBe = function(options, element) {
 		});
 
 		if (options.body) {
-			describe("body", function() {
-				it("should have " + JSON.stringify(options.body), function() {
-					var self = this;
-					Object.keys(options.body).forEach(function(key) {
-						assert.equal(self.obj.body[key], options.body[key]);
-					});
+			shouldBe(options.body, function() {
+				return q(element.bind(this)()).then(function(x) {
+					return x.body;
 				});
-			});
+			}, "body");
 		}
 	});
 
 };
 
+var shouldBe = function(obj, element, name) {
+	describe(name || "obj", function() {
+		beforeEach(function() {
+			var self = this;
+			return q(element.bind(this)()).then(function(x) {
+				self.obj = x;
+			});
+		});
+
+		it("should have " + JSON.stringify(obj), function() {
+			var self = this;
+			Object.keys(obj).forEach(function(key) {
+				assert.equal(self.obj[key], obj[key]);
+			});
+		});
+	});
+
+};
+
 module.exports = {
-	responseShouldBe: responseShouldBe
+	responseShouldBe: responseShouldBe,
+	shouldBe: shouldBe
 };
