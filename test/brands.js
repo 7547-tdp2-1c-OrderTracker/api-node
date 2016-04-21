@@ -1,6 +1,8 @@
 var app = require("../server.js");
 
-var db = require("./helpers/db")(process.env.DATABASE_URL);
+var randomdbName = "ordertrackertest";
+
+var db = require("./helpers/db")(randomdbName);
 var api = require("./helpers/api")(app);
 var expectations = require("./helpers/expectations");
 
@@ -8,6 +10,11 @@ var assert = require("assert");
 
 var getReturned = function() { return this.returnedData; };
 describe("Brands", function() {
+	this.timeout(100000);
+	before(function() {
+		return db.create();
+	});
+
 	beforeEach(function() {
 		return db.reset();
 	});
@@ -144,6 +151,5 @@ describe("Brands", function() {
 				}, function() { return this.response.body.results[0]; });
 			});
 		});
-
 	});
 });

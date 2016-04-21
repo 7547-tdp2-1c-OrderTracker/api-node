@@ -5,6 +5,7 @@ var _exec = require('child_process').exec;
 var schema = fs.readFileSync("sql/schema.sql").toString();
 
 var exec = q.denodeify(function(command, callback) {
+	console.log(command);
 	_exec(command, function(error, stdout, stderr) {
 		callback(error, {stdout:stdout, stderr:stderr});
 	});
@@ -19,8 +20,8 @@ var pgConnect = q.denodeify(function(url, callback) {
 	});
 });
 
-module.exports = function(url) {
-	var dbname = url.split("/").slice(-1)[0];
+module.exports = function(dbname) {
+	var url;
 	var reset = function() {
 		return pgConnect(url)
 					.then(function(connection) {
@@ -32,7 +33,37 @@ module.exports = function(url) {
 					});
 	};
 
+	var destroy = function() {
+		return exec("dropdb " + dbname);
+	};
+
+	var create = function() {
+		return destroy()
+			.catch(function(e) {
+			})
+			.then(function() {
+				return exec("createdb " + dbname)
+			})
+			.catch(function() {
+				var username = process.env.USER;
+				var cmd = "sudo su - postgres -c \"echo 'create user "+username+"; alter user "+username+" password '\\'"+username+"\\''; alter user "+username+" superuser;' | psql\"";
+
+				return exec(cmd)
+					.then(function() {
+						return exec("createdb " + dbname);
+					});
+			})
+			.then(function() {
+				var username = process.env.USER;
+				url = "postgres://"+username+":"+username+"@localhost/" + dbname
+
+				process.env.DATABASE_URL = url;
+			});
+	};
+
 	return {
-		reset: reset
+		create: create,
+		reset: reset,
+		destroy: destroy
 	};
 };
