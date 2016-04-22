@@ -38,12 +38,7 @@ module.exports = function(dbname) {
 	};
 
 	var create = function() {
-		return destroy()
-			.catch(function(e) {
-			})
-			.then(function() {
-				return exec("createdb " + dbname)
-			})
+		return exec("createdb " + dbname)
 			.catch(function() {
 				var username = process.env.USER;
 				var cmd = "sudo su - postgres -c \"echo 'create user "+username+"; alter user "+username+" password '\\'"+username+"\\''; alter user "+username+" superuser;' | psql\"";
@@ -51,6 +46,9 @@ module.exports = function(dbname) {
 				return exec(cmd)
 					.then(function() {
 						return exec("createdb " + dbname);
+					})
+					.catch(function(e) {
+						
 					});
 			})
 			.then(function() {
