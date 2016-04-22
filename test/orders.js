@@ -8,6 +8,16 @@ var expectations = require("./helpers/expectations");
 var assert = require("assert");
 
 var getReturned = function() { return this.returnedData; };
+
+/*
+	Testea todas las funcionalidaes de la order (pedido) que NO involucren
+	a order_items. Por ej verifica que si se da de alta una orden empieza
+	con el status draft y el total_price 0, pero no testea que pasa
+	cuando se agregar order_items
+
+	El test de order items esta en un grupo de tests aparte (order_items.js)
+*/
+
 describe("Orders", function() {
 	this.timeout(100000);
 	before(function() {
