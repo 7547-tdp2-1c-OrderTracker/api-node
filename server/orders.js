@@ -234,7 +234,7 @@ var stock_control = function(req, res, next) {
 			.finally(connection.done)
 			.then(function() {
 				if (nostock) {
-					res.status(400).send(JSON.stringify({error: "NO_STOCK"}));
+					res.status(400).send({error: "NO_STOCK"});
 				} else {
 					next();
 				}
