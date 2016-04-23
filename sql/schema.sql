@@ -64,6 +64,6 @@ CREATE TABLE order_entries (
 	currency varchar(8)
 );
 
-DROP INDEX reject_dup_products;
+DROP INDEX IF EXISTS reject_dup_products;
 CREATE UNIQUE INDEX reject_dup_products ON order_entries (order_id, product_id);
 
