@@ -178,7 +178,7 @@ var updateOrderTotalPrice = function(req, res, id) {
 
 				return query(denormalize, [id])
 					.then(function() {
-						var text = "UPDATE orders SET currency=(SELECT currency FROM order_entries WHERE order_id=$1::int LIMIT 1), total_price=(SELECT sum(unit_price * quantity) FROM order_entries WHERE order_id=$1::int) WHERE id=$1::int";
+						var text = "UPDATE orders SET currency=(SELECT currency FROM order_entries WHERE order_id=$1::int LIMIT 1), total_price=(SELECT coalesce(sum(unit_price * quantity),0) FROM order_entries WHERE order_id=$1::int) WHERE id=$1::int";
 						return query(text, [req.params.order_id]);
 					});
 			})

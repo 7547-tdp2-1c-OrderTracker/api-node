@@ -45,6 +45,7 @@ describe("Orders", function() {
 						picture: 'picture',
 						retail_price: 30,
 						brand_id: self.brand_id,
+						currency: "ARS",
 						stock: 10
 					});
 				}).then(function(res) {
@@ -61,6 +62,29 @@ describe("Orders", function() {
 						});
 		});
 
+		describe("when get list of order items (GET /v1/orders/:order_id/order_items)", function() {
+			beforeEach(function() {
+				var self = this;
+				return api.get("/v1/orders/" + self.order_id + "/order_items").then(function(r) {
+					self.response = r;
+				});
+			});
+
+			describe("paging", function() {
+				it("should total 0", function() {
+					assert.equal(this.response.body.paging.total, 0);
+				});
+			});
+
+			describe("results", function() {
+				describe("length", function() {
+					it("should be 0", function() {
+						assert.equal(this.response.body.results.length, 0);
+					});
+				});
+			});
+		});
+
 		var getReturned = function() { return this.returnedData; };
 		describe("when insert an order_item with quantity=1", function() {
 			beforeEach(function() {
@@ -72,10 +96,58 @@ describe("Orders", function() {
 					});
 			});
 
+			describe("when get order (GET /v1/orders/:order_id)", function() {
+				beforeEach(function() {
+					var self = this;
+					return api.get("/v1/orders/" + this.order_id)
+						.then(function(r) {
+							self.returnedData = r;
+						});
+				});
+
+				expectations.responseShouldBe({
+					status:200,
+					body: {
+						total_price: 30,
+					}
+				}, getReturned);
+			});
+
+			describe("when get list of order items (GET /v1/orders/:order_id/order_items)", function() {
+				beforeEach(function() {
+					var self = this;
+					return api.get("/v1/orders/" + self.order_id + "/order_items").then(function(r) {
+						self.response = r;
+					});
+				});
+
+				describe("paging", function() {
+					it("should total 1", function() {
+						assert.equal(this.response.body.paging.total, 1);
+					});
+				});
+
+				describe("results", function() {
+					describe("length", function() {
+						it("should be 1", function() {
+							assert.equal(this.response.body.results.length, 1);
+						});
+					});
+
+					expectations.shouldBe({
+						name: "test_product",
+						brand: "test_brand",
+						quantity: 1,
+						unit_price: 30,
+						currency: "ARS"
+					}, function() { return this.response.body.results[0]; });
+				});
+			});
+
 			expectations.responseShouldBe({
 				status:200,
 				body: {
-					currency: null,
+					currency: "ARS",
 					unit_price: 30,
 					brand: "test_brand",
 					brand_name: "test_brand",
@@ -98,6 +170,43 @@ describe("Orders", function() {
 						error: "NO_STOCK"
 					}
 				}, getReturned);
+
+
+				describe("when get list of order items (GET /v1/orders/:order_id/order_items)", function() {
+					beforeEach(function() {
+						var self = this;
+						return api.get("/v1/orders/" + self.order_id + "/order_items").then(function(r) {
+							self.response = r;
+						});
+					});
+
+					describe("results", function() {
+						expectations.shouldBe({
+							name: "test_product",
+							brand: "test_brand",
+							quantity: 1,
+							unit_price: 30,
+							currency: "ARS"
+						}, function() { return this.response.body.results[0]; });
+					});
+				});
+
+				describe("when get order (GET /v1/orders/:order_id)", function() {
+					beforeEach(function() {
+						var self = this;
+						return api.get("/v1/orders/" + this.order_id)
+							.then(function(r) {
+								self.returnedData = r;
+							});
+					});
+					expectations.responseShouldBe({
+						status:200,
+						body: {
+							total_price: 30,
+						}
+					}, getReturned);
+				});
+
 			});
 
 			describe("when update an order_item with quantity=2", function() {
@@ -116,9 +225,93 @@ describe("Orders", function() {
 						unit_price: 30,
 						brand: "test_brand",
 						brand_name: "test_brand",
-						quantity: 2
+						quantity: 2,
+						currency: "ARS"
 					}
 				}, getReturned);
+
+				describe("when get order (GET /v1/orders/:order_id)", function() {
+					beforeEach(function() {
+						var self = this;
+						return api.get("/v1/orders/" + this.order_id)
+							.then(function(r) {
+								self.returnedData = r;
+							});
+					});
+
+					expectations.responseShouldBe({
+						status:200,
+						body: {
+							total_price: 60,
+						}
+					}, getReturned);
+				});
+
+				describe("when delete order_entry", function() {
+					beforeEach(function() {
+						return api.del("/v1/orders/" + this.order_id + "/order_items/" + this.order_entry_id);
+					});
+
+					describe("when get list of order items (GET /v1/orders/:order_id/order_items)", function() {
+						beforeEach(function() {
+							var self = this;
+							return api.get("/v1/orders/" + self.order_id + "/order_items").then(function(r) {
+								self.response = r;
+							});
+						});
+
+						describe("paging", function() {
+							it("should total 0", function() {
+								assert.equal(this.response.body.paging.total, 0);
+							});
+						});
+
+						describe("results", function() {
+							describe("length", function() {
+								it("should be 0", function() {
+									assert.equal(this.response.body.results.length, 0);
+								});
+							});
+						});
+					});
+
+					describe("when get order (GET /v1/orders/:order_id)", function() {
+						beforeEach(function() {
+							var self = this;
+							return api.get("/v1/orders/" + this.order_id)
+								.then(function(r) {
+									self.returnedData = r;
+								});
+						});
+
+						expectations.responseShouldBe({
+							status:200,
+							body: {
+								total_price: 0,
+							}
+						}, getReturned);
+					});
+
+				});
+
+				describe("when get list of order items (GET /v1/orders/:order_id/order_items)", function() {
+					beforeEach(function() {
+						var self = this;
+						return api.get("/v1/orders/" + self.order_id + "/order_items").then(function(r) {
+							self.response = r;
+						});
+					});
+
+					describe("results", function() {
+						expectations.shouldBe({
+							name: "test_product",
+							brand: "test_brand",
+							quantity: 2,
+							unit_price: 30,
+							currency: "ARS"
+						}, function() { return this.response.body.results[0]; });
+					});
+				});
 			});
 		});
 
