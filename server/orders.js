@@ -291,7 +291,7 @@ var prevent_stock_surpass_on_update = function(req, res, next) {
 	})
 		.then(function() {
 			if (nostock) {
-				res.status(400).send(JSON.stringify({error: "NO_STOCK"}));
+				res.status(400).send({error: "NO_STOCK"});
 			} else {
 				next();
 			}

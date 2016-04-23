@@ -67,6 +67,7 @@ describe("Orders", function() {
 				var self = this;
 				return api.post("/v1/orders/" + self.order_id + "/order_items", {quantity:1, product_id: this.product_id})
 					.then(function(res) {
+						self.order_entry_id = res.body.id;
 						self.returnedData = res;
 					});
 			});
@@ -81,6 +82,44 @@ describe("Orders", function() {
 					quantity: 1
 				}
 			}, getReturned);
+
+			describe("when update an order_item with quantity=11", function() {
+				beforeEach(function() {
+					var self = this;
+					return api.put("/v1/orders/" + self.order_id + "/order_items/" + self.order_entry_id, {quantity:11})
+						.then(function(res) {
+							self.returnedData = res;
+						});
+				});
+
+				expectations.responseShouldBe({
+					status:400,
+					body: {
+						error: "NO_STOCK"
+					}
+				}, getReturned);
+			});
+
+			describe("when update an order_item with quantity=2", function() {
+				beforeEach(function() {
+					var self = this;
+					return api.put("/v1/orders/" + self.order_id + "/order_items/" + self.order_entry_id, {quantity:2})
+						.then(function(res) {
+							self.returnedData = res;
+						});
+				});
+
+				expectations.responseShouldBe({
+					status:200,
+					body: {
+						currency: null,
+						unit_price: 30,
+						brand: "test_brand",
+						brand_name: "test_brand",
+						quantity: 2
+					}
+				}, getReturned);
+			});
 		});
 
 		describe("when insert an order_item with quantity=11", function() {
