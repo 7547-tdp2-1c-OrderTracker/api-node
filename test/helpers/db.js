@@ -7,7 +7,11 @@ var schema = fs.readFileSync("sql/schema.sql").toString();
 var exec = q.denodeify(function(command, callback) {
 	console.log(command);
 	_exec(command, function(error, stdout, stderr) {
-		callback(error, {stdout:stdout, stderr:stderr});
+		if (error) {
+			callback({err: error, stdout: stderr, stderr: stderr});
+		} else {
+			callback(null, {stdout:stdout, stderr:stderr});
+		}
 	});
 });
 
@@ -39,7 +43,9 @@ module.exports = function(dbname) {
 
 	var create = function() {
 		return exec("createdb " + dbname)
-			.catch(function() {
+			.catch(function(err) {
+				if(err.stderr.slice(-15) === "already exists\n") return;
+				
 				var username = process.env.USER;
 				var cmd = "sudo su - postgres -c \"echo 'create user "+username+"; alter user "+username+" password '\\'"+username+"\\''; alter user "+username+" superuser;' | psql\"";
 
