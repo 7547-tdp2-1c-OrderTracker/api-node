@@ -332,7 +332,42 @@ var prevent_stock_surpass = function(req, res, next) {
 		});
 };
 
+var draft_limit = function(req, res, next) {
+	if (req.method !== "POST") return next();
+	if (!req.body.client_id) return next();
+
+	var draft_limit_reached = false;
+
+	pgConnect(process.env.DATABASE_URL).then(function(connection) {
+		var client = connection.client;
+		var query = q.denodeify(client.query.bind(client));
+
+		return query("SELECT client_id FROM orders as o WHERE o.status = 'draft' AND o.client_id = $1::int", [req.body.client_id])
+				.finally(connection.done)
+				.then(function(result) {
+					if (result.rows.length) {
+						// si hay registros, significa que ya hay pedidos en draft de ese cliente
+						draft_limit_reached = true;
+					}
+				})
+	})
+		.then(function() {
+			if (draft_limit_reached) {
+				res.status(400).send(JSON.stringify({error: "DRAFT_LIMIT_REACHED"}));
+			} else {
+				next();
+			}
+		}).catch(function(err) {
+			console.error(err);
+			res.status(401).send(err.toString());
+		});
+
+};
+
+
 var app = express();
+
+app.use("", draft_limit);
 
 app.use("/:order_id", stock_control);
 app.use("/:order_id", lock_order_items);
