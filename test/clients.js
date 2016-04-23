@@ -106,7 +106,7 @@ describe("clients", function() {
 			});
 		});
 
-		describe("when put the same client (PUT /v1/clients/:id) with name='Mario' and lastname: 'Lucadei'", function() {
+		describe("when put the same client (PUT /v1/clients/:id) with name='Pablo' and lastname: 'Lucadei'", function() {
 			beforeEach(function() {
 				this.returnedData = this.returnedData.then(function(x) {
 					return api.put("/v1/clients/" + x.body.id, {name: "Pablo", lastname: "Lucadei"});
