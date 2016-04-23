@@ -12,6 +12,28 @@ var pgConnect = q.denodeify(function(url, callback) {
 	});
 });
 
+var pgTransaction = function(query, f) {
+	var rollbackOnError = function(e) {
+		return query("ROLLBACK").then(function() {
+			throw e;
+		});
+	};
+
+	var rollbackd = false;
+	var rollback = function() {
+		rollbackd = true;
+		return query("ROLLBACK");
+	};
+
+	return f(query("BEGIN"), rollback)
+				.then(function() {
+					if (!rollbackd) {
+						return query("COMMIT");
+					}
+				})
+				.catch(rollbackOnError);
+};
+
 var convertOrder = function(order_entry) {
 	return {
 		id: order_entry.oe_id,
@@ -174,6 +196,56 @@ var order_entries = pg_endpoint("order_entries", queryList, queryCount, queryGet
 	afterRemove: updateOrderTotalPrice
 });
 
+var stock_control = function(req, res, next) {
+	// el control de stock solo se apica si el metodo es PUT y el status se cambia a confirmed
+	if (req.method !== "PUT") return next();
+
+	pgConnect(process.env.DATABASE_URL).then(function(connection) {
+		var client = connection.client;
+		var query = q.denodeify(client.query.bind(client));
+
+		var nostock = false;
+		return pgTransaction(query, function(tr, rollback) {
+			return tr.then(function() {
+				return query("SELECT * FROM orders WHERE status != 'confirmed' AND id = $1::int", [req.params.order_id])
+					.then(function(result) {
+						if (result.rows.length) {
+							// la orden no esta confirmado, hay que chequear el stock
+							return query("SELECT * FROM order_entries as oe JOIN products as p ON oe.product_id = p.id WHERE order_id = $1::int AND oe.quantity > p.stock", [req.params.order_id])
+								.then(function(result) {
+									if (result.rows.length) {
+										// si hay registros, significa que hay items que exceden la disponibilidad del producto
+										nostock = true;
+										return rollback();
+									} else {
+										// si no devuelve registros, el stock esta bien , hay que actualizarlo y dejar 
+										// que se actualize el status del order
+										return query("UPDATE products as p SET stock=stock-oe.quantity FROM order_entries as oe WHERE p.id = oe.product_id AND oe.order_id = $1::int;", [req.params.order_id]);
+									}
+								});
+						} else {
+							// la orden esta confirmado, no se puede modificar
+							throw new Error("Can't change confirmed order " + req.params.order_id + "\n");
+						}
+						
+					});
+			});
+		})
+			.finally(connection.done)
+			.then(function() {
+				if (nostock) {
+					res.status(400).send(JSON.stringify({error: "NO_STOCK"}));
+				} else {
+					next();
+				}
+			})
+			.catch(function(err) {
+				console.error(err);
+				res.status(500).send(err.toString());
+			});
+	});
+};
+
 var lock_order_items = function(req, res, next) {
 	if (req.method === "GET") return next();
 
@@ -200,6 +272,7 @@ var lock_order_items = function(req, res, next) {
 
 var app = express();
 
+app.use("/:order_id", stock_control);
 app.use("/:order_id", lock_order_items);
 app.use("/:order_id/order_items", lock_order_items);
 
