@@ -1,4 +1,5 @@
 var pg_endpoint = require("./pg_endpoint");
+var express = require("express");
 
 var mapList = function(req, res) {
 	var fullUrl = req.protocol + '://' + req.get('host');
@@ -49,6 +50,27 @@ var queryCount = function(query, req) {
 	}
 };
 
-module.exports = pg_endpoint("products", queryList, queryCount, queryGet, mapList, mapGet, {
+var products = pg_endpoint("products", queryList, queryCount, queryGet, mapList, mapGet, {
 	fields: ["name", "brand_id", "description", "thumbnail", "picture", "stock", "retail_price", "wholesale_price", "currency"]
 });
+
+var readAliasFields = function(req, res, next) {
+	if (req.method === "POST" || req.method === "PUT") {
+		if (req.body.retailPrice) {
+			req.body.retail_price = req.body.retailPrice;
+		}
+		if (req.body.wholesalePrice) {
+			req.body.wholesale_price = req.body.wholesalePrice;
+		}
+	}
+	next();
+
+}
+
+var app = express();
+
+app.use(readAliasFields);
+app.use(products);
+
+
+module.exports = app;
