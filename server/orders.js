@@ -68,6 +68,10 @@ var order_entries = sequelize_endpoint(OrderEntry, {
 		order_id: function(req) {
 			return req.params.order_id;
 		}
+	},
+	map: function(entity) {
+		entity.brand = entity.brand_name;
+		return entity;
 	}
 });
 

@@ -23,23 +23,29 @@ var ret = function(model, options) {
 	base = options.base||"";
 	extra_fields = options.extra_fields ||{};
 
+	if (!options.map) options.map = function(x){return x;};
+
 	// Create
 	app.post(base, promised(function(req, res) {
 		var newObj = {};
 		for (var k in req.body) {
 			newObj[k] = req.body[k];
 		};
-		
+
 		for (var field in extra_fields) {
 			newObj[field] = extra_fields[field](req);
 		};
 
-		return model.create(newObj).then(function(instance) {
-			return {
-				body: instance.dataValues,
-				status: 200
-			};
-		});
+		return model.create(newObj)
+			.then(function(instance) {
+				return model.findOne({where: {id: instance.id}})
+			})
+			.then(function(instance) {
+				return {
+					body: options.map(instance.dataValues),
+					status: 200
+				};
+			});
 	}));	
 
 	// Read
@@ -48,13 +54,18 @@ var ret = function(model, options) {
 			if (!instance) return {status: 404, body: "Not Found"};
 
 			return {
-				body: instance.dataValues,
+				body: options.map(instance.dataValues),
 				status: 200
 			};
 		});
 	}));
 
 	// list
+
+	var getDataValues = function(x) {
+		return x.dataValues;
+	};
+
 	app.get(base, promised(function(req, res) {
 		var offset = parseInt(req.query.offset || '0');
 		var limit = parseInt(req.query.limit || options.default_limit || '20');
@@ -76,7 +87,7 @@ var ret = function(model, options) {
 						offset: offset,
 						total: count.get("count")
 					},
-					results: instances
+					results: instances.map(getDataValues).map(options.map)
 				},
 				status: 200
 			};
@@ -85,22 +96,29 @@ var ret = function(model, options) {
 
 	// Update
 	app.put(base + "/:id", promised(function(req, res) {
-		return model.update(req.body, {where: {id: req.params.id}}).then(function(instance) {
-			return model.findOne({where: {id: req.params.id}}).then(function(instance) {
+		return model.findOne({where: {id: req.params.id}})
+			.then(function(instance) {
+				return instance.update(req.body);
+			})
+			.then(function() {
+				return model.findOne({where: {id: req.params.id}})
+			})
+			.then(function(instance) {
 				return {
-					body: instance.dataValues,
+					body: options.map(instance.dataValues),
 					status: 200
 				};
 			});
-		});
 	}));
 
 	// Destroy
 	app.del(base + "/:id", promised(function(req, res) {
-		return model.destroy({where: {id: req.params.id}}).then(function() {
-			return {
-				status: 204
-			};
+		return model.findOne({where: {id: req.params.id}}).then(function(instance) {
+			return instance.destroy().then(function() {
+				return {
+					status: 204
+				};
+			});
 		});
 	}));
 

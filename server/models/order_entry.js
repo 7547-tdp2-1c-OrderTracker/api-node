@@ -18,6 +18,8 @@ var pgConnect = q.denodeify(function(url, callback) {
 
 var updateOrderTotalPrice = function(instance, options) {
 	var order_id = instance.order_id;
+	var order_entry_id = instance.id;
+
 	return pgConnect(process.env.DATABASE_URL).then(function(connection) {
 		var client = connection.client;
 		var query = q.denodeify(client.query.bind(client));
@@ -41,10 +43,13 @@ var updateOrderTotalPrice = function(instance, options) {
 				" brand_name = b.name from products as p join brands as b on b.id = p.brand_id" +
 				" where oe.id = $1::int and oe.product_id = p.id;";
 
-				return query(denormalize, [id])
+				return query(denormalize, [order_entry_id])
 					.then(function() {
 						var text = "UPDATE orders SET currency=(SELECT currency FROM order_entries WHERE order_id=$1::int LIMIT 1), total_price=(SELECT coalesce(sum(unit_price * quantity),0) FROM order_entries WHERE order_id=$1::int) WHERE id=$1::int";
 						return query(text, [order_id]);
+					})
+					.catch(function(err) {
+						console.error(err);
 					});
 			})
 			.finally(connection.done);
