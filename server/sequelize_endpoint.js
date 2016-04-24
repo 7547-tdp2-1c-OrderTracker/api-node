@@ -17,12 +17,18 @@ var promised = function(f) {
 var ret = function(model, options) {
 	var app = express();
 	var base;
+	var extra_fields;
 
 	options = options || {};
 	base = options.base||"";
+	extra_fields = options.extra_fields ||{};
 
 	// Create
 	app.post(base, promised(function(req, res) {
+		for (var field in extra_fields) {
+			req.body[field] = extra_fields[field](req);
+		};
+
 		return model.create(req.body).then(function(instance) {
 			return {
 				body: instance.dataValues,
