@@ -1,7 +1,10 @@
-var pg_endpoint = require("./pg_endpoint");
 var express = require("express");
 var pg = require("pg");
 var q = require("q");
+
+var sequelize_endpoint = require("./sequelize_endpoint");
+var Order = require("./models/order");
+var OrderEntry = require("./models/order_entry");
 
 var pgConnect = q.denodeify(function(url, callback) {
 	pg.connect(url, function(err, client, done) {
@@ -34,100 +37,29 @@ var pgTransaction = function(query, f) {
 				.catch(rollbackOnError);
 };
 
-var convertOrder = function(order_entry) {
-	return {
-		id: order_entry.oe_id,
-		product_id: order_entry.product_id,
-		name: order_entry.name,
-		brand_name: order_entry.brand_name,
-		brand: order_entry.brand_name,
-		quantity: order_entry.quantity,
-		unit_price: order_entry.unit_price,
-		currency: order_entry.oe_currency,
-		thumbnail: order_entry.thumbnail,
-		order_id: order_entry.id		
-	};
-};
+var filter_fields = ["status","client_id","vendor_id"];
+var where = function(req) {
+	var filters = filter_fields.filter(function(fieldName) {
+		return req.query[fieldName];
+	}).map(function(fieldName) {
+		var ret = {};
+		ret[fieldName] = {$in: req.query[fieldName].split(",")};
 
-var orderMapList = function(req, res) {
-	return function(order) {
-		return {
-			id: order.id,
-			delivery_date: order.delivery_date,
-			status: order.status,
-			total_price: order.total_price,
-			currency: order.currency,
-			client_id: order.client_id,
-			vendor_id: order.vendor_id,
-			date_created: order.date_created
-		};
-	};
-};
-
-var orderMapGet = function(req, res) {
-	var f = orderMapList(req, res);
-	return function(order, orders) {
-		var ret = f(order);
-		if (orders && orders.length && orders[0].product_id) {
-			ret.order_items = orders.map(convertOrder);
-		} else {
-			ret.order_items = [];
-		}
 		return ret;
-	};
-};
-
-var filter_fields = [["status","varchar"], ["client_id","int"], ["vendor_id","int"]];
-var queryList = function(query, req, offset, limit) {
-	var data = [offset, limit];
-	var conditions = [" 1=1 "];
-	var index = 3;
-
-	filter_fields.forEach(function(field) {
-		var fieldName = field[0];
-		var type = field[1];
-		if (req.query[fieldName]) {
-			conditions.push(" " + fieldName + "= $" + index + "::"+type+" ");
-			data.push(req.query[fieldName]);
-			index++;
-		}
 	});
 
-	var strconditions = conditions.join(" AND ");
-	var text = "SELECT * FROM orders WHERE "+ strconditions + "OFFSET $1::int LIMIT $2::int";
-	return query(text, data);
-};
-var queryCount = function(query, req) {
-	var data = [];
-	var conditions = [" 1=1 "];
-	var index = 1;
-
-	filter_fields.forEach(function(field) {
-		var fieldName = field[0];
-		var type = field[1];
-		if (req.query[fieldName]) {
-			conditions.push(" " + fieldName + "= $" + index + "::"+type+" ");
-			data.push(req.query[fieldName]);
-			index++;
-		}
-	});
-
-	var strconditions = conditions.join(" AND ");
-	var text = "SELECT COUNT(*) FROM orders WHERE "+ strconditions;
-	return query(text, data);
-};
-var orderQueryGet = "SELECT orders.id as id, delivery_date, date_created, orders.status as status, total_price, client_id, vendor_id, order_entries.id as oe_id, product_id, name, quantity, unit_price, orders.currency as currency, order_entries.currency as oe_currency, thumbnail, brand_name FROM orders LEFT JOIN order_entries ON orders.id = order_entries.order_id WHERE orders.id = $1::int";
-
-var orders = pg_endpoint("orders", queryList, queryCount, orderQueryGet, orderMapList, orderMapGet, {
-	fields: ["client_id", "vendor_id", "delivery_date", "status", "date_created"],
-	_default: {
-		status: function(){ return 'draft'; },
-		date_created: function(){ return new Date().toISOString(); }
+	if (filters.length) {
+		return {$and: filters};
+	} else {
+		return {};
 	}
+};
+
+var orders = sequelize_endpoint(Order, {
+	where: where
 });
 
-
-mapList = function(req, res) {
+var mapList = function(req, res) {
 	return function(order_entry) {
 		return {
 			id: order_entry.id,
@@ -143,14 +75,14 @@ mapList = function(req, res) {
 		};
 	};
 };
-mapGet = mapList;
+var mapGet = mapList;
 queryList = function(query, req, offset, limit) {
 	return query("SELECT * FROM order_entries WHERE order_id = $3::int OFFSET $1::int LIMIT $2::int", [offset, limit, req.params.order_id]);
 };
-queryCount = function(query, req) {
+var queryCount = function(query, req) {
 	return query("SELECT COUNT(*) FROM order_entries WHERE order_id = $1::int", [req.params.order_id]);
 };
-queryGet = "SELECT * FROM order_entries WHERE order_entries.id = $1::int";
+var queryGet = "SELECT * FROM order_entries WHERE order_entries.id = $1::int";
 
 var updateOrderTotalPrice = function(req, res, id) {
 	return pgConnect(process.env.DATABASE_URL).then(function(connection) {
@@ -186,14 +118,11 @@ var updateOrderTotalPrice = function(req, res, id) {
 	});
 };
 
-
-var order_entries = pg_endpoint("order_entries", queryList, queryCount, queryGet, mapList, mapGet, {
-	fields: ["product_id", "quantity"],
-	params_fields: ["order_id"],
+var order_entries = sequelize_endpoint(OrderEntry, {
 	base: "/:order_id/order_items",
-	afterCreate: updateOrderTotalPrice,
-	afterUpdate: updateOrderTotalPrice,
-	afterRemove: updateOrderTotalPrice
+	where: function(req) {
+		return {order_id: req.params.order_id};
+	}
 });
 
 var stock_control = function(req, res, next) {
