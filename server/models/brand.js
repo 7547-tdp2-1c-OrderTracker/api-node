@@ -1,7 +1,7 @@
-var sequelize_endpoint = require("../sequelize_endpoint");
 var Sequelize = require("sequelize");
+var sequelize = require("../domain/sequelize");
 
-module.exports = sequelize_endpoint.sequelize.define('brands', {
+module.exports = sequelize.define('brands', {
   name: Sequelize.STRING,
   picture: Sequelize.STRING,
   code: Sequelize.STRING

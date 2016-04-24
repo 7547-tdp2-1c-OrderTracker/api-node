@@ -1,8 +1,7 @@
-var Sequelize = require("sequelize");
+var sequelize = require("./domain/sequelize");
 var express = require("express");
 var q = require("q");
 
-var sequelize = new Sequelize(process.env.DATABASE_URL);
 var promised = function(f) {
 	return function(req, res) {
 		f(req, res)
@@ -96,7 +95,5 @@ var ret = function(model, options) {
 
 	return app;
 };
-
-ret.sequelize = sequelize;
 
 module.exports = ret;
