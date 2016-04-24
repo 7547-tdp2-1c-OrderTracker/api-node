@@ -49,14 +49,16 @@ var ret = function(model, options) {
 		var offset = parseInt(req.query.offset || '0');
 		var limit = parseInt(req.query.limit || options.default_limit || '20');
 
+		var where = {};
+		if (options.where) where = options.where(req, res);
+
 		return q.all([
-			model.findAll({limit: limit, offset: offset}),
+			model.findAll({limit: limit, offset: offset, where: where}),
 			model.findOne({
-				attributes: [[sequelize.fn('COUNT', sequelize.col("*")), "count"]]
+				attributes: [[sequelize.fn('COUNT', sequelize.col("*")), "count"]],
+				where: where
 			})
 		]).spread(function(instances, count) {
-
-			console.log(count.dataValues);
 			return {
 				body: {
 					paging: {

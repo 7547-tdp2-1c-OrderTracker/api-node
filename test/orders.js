@@ -45,7 +45,7 @@ describe("Orders", function() {
 					return api.post('/v1/products', {
 						name: 'test_product',
 						picture: 'picture',
-						retail_price: 30,
+						retailPrice: 30,
 						brand_id: brand.body.id,
 						currency: "ARS",
 						stock: 1
