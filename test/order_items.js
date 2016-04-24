@@ -33,7 +33,7 @@ describe("Orders", function() {
 			.then(function() {
 				return api.post("/v1/clients", {
 					name: 'test',
-					seller_type: 'retail'
+					sellerType: 'retail'
 				}).then(function(res) {
 					self.client_id = res.body.id;
 
