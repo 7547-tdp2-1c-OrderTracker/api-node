@@ -1,9 +1,8 @@
-var app = require("../server.js");
+var app, api;
 
 var randomdbName = "ordertrackertest";
 
 var db = require("./helpers/db")(randomdbName);
-var api = require("./helpers/api")(app);
 var expectations = require("./helpers/expectations");
 
 var assert = require("assert");
@@ -12,7 +11,12 @@ var getReturned = function() { return this.returnedData; };
 describe("clients", function() {
 	this.timeout(100000);
 	before(function() {
-		return db.create();
+		return db.create().then(function() {
+
+			// hay q hacer el require despues de inicializar la base de prueba
+ 			app = require("../server.js");
+			api = require("./helpers/api")(app);
+		});
 	});
 
 	beforeEach(function() {
