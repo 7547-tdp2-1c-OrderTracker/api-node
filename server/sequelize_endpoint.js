@@ -25,11 +25,16 @@ var ret = function(model, options) {
 
 	// Create
 	app.post(base, promised(function(req, res) {
+		var newObj = {};
+		for (var k in req.body) {
+			newObj[k] = req.body[k];
+		};
+		
 		for (var field in extra_fields) {
-			req.body[field] = extra_fields[field](req);
+			newObj[field] = extra_fields[field](req);
 		};
 
-		return model.create(req.body).then(function(instance) {
+		return model.create(newObj).then(function(instance) {
 			return {
 				body: instance.dataValues,
 				status: 200

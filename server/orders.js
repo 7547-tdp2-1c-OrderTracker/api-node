@@ -59,41 +59,6 @@ var orders = sequelize_endpoint(Order, {
 	where: where
 });
 
-/*
-var updateOrderTotalPrice = function(req, res, id) {
-	return pgConnect(process.env.DATABASE_URL).then(function(connection) {
-		var client = connection.client;
-		var query = q.denodeify(client.query.bind(client));
-
-		return query("select clients.seller_type from clients join orders on orders.client_id = clients.id where orders.id = $1::int", [req.params.order_id])
-			.then(function(client) {
-				if (!client.rows.length) return;
-
-				var seller_type = client.rows[0].seller_type;
-				var price_column;
-
-				if (seller_type.slice(0,8) === "retail") {
-					price_column = "retail_price";
-				} else if (seller_type.slice(0,8) === "wholesal") {
-					price_column = "wholesale_price";
-				} else {
-					return;
-				}
-
-				var denormalize = "update order_entries as oe set name = p.name, thumbnail = p.thumbnail, unit_price = p."+ price_column +", currency = p.currency," +
-				" brand_name = b.name from products as p join brands as b on b.id = p.brand_id" +
-				" where oe.id = $1::int and oe.product_id = p.id;";
-
-				return query(denormalize, [id])
-					.then(function() {
-						var text = "UPDATE orders SET currency=(SELECT currency FROM order_entries WHERE order_id=$1::int LIMIT 1), total_price=(SELECT coalesce(sum(unit_price * quantity),0) FROM order_entries WHERE order_id=$1::int) WHERE id=$1::int";
-						return query(text, [req.params.order_id]);
-					});
-			})
-			.finally(connection.done);
-	});
-};
-*/
 var order_entries = sequelize_endpoint(OrderEntry, {
 	base: "/:order_id/order_items",
 	where: function(req) {
