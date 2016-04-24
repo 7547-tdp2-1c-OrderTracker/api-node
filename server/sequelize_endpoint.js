@@ -1,5 +1,5 @@
+var Sequelize = require("sequelize");
 var express = require("express");
-var Sequelize = require("sequelize")
 var q = require("q");
 
 var sequelize = new Sequelize(process.env.DATABASE_URL);
