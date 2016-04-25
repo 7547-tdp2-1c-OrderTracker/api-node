@@ -199,6 +199,7 @@ var order_entries = pg_endpoint("order_entries", queryList, queryCount, queryGet
 var stock_control = function(req, res, next) {
 	// el control de stock solo se apica si el metodo es PUT y el status se cambia a confirmed
 	if (req.method !== "PUT") return next();
+	if (req.url !== "/") return next();
 
 	pgConnect(process.env.DATABASE_URL).then(function(connection) {
 		var client = connection.client;
@@ -248,6 +249,7 @@ var stock_control = function(req, res, next) {
 
 var lock_order_items = function(req, res, next) {
 	if (req.method === "GET") return next();
+	if (req.url !== "") return next();
 
 	pgConnect(process.env.DATABASE_URL).then(function(connection) {
 		var client = connection.client;
