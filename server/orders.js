@@ -251,8 +251,10 @@ var stock_control = function(req, res, next) {
 									}
 								});
 						} else {
-							// la orden esta confirmado, no se puede modificar
-							throw new Error("Can't change confirmed order " + req.params.order_id + "\n");
+							// la orden esta confirmado, no se puede modificar, a menos que sea poner el status en confirmed
+							if (req.body.status !== "confirmed" || Object.keys(req.body).length !== 1) {
+								throw new Error("Can't change confirmed order " + req.params.order_id + "\n");
+							}
 						}
 						
 					});
