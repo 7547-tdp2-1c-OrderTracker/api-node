@@ -130,7 +130,7 @@ var stock_control = function(req, res, next) {
 
 var lock_order_items = function(req, res, next) {
 	if (req.method === "GET") return next();
-	if (req.url !== "") return next();
+	if (req.url !== "/") return next();
 
 	pgConnect(process.env.DATABASE_URL).then(function(connection) {
 		var client = connection.client;
