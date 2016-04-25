@@ -193,7 +193,30 @@ var order_entries = pg_endpoint("order_entries", queryList, queryCount, queryGet
 	base: "/:order_id/order_items",
 	afterCreate: updateOrderTotalPrice,
 	afterUpdate: updateOrderTotalPrice,
-	afterRemove: updateOrderTotalPrice
+	afterRemove: updateOrderTotalPrice,
+	postErrorHandler: function(req, err) {
+		if (err.code !== '23505') {
+			throw err;
+		}
+
+		return pgConnect(process.env.DATABASE_URL).then(function(connection) {
+			var client = connection.client;
+			var query = q.denodeify(client.query.bind(client));
+
+			return query("SELECT stock FROM order_entries as oe JOIN products as p ON oe.product_id = p.id WHERE p.stock >= $1::int + oe.quantity AND oe.order_id = $2::int", [req.body.quantity, req.params.order_id])
+				.then(function(result) {
+					if (result.rows.length) {
+						// si hay registros, es porque hay stock suficiente del producto (la cant que ya tenia mas la q se agrega)
+						return query("update order_entries set quantity = quantity + $1::int where order_id = $2::int and product_id = $3::int", [req.body.quantity, req.params.order_id, req.body.product_id]);
+					} else {
+						// en caso contrario hay q devolver un error
+						throw {error: 'NO_STOCK'}
+					}
+				})
+				.finally(connection.done);
+			
+		});
+	}
 });
 
 var stock_control = function(req, res, next) {

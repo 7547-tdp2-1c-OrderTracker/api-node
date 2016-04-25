@@ -18,6 +18,10 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 		});
 	});
 
+	var postErrorHandler = options.postErrorHandler || function(err, res) {
+		res.status(500).send(err.toString());
+	};
+
 	app.delete(base + "/:id", function(req, res) {
 		pgConnect(process.env.DATABASE_URL).then(function(connection) {
 			var client = connection.client;
@@ -100,11 +104,14 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 
 					return result;
 				})
+				.catch(function(err) {
+					return postErrorHandler(req, err);
+				})
 				.then(function(result) {
 					return returnById(req, res, result.rows[0].id);
-				}).catch(function(err) {
-					console.error(err);
-					res.status(500).send(err.toString());
+				})
+				.catch(function(err) {
+					res.status(500).send(err);
 				});
 		});	
 
@@ -148,8 +155,8 @@ module.exports = function(tableName, queryList, queryCount, queryGet, listWrappe
 				.then(function() {
 					return returnById(req, res, req.params.id);
 				}).catch(function(err) {
-					console.error(err);
 					res.status(500).send(err.toString());
+					return;
 				});
 		});	
 
