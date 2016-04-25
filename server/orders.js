@@ -207,7 +207,10 @@ var order_entries = pg_endpoint("order_entries", queryList, queryCount, queryGet
 				.then(function(result) {
 					if (result.rows.length) {
 						// si hay registros, es porque hay stock suficiente del producto (la cant que ya tenia mas la q se agrega)
-						return query("update order_entries set quantity = quantity + $1::int where order_id = $2::int and product_id = $3::int", [req.body.quantity, req.params.order_id, req.body.product_id]);
+						return query("update order_entries set quantity = quantity + $1::int where order_id = $2::int and product_id = $3::int", [req.body.quantity, req.params.order_id, req.body.product_id])
+							.then(function() {
+								return query("select * from order_entries where order_id = $1::int and product_id = $2::int", [req.params.order_id, req.body.product_id]);
+							});
 					} else {
 						// en caso contrario hay q devolver un error
 						throw {error: 'NO_STOCK'}
