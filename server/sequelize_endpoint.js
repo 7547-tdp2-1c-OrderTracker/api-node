@@ -49,10 +49,12 @@ var ret = function(model, options) {
 		var limit = parseInt(req.query.limit || options.default_limit || '20');
 
 		var where = {};
-		if (options.where) where = options.where(req, res);
+		var order = null;
+		if (options.where) where = options.where(req);
+		if (options.order) order = options.order(req);
 
 		return q.all([
-			model.findAll({limit: limit, offset: offset, where: where}),
+			model.findAll({limit: limit, offset: offset, where: where, order: order}),
 			model.findOne({
 				attributes: [[sequelize.fn('COUNT', sequelize.col("*")), "count"]],
 				where: where

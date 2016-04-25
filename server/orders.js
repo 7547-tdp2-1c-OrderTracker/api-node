@@ -94,7 +94,7 @@ var queryList = function(query, req, offset, limit) {
 	});
 
 	var strconditions = conditions.join(" AND ");
-	var text = "SELECT * FROM orders WHERE "+ strconditions + "OFFSET $1::int LIMIT $2::int";
+	var text = "SELECT * FROM orders WHERE "+ strconditions + " ORDER BY status DESC OFFSET $1::int LIMIT $2::int";
 	return query(text, data);
 };
 var queryCount = function(query, req) {

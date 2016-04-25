@@ -13,5 +13,8 @@ var where = function(req, res) {
 };
 
 module.exports = sequelize_endpoint(Product, {
-	where: where	
+	where: where,
+	order: function() {
+		return "name ASC";
+	}
 });
