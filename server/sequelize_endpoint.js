@@ -25,6 +25,8 @@ var ret = function(model, options) {
 
 	if (!options.map) options.map = function(x){return x;};
 
+	var postErrorHandler = options.postErrorHandler || function(req, err){ throw err; };
+
 	// Create
 	app.post(base, promised(function(req, res) {
 		var newObj = {};
@@ -37,6 +39,9 @@ var ret = function(model, options) {
 		};
 
 		return model.create(newObj)
+			.catch(function(err) {
+				return postErrorHandler(err, req);
+			})
 			.then(function(instance) {
 				return model.findOne({where: {id: instance.id}})
 			})

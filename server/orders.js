@@ -1,4 +1,5 @@
 var express = require("express");
+var sequelize = require("./domain/sequelize");
 var pg = require("pg");
 var q = require("q");
 
@@ -72,6 +73,31 @@ var order_entries = sequelize_endpoint(OrderEntry, {
 	map: function(entity) {
 		entity.brand = entity.brand_name;
 		return entity;
+	},
+	postErrorHandler: function(err, req) {
+		if (err.name !== 'SequelizeUniqueConstraintError') {
+			throw err;
+		}
+
+		return sequelize.query("SELECT stock FROM order_entries as oe JOIN products as p ON oe.product_id = p.id WHERE p.stock >= ? + oe.quantity AND oe.order_id = ?",
+				{replacements: [req.body.quantity, req.params.order_id], type: sequelize.QueryTypes.SELECT})
+					.then(function(products) {
+						if (products.length) {
+
+							// si hay registros, es porque hay stock suficiente del producto (la cant que ya tenia mas la q se agrega)
+							return sequelize.query("update order_entries set quantity = quantity + ? where order_id = ? and product_id = ? returning *",
+									{
+										replacements: [req.body.quantity, req.params.order_id, req.body.product_id],
+										type: sequelize.QueryTypes.SELECT
+									})
+								.then(function(results) {
+									return results[0];
+								});
+						} else {
+							// en caso contrario hay q devolver un error
+							throw {error: 'NO_STOCK'}
+						}
+					});
 	}
 });
 
