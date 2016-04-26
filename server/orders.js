@@ -161,74 +161,10 @@ var stock_control = function(req, res, next) {
 	});
 };
 
-var prevent_stock_surpass_on_update = function(req, res, next) {
-	if (req.method !== "PUT") return next();
-	// si no se cambia el quantity, no hay que chequear nada
-	if (!req.body.quantity) return next();
-
-	var nostock = false;
-	pgConnect(process.env.DATABASE_URL).then(function(connection) {
-		var client = connection.client;
-		var query = q.denodeify(client.query.bind(client));
-
-		return query("SELECT stock FROM order_entries as oe JOIN products as p ON oe.product_id = p.id WHERE p.stock >= $1::int AND oe.id = $2::int", [req.body.quantity, req.params.order_entry_id])
-				.finally(connection.done)
-				.then(function(result) {
-					if (!result.rows.length) {
-						// si no hay registros, significa que no hay stock del producto
-						nostock = true;
-					}
-				})
-	})
-		.then(function() {
-			if (nostock) {
-				res.status(400).send({error: "NO_STOCK"});
-			} else {
-				next();
-			}
-		}).catch(function(err) {
-			console.error(err);
-			res.status(401).send(err.toString());
-		});	
-};
-
-var prevent_stock_surpass = function(req, res, next) {
-	if (req.method !== "POST") return next();
-	if (!req.body.product_id) return next();
-	if (!req.body.quantity) return next();
-
-	var nostock = false;
-	pgConnect(process.env.DATABASE_URL).then(function(connection) {
-		var client = connection.client;
-		var query = q.denodeify(client.query.bind(client));
-
-		return query("SELECT stock FROM products WHERE stock >= $1::int AND id = $2::int", [req.body.quantity, req.body.product_id])
-				.finally(connection.done)
-				.then(function(result) {
-					if (!result.rows.length) {
-						// si no hay registros, significa que no hay stock del producto
-						nostock = true;
-					}
-				})
-	})
-		.then(function() {
-			if (nostock) {
-				res.status(400).send({error: "NO_STOCK"});
-			} else {
-				next();
-			}
-		}).catch(function(err) {
-			console.error(err);
-			res.status(401).send(err.toString());
-		});
-};
-
 
 var app = express();
 
 app.use("/:order_id", stock_control);
-app.use("/:order_id/order_items/:order_entry_id", prevent_stock_surpass_on_update);
-app.use("/:order_id/order_items", prevent_stock_surpass);
 
 // PUT empty order
 app.put("/:order_id/empty", function(req, res) {

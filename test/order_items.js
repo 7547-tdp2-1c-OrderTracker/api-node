@@ -171,7 +171,10 @@ describe("Orders", function() {
 				expectations.responseShouldBe({
 					status:400,
 					body: {
-						error: "NO_STOCK"
+						error: {
+							key: "NO_STOCK",
+							value: "No hay suficientes unidades del producto"
+						}
 					}
 				}, getReturned);
 
@@ -331,7 +334,10 @@ describe("Orders", function() {
 			expectations.responseShouldBe({
 				status:400,
 				body: {
-					error: "NO_STOCK"
+					error: {
+						key: "NO_STOCK",
+						value: "No hay suficientes unidades del producto"
+					}
 				}
 			}, getReturned);
 		});

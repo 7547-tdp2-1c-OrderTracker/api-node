@@ -58,23 +58,39 @@ var updateOrderTotalPrice = function(instance, options) {
 
 var validateConfirmed = function(order_id, errormsg) {
 	return Order.findOne({where: {id: order_id, status: {$ne: 'confirmed'}}})
-		.then(function(results) {
+		.then(function(result) {
 			// si no devuelve resultados, es porque el pedido no esta confirmado y no 
 			// se permite modificar el item
-			if (!results) {
+			if (!result) {
 				throw {error: {key: 'ALREADY_CONFIRMED', value: errormsg}, status: 400}
+			}
+		});
+};
+
+var stockControl = function(product_id, quantity) {
+	return Product.findOne({where: {id: product_id, stock: {$gte: quantity}}})
+		.then(function(result) {
+			// si no devuelve resultados, significa que no hay stock suficiente del producto
+			if (!result) {
+				throw {error: {key: 'NO_STOCK', value: "No hay suficientes unidades del producto"}, status: 400}
 			}
 		});
 };
 
 var beforeUpdate = function(instance, options) {
 	var order_id = instance.get('order_id');
-	return validateConfirmed(order_id, "no se puede modificar un item de un pedido que ya fue confirmado");
+	return validateConfirmed(order_id, "no se puede modificar un item de un pedido que ya fue confirmado")
+		.then(function() {
+			return stockControl(instance.get('product_id'), instance.get('quantity'))
+		});
 };
 
 var beforeCreate = function(instance, options) {
 	var order_id = instance.get('order_id');
-	return validateConfirmed(order_id, "no se puede crear un item para un pedido que ya fue confirmado");
+	return validateConfirmed(order_id, "no se puede crear un item para un pedido que ya fue confirmado")
+		.then(function() {
+			return stockControl(instance.get('product_id'), instance.get('quantity'))
+		});
 };
 
 var OrderItem = sequelize.define('order_items', {

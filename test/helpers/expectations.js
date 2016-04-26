@@ -39,7 +39,7 @@ var shouldBe = function(obj, element, name) {
 		it("should have " + JSON.stringify(obj), function() {
 			var self = this;
 			Object.keys(obj).forEach(function(key) {
-				assert.equal(self.obj[key], obj[key]);
+				assert.equal(JSON.stringify(self.obj[key]), JSON.stringify(obj[key]));
 			});
 		});
 	});
