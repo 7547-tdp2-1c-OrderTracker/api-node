@@ -30,7 +30,7 @@ module.exports = function(model, options) {
 
 	if (!options.map) options.map = function(x){return x;};
 
-	var postErrorHandler = options.postErrorHandler || function(req, err){ throw err; };
+	var postErrorHandler = options.postErrorHandler || function(err){ throw err; };
 
 	// Create
 	app.post(base, promised(function(req, res) {
