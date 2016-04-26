@@ -56,6 +56,26 @@ var updateOrderTotalPrice = function(instance, options) {
 	});
 };
 
+var validateConfirmed = function(order_id, errormsg) {
+	return Order.findOne({where: {id: order_id, status: {$ne: 'confirmed'}}})
+		.then(function(results) {
+			// si no devuelve resultados, es porque el pedido no esta confirmado y no 
+			// se permite modificar el item
+			if (!results) {
+				throw {error: {key: 'ALREADY_CONFIRMED', value: errormsg}, status: 400}
+			}
+		});
+};
+
+var beforeUpdate = function(instance, options) {
+	var order_id = instance.get('order_id');
+	return validateConfirmed(order_id, "no se puede modificar un item de un pedido que ya fue confirmado");
+};
+
+var beforeCreate = function(instance, options) {
+	var order_id = instance.get('order_id');
+	return validateConfirmed(order_id, "no se puede crear un item para un pedido que ya fue confirmado");
+};
 
 var OrderItem = sequelize.define('order_items', {
   name: Sequelize.STRING,
@@ -71,6 +91,8 @@ var OrderItem = sequelize.define('order_items', {
   tableName: 'order_entries',
   timestamps: false,
   hooks: {
+  	beforeUpdate: beforeUpdate,
+  	beforeCreate: beforeCreate,
   	afterCreate: updateOrderTotalPrice,
   	afterDestroy: updateOrderTotalPrice,
   	afterUpdate: updateOrderTotalPrice

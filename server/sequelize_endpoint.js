@@ -9,7 +9,10 @@ var promised = function(f) {
 				res.status(value.status).send(value.body);
 			})
 			.catch(function(err) {
-				res.status(500).send(err.toString());
+				if (typeof err !== "object") {
+					err = {error: 'UNKNOWN', value: err.toString()};
+				}
+				res.status(err.status||500).send(err);
 			});
 	};
 };

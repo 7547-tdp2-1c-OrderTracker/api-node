@@ -139,7 +139,7 @@ var stock_control = function(req, res, next) {
 						} else {
 							// la orden esta confirmado, no se puede modificar, a menos que sea poner el status en confirmed
 							if (req.body.status !== "confirmed" || Object.keys(req.body).length !== 1) {
-								throw new Error("Can't change confirmed order " + req.params.order_id + "\n");
+								throw {error: {key: 'ALREADY_CONFIRMED', value: "No se puede modifcar un pedido que ya ha sido confirmado"}, status: 400};
 							}
 						}
 						
@@ -156,34 +156,9 @@ var stock_control = function(req, res, next) {
 			})
 			.catch(function(err) {
 				console.error(err);
-				res.status(500).send(err.toString());
+				res.status(500).send(err);
 			});
 	});
-};
-
-var lock_order_items = function(req, res, next) {
-	if (req.method === "GET") return next();
-	if (req.url !== "/") return next();
-
-	pgConnect(process.env.DATABASE_URL).then(function(connection) {
-		var client = connection.client;
-		var query = q.denodeify(client.query.bind(client));
-		return query("SELECT * FROM orders WHERE id = $1::int", [req.params.order_id])
-			.finally(connection.done)
-			.then(function(result) {
-				if (result.rows && result.rows.length > 0) {
-					if (result.rows[0].status === "confirmed") {
-						throw new Error("Can't change confirmed order " + req.params.order_id + "\n");
-					}
-				}
-			});
-	})
-		.then(function() {
-			next();
-		}).catch(function(err) {
-			console.error(err);
-			res.status(401).send(err.toString());
-		});
 };
 
 var prevent_stock_surpass_on_update = function(req, res, next) {
@@ -286,11 +261,9 @@ var app = express();
 app.use("", draft_limit);
 
 app.use("/:order_id", stock_control);
-app.use("/:order_id", lock_order_items);
 
 app.use("/:order_id/order_items/:order_entry_id", prevent_stock_surpass_on_update);
 app.use("/:order_id/order_items", prevent_stock_surpass);
-app.use("/:order_id/order_items", lock_order_items);
 
 // PUT empty order
 app.put("/:order_id/empty", function(req, res) {
