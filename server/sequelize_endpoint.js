@@ -14,14 +14,16 @@ var promised = function(f) {
 	};
 };
 
-var ret = function(model, options) {
+module.exports = function(model, options) {
 	var app = express();
 	var base;
 	var extra_fields;
+	var include;
 
 	options = options || {};
 	base = options.base||"";
 	extra_fields = options.extra_fields ||{};
+	include = options.include || [];
 
 	if (!options.map) options.map = function(x){return x;};
 
@@ -55,7 +57,7 @@ var ret = function(model, options) {
 
 	// Read
 	app.get(base + "/:id", promised(function(req, res) {
-		return model.findOne({where: {id: req.params.id}}).then(function(instance) {
+		return model.findOne({where: {id: req.params.id}, include: include}).then(function(instance) {
 			if (!instance) return {status: 404, body: "Not Found"};
 
 			return {
@@ -81,7 +83,7 @@ var ret = function(model, options) {
 		if (options.order) order = options.order(req);
 
 		return q.all([
-			model.findAll({limit: limit, offset: offset, where: where, order: order}),
+			model.findAll({limit: limit, offset: offset, where: where, order: order, include: include}),
 			model.findOne({
 				attributes: [[sequelize.fn('COUNT', sequelize.col("*")), "count"]],
 				where: where
@@ -131,5 +133,3 @@ var ret = function(model, options) {
 
 	return app;
 };
-
-module.exports = ret;

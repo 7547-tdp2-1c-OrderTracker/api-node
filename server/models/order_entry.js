@@ -57,7 +57,7 @@ var updateOrderTotalPrice = function(instance, options) {
 };
 
 
-var OrderEntry = sequelize.define('order_entries', {
+var OrderEntry = sequelize.define('order_items', {
   name: Sequelize.STRING,
   brand_name: Sequelize.STRING,
   thumbnail: Sequelize.STRING,
@@ -68,6 +68,7 @@ var OrderEntry = sequelize.define('order_entries', {
   currency: Sequelize.STRING(4)
 }, {
   freezeTableName: true,
+  tableName: 'order_entries',
   timestamps: false,
   hooks: {
   	afterCreate: updateOrderTotalPrice,
@@ -77,6 +78,8 @@ var OrderEntry = sequelize.define('order_entries', {
 });
 
 OrderEntry.belongsTo(Order, {foreignKey: 'order_id'});
+Order.hasMany(OrderEntry, {foreignKey: 'order_id'});
+
 OrderEntry.belongsTo(Product, {foreignKey: 'product_id'});
 
 module.exports = OrderEntry;

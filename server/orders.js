@@ -1,11 +1,13 @@
 var express = require("express");
 var sequelize = require("./domain/sequelize");
+
 var pg = require("pg");
 var q = require("q");
 
 var sequelize_endpoint = require("./sequelize_endpoint");
 var Order = require("./models/order");
 var OrderEntry = require("./models/order_entry");
+var Client = require("./models/client");
 
 var pgConnect = q.denodeify(function(url, callback) {
 	pg.connect(url, function(err, client, done) {
@@ -57,7 +59,12 @@ var where = function(req) {
 };
 
 var orders = sequelize_endpoint(Order, {
-	where: where
+	where: where,
+	include: [{
+		model: Client
+	},{
+		model: OrderEntry
+	}]
 });
 
 var order_entries = sequelize_endpoint(OrderEntry, {

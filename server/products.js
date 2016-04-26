@@ -1,5 +1,6 @@
 var sequelize_endpoint = require("./sequelize_endpoint");
 var Product = require("./models/product");
+var Brand = require("./models/brand");
 
 var where = function(req, res) {
 	if (req.query.brand_id) {
@@ -16,5 +17,15 @@ module.exports = sequelize_endpoint(Product, {
 	where: where,
 	order: function() {
 		return "name ASC";
+	},
+	include: [{
+		model: Brand,
+		attributes: ['name']
+	}],
+	map: function(product) {
+		if (product.brand) {
+			product.brand_name = product.brand.name;
+		}
+		return product;
 	}
 });
