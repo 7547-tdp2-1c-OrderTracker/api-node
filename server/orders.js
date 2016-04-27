@@ -90,15 +90,14 @@ var order_entries = sequelize_endpoint(OrderItem, {
 				{replacements: [req.body.quantity, req.params.order_id], type: sequelize.QueryTypes.SELECT})
 					.then(function(products) {
 						if (products.length) {
-
 							// si hay registros, es porque hay stock suficiente del producto (la cant que ya tenia mas la q se agrega)
-							return sequelize.query("update order_entries set quantity = quantity + ? where order_id = ? and product_id = ? returning *",
-									{
-										replacements: [req.body.quantity, req.params.order_id, req.body.product_id],
-										type: sequelize.QueryTypes.SELECT
-									})
-								.then(function(results) {
-									return results[0];
+							return OrderItem.findOne({where: {product_id: req.body.product_id, order_id: req.params.order_id}})
+								.then(function(order_item) {
+									if (order_item) {
+										return order_item.update({
+											quantity: order_item.quantity + req.body.quantity
+										});
+									}
 								});
 						} else {
 							// en caso contrario hay q devolver un error
