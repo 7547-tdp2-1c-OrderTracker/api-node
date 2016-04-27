@@ -114,7 +114,7 @@ Order.empty = function(order_id) {
   return Order.findOne({where: {id: order_id}})
     .then(function(order) {
       if (order.get('status') === 'confirmed') {
-        throw {error: {key: 'ALREADY_CONFIRMED', value: "no se puede vaciar un pedido qye ya esta confirmado"}, status: 400}
+        throw {error: {key: 'ALREADY_CONFIRMED', value: "no se puede vaciar un pedido que ya esta confirmado"}, status: 400}
       }
 
       // TODO: ponerlo en una transaccion

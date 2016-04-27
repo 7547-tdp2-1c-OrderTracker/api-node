@@ -152,7 +152,7 @@ describe("Orders", function() {
 						expectations.responseShouldBe({
 							status:400,
 							body: {
-								error: "NO_STOCK",
+								error: {key: "NO_STOCK", value: "no se puede confirmar el pedido porque no alcanza el stock"},
 							}
 						}, getReturned);
 
