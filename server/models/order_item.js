@@ -110,4 +110,20 @@ Order.hasMany(OrderItem, {foreignKey: 'order_id'});
 
 OrderItem.belongsTo(Product, {foreignKey: 'product_id'});
 
+Order.empty = function(order_id) {
+  return Order.findOne({where: {id: order_id}})
+    .then(function(order) {
+      if (order.get('status') === 'confirmed') {
+        throw {error: {key: 'ALREADY_CONFIRMED', value: "no se puede vaciar un pedido qye ya esta confirmado"}, status: 400}
+      }
+
+      // TODO: ponerlo en una transaccion
+      return OrderItem.destroy({where: {order_id: order_id} })
+      	.then(function() {
+      		return order.update({total_price: 0, currency: null});
+      	});
+    });
+  
+};
+
 module.exports = OrderItem;

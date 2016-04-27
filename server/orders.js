@@ -167,31 +167,13 @@ app.use("/:order_id", stock_control);
 
 // PUT empty order
 app.put("/:order_id/empty", function(req, res) {
-
-	var mapF = orderMapGet(req, res);
-	pgConnect(process.env.DATABASE_URL).then(function(connection) {
-		var client = connection.client;
-		var query = q.denodeify(client.query.bind(client));
-
-		return query("DELETE FROM order_entries WHERE order_id = $1::int", [req.params.order_id])
-			.then(function() {
-				return query("UPDATE orders SET currency=null, total_price=0 WHERE id=$1::int", [req.params.order_id]);
-			})
-			.then(function() {
-				return query(orderQueryGet, [req.params.order_id]);
-			})
-			.finally(connection.done)
-			.then(function(result) {
-				if (result.rows && result.rows.length) {
-					res.send(mapF(result.rows[0], result.rows));
-				} else {
-					res.status(404).send("Not found");
-				}
-			}).catch(function(err) {
-				console.error(err);
-				res.status(500).send(err.toString());
-			});
-	});
+	Order.empty(req.params.order_id)
+		.then(function(result) {
+			res.status(200).send(result);
+		})
+		.catch(function(err) {
+			res.status(500).send(err);
+		});
 });
 
 app.use(orders);
