@@ -34,10 +34,16 @@ heroku local
 
 ## Comandos para migraciones
 
-Crear migracion
-sequelize seed:create --name demo
+Crear migrate
+sequelize migration:create --name xxx
 
 Correr migraciones
+sequelize db:migrate
+
+Crear seed
+sequelize seed:create --name demo
+
+Correr seeds
 sequelize db:seed:all
 
 NOTA: hay que instalar sequelize-cli globalmente con npm install -g

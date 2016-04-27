@@ -88,10 +88,6 @@ var beforeUpdate = function(instance, options) {
 
 var Order = sequelize.define('orders', {
   delivery_date: Sequelize.DATE,
-  date_created: {
-  	type: Sequelize.DATE,
-  	defaultValue: Sequelize.NOW
-  },
   status: {
   	type: Sequelize.STRING,
   	defaultValue: 'draft'
@@ -101,10 +97,17 @@ var Order = sequelize.define('orders', {
   	defaultValue: 0
   },
   currency: Sequelize.STRING(4),
-  vendor_id: Sequelize.INTEGER
+  vendor_id: Sequelize.INTEGER,
+  createdAt: {
+    field: 'created_at',
+    type: Sequelize.DATE
+  },
+  updatedAt: {
+    field: 'updated_at',
+    type: Sequelize.DATE
+  }
 }, {
   freezeTableName: true,
-  timestamps: false,
   hooks: {
     beforeCreate: beforeCreate,
     beforeUpdate: beforeUpdate

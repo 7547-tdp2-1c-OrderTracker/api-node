@@ -19,10 +19,17 @@ var Product = sequelize.define('products', {
   retailPrice: {
   	type: Sequelize.STRING,
   	field: 'retail_price'
+  },
+  createdAt: {
+    field: 'created_at',
+    type: Sequelize.DATE
+  },
+  updatedAt: {
+    field: 'updated_at',
+    type: Sequelize.DATE
   }
 }, {
-  freezeTableName: true,
-  timestamps: false
+  freezeTableName: true
 });
 
 Product.belongsTo(Brand, {foreignKey: 'brand_id'});

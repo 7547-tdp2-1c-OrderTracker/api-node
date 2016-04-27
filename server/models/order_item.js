@@ -91,11 +91,18 @@ var OrderItem = sequelize.define('order_items', {
   unit_price: Sequelize.INTEGER,
   order_id: Sequelize.INTEGER,
   product_id: Sequelize.INTEGER,
-  currency: Sequelize.STRING(4)
+  currency: Sequelize.STRING(4),
+  createdAt: {
+    field: 'created_at',
+    type: Sequelize.DATE
+  },
+  updatedAt: {
+    field: 'updated_at',
+    type: Sequelize.DATE
+  }
 }, {
   freezeTableName: true,
   tableName: 'order_entries',
-  timestamps: false,
   hooks: {
   	beforeUpdate: beforeUpdate,
   	beforeCreate: beforeCreate,

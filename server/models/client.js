@@ -15,9 +15,16 @@ module.exports = sequelize.define('clients', {
   sellerType: {
   	type: Sequelize.STRING,
   	field: 'seller_type'
+  },
+  createdAt: {
+    field: 'created_at',
+    type: Sequelize.DATE
+  },
+  updatedAt: {
+    field: 'updated_at',
+    type: Sequelize.DATE
   }
 }, {
-  freezeTableName: true,
-  timestamps: false
+  freezeTableName: true
 });
 
