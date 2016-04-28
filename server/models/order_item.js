@@ -68,6 +68,8 @@ var stockControl = function(product_id, quantity) {
 };
 
 var beforeUpdate = function(instance, options) {
+	sequelize.checkAllowed(["quantity", "updatedAt", "createdAt"], options);
+
 	var order_id = instance.get('order_id');
 	return validateConfirmed(order_id, "no se puede modificar un item de un pedido que ya fue confirmado")
 		.then(function() {

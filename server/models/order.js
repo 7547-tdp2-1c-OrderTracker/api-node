@@ -27,6 +27,7 @@ var beforeCreate = function(instance, options) {
 };
 
 var beforeUpdate = function(instance, options) {
+  sequelize.checkAllowed(["status", "delivery_date", "updatedAt", "createdAt"], options);
 
   var OrderItem = require("./order_item");
   var decrementStock = "UPDATE products as p SET stock=stock-oe.quantity FROM order_entries as oe WHERE p.id = oe.product_id AND oe.order_id = ?;";
