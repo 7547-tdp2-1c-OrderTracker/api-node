@@ -24,11 +24,15 @@ describe("Brands", function() {
 
 	describe("when create new brand (POST /v1/brands)", function() {
 		beforeEach(function() {
-			this.returnedData = api.post("/v1/brands", {
+
+			var self = this;
+			return api.post("/v1/brands", {
 				name: "Nike",
 				picture: "http://showsport.vteximg.com.br/arquivos/ids/165247/nike-brand-icon.png"
+			}).then(function(r) {
+				self.returnedData = r;
+				self.brand_id = r.body.id;
 			});
-			return this.returnedData;
 		});
 
 		expectations.responseShouldBe({
@@ -41,10 +45,11 @@ describe("Brands", function() {
 
 		describe("when get the same brand (GET /v1/brands/:id)", function() {
 			beforeEach(function() {
-				this.returnedData = this.returnedData.then(function(x) {
-					return api.get("/v1/brands/" + x.body.id);
-				})
-				return this.returnedData;
+				var self = this;
+				return api.get("/v1/brands/" + this.brand_id)
+					.then(function(r) {
+						self.returnedData = r;
+					})
 			});
 
 			expectations.responseShouldBe({
@@ -58,10 +63,11 @@ describe("Brands", function() {
 
 		describe("when put the same brand (PUT /v1/brands/:id) with name='Puma'", function() {
 			beforeEach(function() {
-				this.returnedData = this.returnedData.then(function(x) {
-					return api.put("/v1/brands/" + x.body.id, {name: "Puma"});
-				})
-				return this.returnedData;
+				var self = this;
+				return api.put("/v1/brands/" + this.brand_id, {name: "Puma"})
+					.then(function(r) {
+						self.returnedData = r;
+					});
 			});
 
 			expectations.responseShouldBe({
@@ -74,10 +80,11 @@ describe("Brands", function() {
 
 			describe("when get the same brand (GET /v1/brands/:id)", function() {
 				beforeEach(function() {
-					this.returnedData = this.returnedData.then(function(x) {
-						return api.get("/v1/brands/" + x.body.id);
-					})
-					return this.returnedData;
+					var self = this;
+					return api.get("/v1/brands/" + this.brand_id)
+						.then(function(r) {
+							self.returnedData = r;
+						});
 				});
 
 				expectations.responseShouldBe({
@@ -93,10 +100,11 @@ describe("Brands", function() {
 
 		describe("when delete brand (DELETE /v1/brands/:id)", function() {
 			beforeEach(function() {
-				this.deleteReturned = this.returnedData.then(function(x) {
-					return api.del("/v1/brands/" + x.body.id);
-				})
-				return this.deleteReturned;
+				var self = this;
+				return api.del("/v1/brands/" + this.brand_id)
+					.then(function(r) {
+						self.deleteReturned = r;
+					});
 			});
 
 			expectations.responseShouldBe({

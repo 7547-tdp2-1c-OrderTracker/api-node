@@ -8,11 +8,12 @@
     "dialect": "postgres"
   },
   "test": {
-    "username": "root",
-    "password": null,
-    "database": "database_test",
+    "username": "grailsdev",
+    "password": "grailsdev",
+    "database": "ordertrackertest",
     "host": "127.0.0.1",
-    "dialect": "mysql"
+    "port": 5432,
+    "dialect": "postgres"
   },
   "production": {
     "use_env_variable": "DATABASE_URL"  

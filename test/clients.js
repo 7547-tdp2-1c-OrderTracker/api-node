@@ -11,6 +11,13 @@ var getReturned = function() { return this.returnedData; };
 describe("clients", function() {
 	this.timeout(100000);
 	before(function() {
+		this.set = function(name){
+			var self = this;
+			return function(value) {
+				self[name] = value;
+				return value;
+			};
+		};
 		return db.create().then(function() {
 
 			// hay q hacer el require despues de inicializar la base de prueba
@@ -25,7 +32,8 @@ describe("clients", function() {
 
 	describe("when create new client (POST /v1/clients)", function() {
 		beforeEach(function() {
-			this.returnedData = api.post("/v1/clients", {
+			var self = this;
+			return api.post("/v1/clients", {
 				name: "Dario",
 				lastname: "Seminara",
 				sellerType: "retail",
@@ -35,8 +43,11 @@ describe("clients", function() {
 				email: "user@domain.com",
 				lat: 13,
 				lon: 32
+			})
+			.then(this.set("returnedData"))
+			.then(function(x) {
+				self.client_id = x.body.id;
 			});
-			return this.returnedData;
 		});
 
 		expectations.responseShouldBe({
@@ -56,10 +67,7 @@ describe("clients", function() {
 
 		describe("when get the same client (GET /v1/clients/:id)", function() {
 			beforeEach(function() {
-				this.returnedData = this.returnedData.then(function(x) {
-					return api.get("/v1/clients/" + x.body.id);
-				})
-				return this.returnedData;
+				return api.get("/v1/clients/" + this.client_id).then(this.set("returnedData"));
 			});
 
 			expectations.responseShouldBe({
@@ -80,10 +88,7 @@ describe("clients", function() {
 
 		describe("when put the same client (PUT /v1/clients/:id) with sellerType='wholesale'", function() {
 			beforeEach(function() {
-				this.returnedData = this.returnedData.then(function(x) {
-					return api.put("/v1/clients/" + x.body.id, {sellerType: 'wholesale'});
-				})
-				return this.returnedData;
+				return api.put("/v1/clients/" + this.client_id, {sellerType: 'wholesale'}).then(this.set("returnedData"));
 			});
 
 			expectations.responseShouldBe({
@@ -95,10 +100,7 @@ describe("clients", function() {
 
 			describe("when get the same client (GET /v1/clients/:id)", function() {
 				beforeEach(function() {
-					this.returnedData = this.returnedData.then(function(x) {
-						return api.get("/v1/clients/" + x.body.id);
-					})
-					return this.returnedData;
+					return api.get("/v1/clients/" + this.client_id).then(this.set("returnedData"));
 				});
 
 				expectations.responseShouldBe({
@@ -112,10 +114,7 @@ describe("clients", function() {
 
 		describe("when put the same client (PUT /v1/clients/:id) with name='Pablo' and lastname: 'Lucadei'", function() {
 			beforeEach(function() {
-				this.returnedData = this.returnedData.then(function(x) {
-					return api.put("/v1/clients/" + x.body.id, {name: "Pablo", lastname: "Lucadei"});
-				})
-				return this.returnedData;
+				return api.put("/v1/clients/" + this.client_id, {name: "Pablo", lastname: "Lucadei"}).then(this.set("returnedData"));
 			});
 
 			expectations.responseShouldBe({
@@ -135,10 +134,7 @@ describe("clients", function() {
 
 			describe("when get the same client (GET /v1/clients/:id)", function() {
 				beforeEach(function() {
-					this.returnedData = this.returnedData.then(function(x) {
-						return api.get("/v1/clients/" + x.body.id);
-					})
-					return this.returnedData;
+					return api.get("/v1/clients/" + this.client_id).then(this.set("returnedData"));
 				});
 
 				expectations.responseShouldBe({
@@ -161,10 +157,7 @@ describe("clients", function() {
 
 		describe("when delete client (DELETE /v1/clients/:id)", function() {
 			beforeEach(function() {
-				this.deleteReturned = this.returnedData.then(function(x) {
-					return api.del("/v1/clients/" + x.body.id);
-				})
-				return this.deleteReturned;
+				return api.del("/v1/clients/" + this.client_id).then(this.set("deleteReturned"));
 			});
 
 			expectations.responseShouldBe({

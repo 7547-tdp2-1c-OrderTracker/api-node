@@ -26,15 +26,17 @@ var pgConnect = q.denodeify(function(url, callback) {
 
 module.exports = function(dbname) {
 	var url;
+	var deleteSql = "DELETE FROM order_entries; DELETE FROM orders; DELETE FROM products; DELETE FROM clients; DELETE FROM brands";
 	var reset = function() {
-		return pgConnect(url)
-					.then(function(connection) {
-						var client = connection.client;
-						var query = q.denodeify(client.query.bind(client));
+       return pgConnect(url)
+                       .then(function(connection) {
+                               var client = connection.client;
+                               var query = q.denodeify(client.query.bind(client));
 
-						return query(schema)
-							.finally(connection.done);
-					});
+                               return query(deleteSql)
+                                       .finally(connection.done);
+                       });
+
 	};
 
 	var destroy = function() {
@@ -56,6 +58,9 @@ module.exports = function(dbname) {
 					.catch(function(e) {
 						
 					});
+			})
+			.then(function() {
+				return exec("sequelize db:migrate --env test");
 			})
 			.then(function() {
 				var username = process.env.USER;
