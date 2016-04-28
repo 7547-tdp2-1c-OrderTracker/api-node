@@ -9,7 +9,6 @@ var promised = function(f) {
 				res.status(value.status).send(value.body);
 			})
 			.catch(function(err) {
-				console.error(err);
 				if (typeof err !== "object") {
 					err = {error: 'UNKNOWN', value: err.toString()};
 				}
