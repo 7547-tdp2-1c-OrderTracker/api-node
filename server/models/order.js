@@ -91,7 +91,10 @@ var Order = sequelize.define('orders', {
   delivery_date: Sequelize.DATE,
   status: {
   	type: Sequelize.STRING,
-  	defaultValue: 'draft'
+  	defaultValue: 'draft',
+    validate: {
+      isIn: [['draft', 'cancelled', 'confirmed']]
+    }
   },
   total_price: {
   	type: Sequelize.INTEGER,
