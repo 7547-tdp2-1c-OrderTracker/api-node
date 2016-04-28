@@ -69,7 +69,7 @@ var order_entries = sequelize_endpoint(OrderItem, {
 								});
 						} else {
 							// en caso contrario hay q devolver un error
-							throw {error: 'NO_STOCK'}
+							throw {"error":{"key":"NO_STOCK","value":"No se puede incrementar la cantidad del item, no hay suficiente stock del producto"},"status":400}
 						}
 					});
 	}
