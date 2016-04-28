@@ -9,7 +9,6 @@ var beforeCreate = function(instance, options) {
   return Order.findOne({
     attributes: [[sequelize.fn('COUNT', sequelize.col("*")), "count"]],
     where: {
-      vendor_id: instance.get("vendor_id"), 
       client_id: instance.get("client_id"),
       status: 'draft'
     }
@@ -18,7 +17,7 @@ var beforeCreate = function(instance, options) {
       throw {
         error: {
           key: 'DRAFT_LIMIT_REACHED', 
-          value: 'se alcanzo el numero maximo de pedidos en borrador para ese vendor y cliente'
+          value: 'se alcanzo el numero maximo de pedidos en borrador para ese seller y cliente'
         }, 
         status: 400
       };
@@ -101,7 +100,6 @@ var Order = sequelize.define('orders', {
   	defaultValue: 0
   },
   currency: Sequelize.STRING(4),
-  vendor_id: Sequelize.INTEGER,
   created_at: Sequelize.DATE,
   updated_at: Sequelize.DATE
 }, {

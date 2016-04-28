@@ -58,8 +58,8 @@ var validateConfirmed = function(order_id, errormsg) {
 };
 
 var stockControl = function(product_id, quantity, order_id, order_entry_id) {
-	return sequelize.query("SELECT coalesce(SUM(oe.quantity),0) as total_quantity FROM order_entries as oe JOIN orders as o ON oe.order_id = o.id WHERE o.vendor_id = (SELECT vendor_id FROM orders WHERE id = ?) AND oe.id != ?",
-		{replacements: [order_id, order_entry_id]})
+	return sequelize.query("SELECT coalesce(SUM(oe.quantity),0) as total_quantity FROM order_entries as oe JOIN orders as o ON oe.order_id = o.id WHERE oe.id != ?",
+		{replacements: [order_entry_id]})
 		.then(function(total) {
 			var newTotal = parseInt(quantity) + parseInt(total[0][0].total_quantity);
 

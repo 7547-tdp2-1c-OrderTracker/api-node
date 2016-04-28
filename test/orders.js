@@ -59,7 +59,7 @@ describe("Orders", function() {
 	describe("when create an order", function() {
 		beforeEach(function() {
 			var self = this;
-			return api.post("/v1/orders", {client_id: this.client_id1, vendor_id: 1})
+			return api.post("/v1/orders", {client_id: this.client_id1})
 						.then(function(res) {
 							self.order_id = res.body.id;
 						});
@@ -76,7 +76,6 @@ describe("Orders", function() {
 				body: {
 					status: "draft",
 					total_price: 0,
-					vendor_id: 1,
 					currency: null
 				}
 			}, getReturned);
@@ -106,7 +105,6 @@ describe("Orders", function() {
 				expectations.shouldBe({
 					status: "draft",
 					total_price: 0,
-					vendor_id: 1,
 					currency: null
 				}, function() { return this.response.body.results[0]; });
 			});
@@ -185,7 +183,7 @@ describe("Orders", function() {
 		describe("when create a second order", function() {
 			beforeEach(function() {
 				var self = this;
-				return api.post("/v1/orders", {client_id: this.client_id2, vendor_id: 1})
+				return api.post("/v1/orders", {client_id: this.client_id2})
 							.then(function(res) {
 								self.order_id2 = res.body.id;
 							});
@@ -218,7 +216,6 @@ describe("Orders", function() {
 						expectations.shouldBe({
 							status: "draft",
 							total_price: 0,
-							vendor_id: 1,
 							currency: null
 						}, function() { return this.response.body.results[0]; });
 					});
@@ -227,7 +224,6 @@ describe("Orders", function() {
 						expectations.shouldBe({
 							status: "draft",
 							total_price: 0,
-							vendor_id: 1,
 							currency: null
 						}, function() { return this.response.body.results[1]; });
 					});
