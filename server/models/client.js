@@ -1,7 +1,8 @@
 var Sequelize = require("sequelize");
 var sequelize = require("../domain/sequelize");
+var Seller = require("./seller");
 
-module.exports = sequelize.define('clients', {
+var Client = sequelize.define('clients', {
   name: Sequelize.STRING,
   lastname: Sequelize.STRING,
   avatar: Sequelize.STRING,
@@ -24,3 +25,6 @@ module.exports = sequelize.define('clients', {
   createdAt: 'created_at'
 });
 
+Client.belongsTo(Seller, {foreignKey: 'seller_id'})
+
+module.exports = Client;

@@ -3,6 +3,7 @@ var sequelize = require("../domain/sequelize");
 
 var Client = require("./client");
 var Product = require("./product");
+var Seller = require("./seller");
 
 var beforeCreate = function(instance, options) {
   // no permitir crear el pedido nuevo, si ya existen orders del mismo cliente y vendedor
@@ -113,5 +114,6 @@ var Order = sequelize.define('orders', {
 });
 
 Order.belongsTo(Client, {foreignKey: 'client_id'});
+Order.belongsTo(Seller, {foreignKey: 'seller_id'});
 
 module.exports = Order;
