@@ -5,15 +5,11 @@ module.exports = sequelize.define('brands', {
   name: Sequelize.STRING,
   picture: Sequelize.STRING,
   code: Sequelize.STRING,
-  createdAt: {
-    field: 'created_at',
-    type: Sequelize.DATE
-  },
-  updatedAt: {
-    field: 'updated_at',
-    type: Sequelize.DATE
-  }
+  created_at: Sequelize.DATE,
+  updated_at: Sequelize.DATE
 }, {
-  freezeTableName: true
+  freezeTableName: true,
+  updatedAt: 'updated_at',
+  createdAt: 'created_at'
 });
 

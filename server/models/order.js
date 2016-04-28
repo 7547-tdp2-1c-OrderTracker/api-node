@@ -27,7 +27,7 @@ var beforeCreate = function(instance, options) {
 };
 
 var beforeUpdate = function(instance, options) {
-  sequelize.checkAllowed(["status", "delivery_date", "updatedAt", "createdAt"], options);
+  sequelize.checkAllowed(["status", "delivery_date"], options);
 
   var OrderItem = require("./order_item");
   var decrementStock = "UPDATE products as p SET stock=stock-oe.quantity FROM order_entries as oe WHERE p.id = oe.product_id AND oe.order_id = ?;";
@@ -102,20 +102,16 @@ var Order = sequelize.define('orders', {
   },
   currency: Sequelize.STRING(4),
   vendor_id: Sequelize.INTEGER,
-  createdAt: {
-    field: 'created_at',
-    type: Sequelize.DATE
-  },
-  updatedAt: {
-    field: 'updated_at',
-    type: Sequelize.DATE
-  }
+  created_at: Sequelize.DATE,
+  updated_at: Sequelize.DATE
 }, {
   freezeTableName: true,
   hooks: {
     beforeCreate: beforeCreate,
     beforeUpdate: beforeUpdate
-  }
+  },
+  updatedAt: 'updated_at',
+  createdAt: 'created_at'
 });
 
 Order.belongsTo(Client, {foreignKey: 'client_id'});

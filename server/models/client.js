@@ -16,15 +16,11 @@ module.exports = sequelize.define('clients', {
   	type: Sequelize.STRING,
   	field: 'seller_type'
   },
-  createdAt: {
-    field: 'created_at',
-    type: Sequelize.DATE
-  },
-  updatedAt: {
-    field: 'updated_at',
-    type: Sequelize.DATE
-  }
+  created_at: Sequelize.DATE,
+  updated_at: Sequelize.DATE
 }, {
-  freezeTableName: true
+  freezeTableName: true,
+  updatedAt: 'updated_at',
+  createdAt: 'created_at'
 });
 

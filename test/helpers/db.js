@@ -2,7 +2,6 @@ var q = require("q");
 var pg = require("pg");
 var fs = require("fs");
 var _exec = require('child_process').exec;
-var schema = fs.readFileSync("sql/schema.sql").toString();
 
 var exec = q.denodeify(function(command, callback) {
 	console.log(command);

@@ -68,7 +68,7 @@ var stockControl = function(product_id, quantity) {
 };
 
 var beforeUpdate = function(instance, options) {
-	sequelize.checkAllowed(["quantity", "updatedAt", "createdAt"], options);
+	sequelize.checkAllowed(["quantity"], options);
 
 	var order_id = instance.get('order_id');
 	return validateConfirmed(order_id, "no se puede modificar un item de un pedido que ya fue confirmado")
@@ -94,14 +94,8 @@ var OrderItem = sequelize.define('order_items', {
   order_id: Sequelize.INTEGER,
   product_id: Sequelize.INTEGER,
   currency: Sequelize.STRING(4),
-  createdAt: {
-    field: 'created_at',
-    type: Sequelize.DATE
-  },
-  updatedAt: {
-    field: 'updated_at',
-    type: Sequelize.DATE
-  }
+  created_at: Sequelize.DATE,
+  updated_at: Sequelize.DATE
 }, {
   freezeTableName: true,
   tableName: 'order_entries',
@@ -111,7 +105,9 @@ var OrderItem = sequelize.define('order_items', {
   	afterCreate: updateOrderTotalPrice,
   	afterDestroy: updateOrderTotalPrice,
   	afterUpdate: updateOrderTotalPrice
-  }
+  },
+  updatedAt: 'updated_at',
+  createdAt: 'created_at'
 });
 
 OrderItem.belongsTo(Order, {foreignKey: 'order_id'});
