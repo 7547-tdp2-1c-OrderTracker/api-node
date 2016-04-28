@@ -8,6 +8,7 @@ var clients = require("./server/clients");
 var products = require("./server/products");
 var brands = require("./server/brands");
 var orders = require("./server/orders")
+var sellers = require("./server/sellers")
 
 var app = express();
 
@@ -24,6 +25,7 @@ app.use("/v1/clients", clients);
 app.use("/v1/products", products);
 app.use("/v1/brands", brands);
 app.use("/v1/orders", orders);
+app.use("/v1/sellers", sellers);
 
 if (require.main === module) {
 	app.listen(port, function() {
