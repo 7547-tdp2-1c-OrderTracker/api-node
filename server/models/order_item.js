@@ -57,13 +57,19 @@ var validateConfirmed = function(order_id, errormsg) {
 		});
 };
 
-var stockControl = function(product_id, quantity) {
-	return Product.findOne({where: {id: product_id, stock: {$gte: quantity}}})
-		.then(function(result) {
-			// si no devuelve resultados, significa que no hay stock suficiente del producto
-			if (!result) {
-				throw {error: {key: 'NO_STOCK', value: "No hay suficientes unidades del producto"}, status: 400}
-			}
+var stockControl = function(product_id, quantity, order_id, order_entry_id) {
+	return sequelize.query("SELECT coalesce(SUM(oe.quantity),0) as total_quantity FROM order_entries as oe JOIN orders as o ON oe.order_id = o.id WHERE o.vendor_id = (SELECT vendor_id FROM orders WHERE id = ?) AND oe.id != ?",
+		{replacements: [order_id, order_entry_id]})
+		.then(function(total) {
+			var newTotal = parseInt(quantity) + parseInt(total[0][0].total_quantity);
+
+			return Product.findOne({where: {id: product_id, stock: {$gte: newTotal}}})
+				.then(function(result) {
+					// si no devuelve resultados, significa que no hay stock suficiente del producto
+					if (!result) {
+						throw {error: {key: 'NO_STOCK', value: "No hay suficientes unidades del producto"}, status: 400}
+					}
+				});
 		});
 };
 
@@ -73,7 +79,7 @@ var beforeUpdate = function(instance, options) {
 	var order_id = instance.get('order_id');
 	return validateConfirmed(order_id, "no se puede modificar un item de un pedido que ya fue confirmado")
 		.then(function() {
-			return stockControl(instance.get('product_id'), instance.get('quantity'))
+			return stockControl(instance.get('product_id'), instance.get('quantity'), order_id, instance.get('id'));
 		});
 };
 
@@ -81,7 +87,7 @@ var beforeCreate = function(instance, options) {
 	var order_id = instance.get('order_id');
 	return validateConfirmed(order_id, "no se puede crear un item para un pedido que ya fue confirmado")
 		.then(function() {
-			return stockControl(instance.get('product_id'), instance.get('quantity'))
+			return stockControl(instance.get('product_id'), instance.get('quantity'), order_id)
 		});
 };
 

@@ -63,7 +63,7 @@ var order_entries = sequelize_endpoint(OrderItem, {
 								.then(function(order_item) {
 									if (order_item) {
 										return order_item.update({
-											quantity: order_item.quantity + req.body.quantity
+											quantity: parseInt(order_item.get('quantity')) + parseInt(req.body.quantity)
 										});
 									}
 								});
