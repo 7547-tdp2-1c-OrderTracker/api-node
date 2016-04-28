@@ -5,12 +5,10 @@ module.exports = {
     /*
       Add altering commands here.
       Return a promise to correctly handle asynchronicity.
-
       */
       var products = function() {
         return queryInterface.bulkInsert('products', [
             {
-              "id": 18,
               "name": "Pantalon Mujer Blanca",
               "code": null,
               "description": "Texto de descripción para el producto",
@@ -24,7 +22,6 @@ module.exports = {
               "brand_id": 3
             },
             {
-              "id": 19,
               "name": "Pantalon Mujer Negra",
               "code": null,
               "description": "Texto de descripción para el producto",
@@ -38,7 +35,6 @@ module.exports = {
               "brand_id": 2
             },
             {
-              "id": 20,
               "name": "Remera de Mujer con titulo MUY pero MUY LARGO MAL!!!!!",
               "code": null,
               "description": "Remera de Mujer con titulo MUY pero MUY LARGO MAL!!!!! Para pruebas de titulos largos.",
@@ -52,7 +48,6 @@ module.exports = {
               "brand_id": 1
             },
             {
-              "id": 5,
               "name": "Remera Hombre Amarilla",
               "code": null,
               "description": "Texto de descripción para el producto",
@@ -66,7 +61,6 @@ module.exports = {
               "brand_id": 2
             },
             {
-              "id": 2,
               "name": "Remera Hombre Blanca",
               "code": null,
               "description": "Texto de descripción para el producto",
@@ -80,7 +74,6 @@ module.exports = {
               "brand_id": 2
             },
             {
-              "id": 1,
               "name": "Remera Hombre Negra",
               "code": null,
               "description": "Texto de descripción para el producto",
@@ -94,7 +87,6 @@ module.exports = {
               "brand_id": 1
             },
             {
-              "id": 4,
               "name": "Remera Hombre Roja",
               "code": null,
               "description": "Texto de descripción para el producto más largo y largo y largo que describe el item.",
@@ -108,7 +100,6 @@ module.exports = {
               "brand_id": 1
             },
             {
-              "id": 3,
               "name": "Remera Hombre Verde",
               "code": null,
               "description": "Texto de descripción para el producto",
@@ -122,7 +113,6 @@ module.exports = {
               "brand_id": 1
             },
             {
-              "id": 7,
               "name": "Remera Mujer Negra",
               "code": null,
               "description": null,
@@ -136,7 +126,6 @@ module.exports = {
               "brand_id": 3
             },
             {
-              "id": 9,
               "name": "Remera Mujer Roja",
               "code": null,
               "description": null,
@@ -150,7 +139,6 @@ module.exports = {
               "brand_id": 2
             },
             {
-              "id": 6,
               "name": "Remera Mujer Rosa",
               "code": null,
               "description": null,
@@ -164,7 +152,6 @@ module.exports = {
               "brand_id": 3
             },
             {
-              "id": 8,
               "name": "Remera Mujer Violeta",
               "code": null,
               "description": null,
@@ -178,7 +165,6 @@ module.exports = {
               "brand_id": 2
             },
             {
-              "id": 11,
               "name": "Zepatillas Hombre Azul",
               "code": null,
               "description": null,
@@ -192,7 +178,6 @@ module.exports = {
               "brand_id": 1
             },
             {
-              "id": 13,
               "name": "Zepatillas Hombre Azul",
               "code": null,
               "description": null,
@@ -206,7 +191,6 @@ module.exports = {
               "brand_id": 1
             },
             {
-              "id": 10,
               "name": "Zepatillas Hombre Negra",
               "code": null,
               "description": null,
@@ -220,7 +204,6 @@ module.exports = {
               "brand_id": 1
             },
             {
-              "id": 12,
               "name": "Zepatillas Hombre Verde",
               "code": null,
               "description": null,
@@ -234,7 +217,6 @@ module.exports = {
               "brand_id": 3
             },
             {
-              "id": 14,
               "name": "Zepatillas Mujer Blanca",
               "code": null,
               "description": null,
@@ -248,7 +230,6 @@ module.exports = {
               "brand_id": 3
             },
             {
-              "id": 17,
               "name": "Zepatillas Mujer Celeste",
               "code": null,
               "description": null,
@@ -262,7 +243,6 @@ module.exports = {
               "brand_id": 3
             },
             {
-              "id": 15,
               "name": "Zepatillas Mujer Negra",
               "code": null,
               "description": null,
@@ -276,7 +256,6 @@ module.exports = {
               "brand_id": 1
             },
             {
-              "id": 16,
               "name": "Zepatillas Mujer Verde",
               "code": null,
               "description": null,
