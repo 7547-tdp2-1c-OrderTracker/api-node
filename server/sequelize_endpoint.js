@@ -63,7 +63,9 @@ module.exports = function(model, options) {
 	// Read
 	app.get(base + "/:id", promised(function(req, res) {
 		return model.findOne({where: {id: req.params.id}, include: include}).then(function(instance) {
-			if (!instance) return {status: 404, body: "Not Found"};
+			if (!instance) {
+				throw {error: {key: 'NOT_FOUND', value: 'el recurso que se intento leer no se encuentra'}, status: 404};
+			}
 
 			return {
 				body: options.map(instance.dataValues),
@@ -112,6 +114,10 @@ module.exports = function(model, options) {
 	app.put(base + "/:id", promised(function(req, res) {
 		return model.findOne({where: {id: req.params.id}})
 			.then(function(instance) {
+				if (!instance) {
+					throw {error: {key: 'NOT_FOUND', value: 'el recurso que se intento modificar no se encuentra'}, status: 404};
+				}
+
 				return instance.update(req.body);
 			})
 			.then(function() {
