@@ -10,9 +10,9 @@ var promised = function(f) {
 			})
 			.catch(function(err) {
 				if (typeof err !== "object") {
-					err = {error: 'UNKNOWN', value: err.toString()};
+					err = {error: {key: 'UNKNOWN', value: err.toString()}};
 				} else if (!err.error) {
-					err = {error: 'UNKNOWN', value: err.toString()};
+					err = {error: {key: 'UNKNOWN', value: err.toString()}};
 				}
 				res.status(err.status||500).send(err);
 			});
