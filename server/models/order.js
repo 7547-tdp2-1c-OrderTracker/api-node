@@ -101,16 +101,16 @@ var Order = sequelize.define('orders', {
   	defaultValue: 0
   },
   currency: Sequelize.STRING(4),
-  created_at: Sequelize.DATE,
-  updated_at: Sequelize.DATE
+  date_created: {field: 'created_at', type: Sequelize.DATE},
+  last_modified: {field: 'updated_at', type: Sequelize.DATE}
 }, {
   freezeTableName: true,
   hooks: {
     beforeCreate: beforeCreate,
     beforeUpdate: beforeUpdate
   },
-  updatedAt: 'updated_at',
-  createdAt: 'created_at'
+  updatedAt: 'last_modified',
+  createdAt: 'date_created',
 });
 
 Order.belongsTo(Client, {foreignKey: 'client_id'});

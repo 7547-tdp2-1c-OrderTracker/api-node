@@ -26,12 +26,12 @@ var Client = sequelize.define('clients', {
   	field: 'seller_type'
   },
   location: {type: Sequelize.GEOMETRY('POINT', 4326)},
-  created_at: Sequelize.DATE,
-  updated_at: Sequelize.DATE
+  date_created: {field: 'created_at', type: Sequelize.DATE},
+  last_modified: {field: 'updated_at', type: Sequelize.DATE}
 }, {
   freezeTableName: true,
-  updatedAt: 'updated_at',
-  createdAt: 'created_at',
+  updatedAt: 'last_modified',
+  createdAt: 'date_created',
   hooks: {
     beforeUpdate: beforeUpdate,
     beforeCreate: beforeCreate

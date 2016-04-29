@@ -100,8 +100,8 @@ var OrderItem = sequelize.define('order_items', {
   order_id: Sequelize.INTEGER,
   product_id: Sequelize.INTEGER,
   currency: Sequelize.STRING(4),
-  created_at: Sequelize.DATE,
-  updated_at: Sequelize.DATE
+  date_created: {field: 'created_at', type: Sequelize.DATE},
+  last_modified: {field: 'updated_at', type: Sequelize.DATE}
 }, {
   freezeTableName: true,
   tableName: 'order_entries',
@@ -112,8 +112,8 @@ var OrderItem = sequelize.define('order_items', {
   	afterDestroy: updateOrderTotalPrice,
   	afterUpdate: updateOrderTotalPrice
   },
-  updatedAt: 'updated_at',
-  createdAt: 'created_at'
+  updatedAt: 'last_modified',
+  createdAt: 'date_created',
 });
 
 OrderItem.belongsTo(Order, {foreignKey: 'order_id'});
