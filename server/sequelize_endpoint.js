@@ -90,7 +90,10 @@ module.exports = function(model, options) {
 		if (options.order) order = options.order(req);
 
 		return q.all([
-			model.findAll({limit: limit, offset: offset, where: where, order: order, include: include}),
+			model.findAll({limit: limit, offset: offset, where: where, order: order, include: include,
+				attributes: {
+					include: options.extraAttributes ? options.extraAttributes(req) : []
+				}}),
 			model.findOne({
 				attributes: [[sequelize.fn('COUNT', sequelize.col("*")), "count"]],
 				where: where
