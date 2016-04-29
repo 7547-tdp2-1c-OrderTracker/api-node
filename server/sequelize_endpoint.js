@@ -140,7 +140,8 @@ module.exports = function(model, options) {
 
 			return instance.destroy().then(function() {
 				return {
-					status: 204
+					body: options.map(instance.dataValues),
+					status: 200
 				};
 			});
 		});
