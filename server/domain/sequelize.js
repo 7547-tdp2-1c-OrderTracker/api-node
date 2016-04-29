@@ -2,8 +2,8 @@ var Sequelize = require("sequelize");
 var seq = new Sequelize(process.env.DATABASE_URL);
 
 seq.checkAllowed = function(allowedFields, options) {
-	allowedFields.push("updated_at");
-	allowedFields.push("created_at");
+	allowedFields.push("date_created");
+	allowedFields.push("last_modified");
 
 	var rejected = function(field) {
 		return allowedFields.indexOf(field) === -1;
