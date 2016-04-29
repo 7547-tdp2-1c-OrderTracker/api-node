@@ -101,7 +101,7 @@ module.exports = function(model, options) {
 					paging: {
 						limit: limit,
 						offset: offset,
-						total: count.get("count")
+						total: parseInt(count.get("count"))
 					},
 					results: instances.map(getDataValues).map(options.map)
 				},
