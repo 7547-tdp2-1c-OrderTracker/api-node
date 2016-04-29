@@ -131,7 +131,7 @@ Order.empty = function(order_id) {
       // TODO: ponerlo en una transaccion
       return OrderItem.destroy({where: {order_id: order_id} })
       	.then(function() {
-      		return order.update({total_price: 0, currency: null});
+      		return order.update({total_price: 0, currency: null}, {hooks: false});
       	});
     });
   
