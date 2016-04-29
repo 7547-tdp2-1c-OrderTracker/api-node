@@ -32,7 +32,10 @@ var orders = sequelize_endpoint(Order, {
 		model: Client
 	},{
 		model: OrderItem
-	}]
+	}],
+	order: function() {
+		return "status DESC";
+	}
 });
 
 var order_entries = sequelize_endpoint(OrderItem, {
