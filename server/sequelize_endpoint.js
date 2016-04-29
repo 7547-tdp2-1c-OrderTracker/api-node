@@ -128,6 +128,10 @@ module.exports = function(model, options) {
 	// Destroy
 	app.del(base + "/:id", promised(function(req, res) {
 		return model.findOne({where: {id: req.params.id}}).then(function(instance) {
+			if (!instance) {
+				throw {error: {key: 'NOT_FOUND', value: 'el recurso que se intento eliminar no se encuentra'}, status: 404};
+			}
+
 			return instance.destroy().then(function() {
 				return {
 					status: 204
