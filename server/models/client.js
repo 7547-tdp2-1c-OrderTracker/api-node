@@ -10,7 +10,7 @@ var beforeCreate = function(instance, options) {
   instance.location = {type: 'Point', coordinates: [instance.get('lat'), instance.get('lon')]};
 };
 
-var Client = sequelize.define('clients', {
+var clientDefinition = {
   name: Sequelize.STRING,
   lastname: Sequelize.STRING,
   avatar: Sequelize.STRING,
@@ -22,13 +22,18 @@ var Client = sequelize.define('clients', {
   lat: Sequelize.REAL,
   lon: Sequelize.REAL,
   sellerType: {
-  	type: Sequelize.STRING,
-  	field: 'seller_type'
+    type: Sequelize.STRING,
+    field: 'seller_type'
   },
-  location: {type: Sequelize.GEOMETRY('POINT', 4326)},
   date_created: {field: 'created_at', type: Sequelize.DATE},
   last_modified: {field: 'updated_at', type: Sequelize.DATE}
-}, {
+};
+
+if (!process.env.POSTGIS_DISABLED) {
+  clientDefinition.location = {type: Sequelize.GEOMETRY('POINT', 4326)};
+}
+
+var Client = sequelize.define('clients', clientDefinition, {
   freezeTableName: true,
   updatedAt: 'last_modified',
   createdAt: 'date_created',
