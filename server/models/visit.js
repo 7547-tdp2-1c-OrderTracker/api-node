@@ -4,7 +4,6 @@ var sequelize = require("../domain/sequelize");
 var ScheduleEntry = require("./schedule_entry");
 
 var Visit = sequelize.define('visits', {
-  picture: Sequelize.STRING,
   date: Sequelize.DATE,
   comment: Sequelize.STRING,
   date_created: {field: 'created_at', type: Sequelize.DATE},
