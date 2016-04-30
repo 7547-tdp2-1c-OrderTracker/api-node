@@ -15,5 +15,6 @@ var Visit = sequelize.define('visits', {
 });
 
 Visit.belongsTo(ScheduleEntry, {foreignKey: 'schedule_entry_id'});
+ScheduleEntry.hasMany(Visit, {foreignKey: 'schedule_entry_id'});
 
 module.exports = Visit;

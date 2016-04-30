@@ -12,6 +12,7 @@ var orders = require("./server/orders")
 var sellers = require("./server/sellers")
 var visits = require("./server/visits")
 var schedule_entries = require("./server/schedule_entries");
+var schedules = require("./server/schedules");
 
 var app = express();
 
@@ -31,6 +32,8 @@ app.use("/v1/orders", orders);
 app.use("/v1/sellers", sellers);
 app.use("/v1/visits", visits);
 app.use("/v1/schedule_entries", schedule_entries);
+app.use("/v1/schedules", schedules);
+app.use("/v1/schedule", schedules);
 
 if (require.main === module) {
 	app.listen(port, function() {
