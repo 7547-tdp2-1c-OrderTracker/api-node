@@ -6,7 +6,7 @@ module.exports = {
       id: {type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true},
       schedule_entry_id: {type: Sequelize.INTEGER},
       date: {type: Sequelize.DATE},
-      comment: {type: Sequelize.STRING(511))},
+      comment: {type: Sequelize.STRING(511)},
       updated_at: {type: Sequelize.DATE},
       created_at: {type: Sequelize.DATE}
     });
