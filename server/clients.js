@@ -2,8 +2,13 @@ var sequelize_endpoint = require("./sequelize_endpoint");
 var Sequelize = require("sequelize");
 
 var Client = require("./models/client");
+var Seller = require("./models/seller");
 
 module.exports = sequelize_endpoint(Client, {
+	include: [{
+		model: Seller
+	}],
+
 	order: function(req) {
 		if (req.query.lat && req.query.lon && req.query.order === "distance") {
 			// Evitar sql injection usando parseFloat
