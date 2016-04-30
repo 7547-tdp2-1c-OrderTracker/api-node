@@ -56,7 +56,11 @@ var beforeUpdate = function(instance, options) {
                   };
 
                   if (!order_items.every(hasStock)) {
-                    throw {error: {key: 'NO_STOCK', value: 'no se puede confirmar el pedido porque no alcanza el stock'}, status: 400};
+                    var order_item_ids = order_items.filter(function(order_item) {
+                        return !hasStock(order_item);
+                      }).map(function(order_item){ return order_item.get("id"); });
+
+                    throw {error: {key: 'NO_STOCK', value: 'no se puede confirmar el pedido porque no alcanza el stock, order_item_ids: ' + JSON.stringify(order_item_ids)}, status: 400};
                   } else {
                     // decrementar el stock de todos los productos
                     return sequelize.query(decrementStock, {replacements: [instance.id]})
