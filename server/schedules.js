@@ -69,7 +69,7 @@ schedules.get("/day", promised(function(req, res) {
 	return ScheduleEntry.findAll({where: where, include: include, order: clientOrder})
 		.then(function(result) {
 			return {status: 200, body: {
-				seller_id: req.query.seller_id,
+				seller_id: parseInt(req.query.seller_id),
 				date: req.query.date || now.toISOString(),
 				clients: result.map(_.property("dataValues")).map(getClient)
 			}};
@@ -136,7 +136,7 @@ schedules.get("/week", promised(function(req, res) {
 			return {
 				status: 200, 
 				body: {
-					seller_id: req.query.seller_id,
+					seller_id: parseInt(req.query.seller_id),
 					date: req.query.date || now.toISOString(),
 					semaphore: [0,1,2,3,4,5,6].map(getSemaphore(result))
 				}};
