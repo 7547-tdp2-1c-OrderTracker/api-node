@@ -1,11 +1,43 @@
 var Sequelize = require("sequelize");
 var sequelize = require("../domain/sequelize");
+var md5 = require("md5");
+
+var gravatarBaseUrl = "http://www.gravatar.com/avatar/";
+var getGravatar = function(instance, size) {
+  var url = gravatarBaseUrl + md5(instance.get("email")) + "?d=mm"
+  if (size) {
+    url = url + "&size=" + size;
+  }
+  return url;
+};
+
+var rewriteUrl = function(url) {
+  if (!url) return true;
+  return url.startsWith(gravatarBaseUrl);
+};
+
+var writeUrl = function(url) {
+  if (!url) return true;
+  return !url.startsWith("http");
+};
 
 var beforeUpdate = function(instance, options) {
+  if (options.fields.indexOf("email") != -1) {
+    if (rewriteUrl(instance.thumbnail) || rewriteUrl(instance.avatar)) {
+      instance.thumbnail = getGravatar(instance, 32);
+      instance.avatar = getGravatar(instance)
+    }
+  }
+
   instance.location = {type: 'Point', coordinates: [instance.get('lat'), instance.get('lon')]};
 };
 
 var beforeCreate = function(instance, options) {
+  if (writeUrl(instance.thumbnail) || writeUrl(instance.avatar)) {
+    instance.thumbnail = getGravatar(instance, 32);
+    instance.avatar = getGravatar(instance)
+  }
+
   instance.location = {type: 'Point', coordinates: [instance.get('lat'), instance.get('lon')]};
 };
 
