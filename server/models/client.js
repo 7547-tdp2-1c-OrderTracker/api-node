@@ -4,7 +4,7 @@ var md5 = require("md5");
 
 var gravatarBaseUrl = "http://www.gravatar.com/avatar/";
 var getGravatar = function(instance, size) {
-  var url = gravatarBaseUrl + md5(instance.get("email")) + "?d=mm"
+  var url = gravatarBaseUrl + md5(instance.get("email")) + "?d=identicon"
   if (size) {
     url = url + "&size=" + size;
   }
