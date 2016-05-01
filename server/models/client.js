@@ -1,6 +1,5 @@
 var Sequelize = require("sequelize");
 var sequelize = require("../domain/sequelize");
-var Seller = require("./seller");
 
 var beforeUpdate = function(instance, options) {
   instance.location = {type: 'Point', coordinates: [instance.get('lat'), instance.get('lon')]};
@@ -42,7 +41,5 @@ var Client = sequelize.define('clients', clientDefinition, {
     beforeCreate: beforeCreate
   }
 });
-
-Client.belongsTo(Seller, {foreignKey: 'seller_id'})
 
 module.exports = Client;
