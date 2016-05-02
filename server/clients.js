@@ -5,16 +5,25 @@ var sequelize = require("./domain/sequelize");
 var Client = require("./models/client");
 var Seller = require("./models/seller");
 
-var clientListQuery = 'select clients.id, "name", "lastname", "avatar", "thumbnail", "cuil", "address", "phone_number", "email", "lat", "lon", "seller_type" AS "sellerType", clients.created_at AS "date_created", clients.updated_at AS "last_modified" from clients left join schedule_entries as se on clients.id = se.client_id where se.id ISNULL OFFSET ? LIMIT ?;'
-var	clientCountQuery = "select count(*) from clients left join schedule_entries as se on clients.id = se.client_id where se.id ISNULL;";
+var clientListNullQuery = 'select clients.id, "name", "lastname", "avatar", "thumbnail", "cuil", "address", "phone_number", "email", "lat", "lon", "seller_type" AS "sellerType", clients.created_at AS "date_created", clients.updated_at AS "last_modified" from clients left join schedule_entries as se on clients.id = se.client_id where se.id ISNULL OFFSET ? LIMIT ?;'
+var	clientCountNullQuery = "select count(*) from clients left join schedule_entries as se on clients.id = se.client_id where se.id ISNULL;";
+
+var clientListQuery = 'select clients.id, "name", "lastname", "avatar", "thumbnail", "cuil", "address", "phone_number", "email", "lat", "lon", "seller_type" AS "sellerType", clients.created_at AS "date_created", clients.updated_at AS "last_modified" from clients left join schedule_entries as se on clients.id = se.client_id where se.seller_id = ? OFFSET ? LIMIT ?;'
+var clientCountQuery = 'select count(*) from clients left join schedule_entries as se on clients.id = se.client_id where se.seller_id = ?;'
+
 
 module.exports = sequelize_endpoint(Client, {
 	customListQuery: function(req, limit, offset) {
 		if(typeof req.query.seller_id !== "undefined") {
 			if (req.query.seller_id === "null") {
-				return sequelize.query(clientListQuery, {
+				return sequelize.query(clientListNullQuery, {
 					model: Client,
 					replacements: [offset, limit]
+				});
+			} else {
+				return sequelize.query(clientListQuery, {
+					model: Client,
+					replacements: [req.query.seller_id, offset, limit]
 				});
 			}
 		}
@@ -23,7 +32,17 @@ module.exports = sequelize_endpoint(Client, {
 	customCountQuery: function(req) {
 		if(typeof req.query.seller_id !== "undefined") {
 			if (req.query.seller_id === "null") {
-				return sequelize.query(clientCountQuery).then(function(count) {
+				return sequelize.query(clientCountNullQuery).then(function(count) {
+					return {
+						get: function() {
+							return count[0][0].count;
+						}
+					};
+				});
+			} else {
+				return sequelize.query(clientCountQuery, {
+					replacements: [req.query.seller_id]
+				}).then(function(count) {
 					return {
 						get: function() {
 							return count[0][0].count;
