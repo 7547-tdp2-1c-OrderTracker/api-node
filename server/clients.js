@@ -8,7 +8,8 @@ var Seller = require("./models/seller");
 var clientListNullQuery = 'select clients.id, "name", "lastname", "avatar", "thumbnail", "cuil", "address", "phone_number", "email", "lat", "lon", "seller_type" AS "sellerType", clients.created_at AS "date_created", clients.updated_at AS "last_modified" from clients left join schedule_entries as se on clients.id = se.client_id where se.id ISNULL OFFSET ? LIMIT ?;'
 var	clientCountNullQuery = "select count(*) from clients left join schedule_entries as se on clients.id = se.client_id where se.id ISNULL;";
 
-var clientListQuery = 'select clients.id, "name", "lastname", "avatar", "thumbnail", "cuil", "address", "phone_number", "email", "lat", "lon", "seller_type" AS "sellerType", clients.created_at AS "date_created", clients.updated_at AS "last_modified" from clients left join schedule_entries as se on clients.id = se.client_id where se.seller_id = ? OFFSET ? LIMIT ?;'
+var distance = "ST_Distance(clients.location, ST_GeographyFromText('SRID=4326;POINT(? ?)'))";
+var clientListQuery = 'select ' + distance + ' as distance, clients.id, "name", "lastname", "avatar", "thumbnail", "cuil", "address", "phone_number", "email", "lat", "lon", "seller_type" AS "sellerType", clients.created_at AS "date_created", clients.updated_at AS "last_modified" from clients left join schedule_entries as se on clients.id = se.client_id where se.seller_id = ? ORDER BY ' + distance + ' OFFSET ? LIMIT ?;'
 var clientCountQuery = 'select count(*) from clients left join schedule_entries as se on clients.id = se.client_id where se.seller_id = ?;'
 
 
@@ -23,7 +24,7 @@ module.exports = sequelize_endpoint(Client, {
 			} else {
 				return sequelize.query(clientListQuery, {
 					model: Client,
-					replacements: [req.query.seller_id, offset, limit]
+					replacements: [req.query.lat, req.query.lon, req.query.seller_id, req.query.lat, req.query.lon, offset, limit]
 				});
 			}
 		}
