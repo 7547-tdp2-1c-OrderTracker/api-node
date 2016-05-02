@@ -14,7 +14,7 @@ module.exports = sequelize_endpoint(Client, {
 			if (req.query.seller_id === "null") {
 				return sequelize.query(clientListQuery, {
 					model: Client,
-					replacements: [limit, offset]
+					replacements: [offset, limit]
 				});
 			}
 		}
