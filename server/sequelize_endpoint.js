@@ -32,6 +32,9 @@ module.exports = function(model, options) {
 
 	if (!options.map) options.map = function(x){return x;};
 
+	options.customListQuery = options.customListQuery || function(){return null; };
+	options.customCountQuery = options.customCountQuery || function(){return null; };
+
 	var postErrorHandler = options.postErrorHandler || function(err){ throw err; };
 
 	// Create
@@ -80,24 +83,37 @@ module.exports = function(model, options) {
 		return x.dataValues;
 	};
 
-	app.get(base, promised(function(req, res) {
-		var offset = parseInt(req.query.offset || '0');
-		var limit = parseInt(req.query.limit || options.default_limit || '20');
-
+	var listQuery = function(req, limit, offset) {
 		var where = {};
 		var order = null;
 		if (options.where) where = options.where(req);
 		if (options.order) order = options.order(req);
 
-		return q.all([
-			model.findAll({limit: limit, offset: offset, where: where, order: order, include: include,
+		return options.customListQuery(req, limit, offset) || model.findAll({limit: limit, offset: offset, where: where, order: order, include: include,
 				attributes: {
 					include: options.extraAttributes ? options.extraAttributes(req) : []
-				}}),
-			model.findOne({
+				}});
+	};
+
+	var countQuery = function(req) {
+		var where = {};
+		if (options.where) where = options.where(req);
+
+		return options.customCountQuery(req) || model.findOne({
 				attributes: [[sequelize.fn('COUNT', sequelize.col("*")), "count"]],
 				where: where
-			})
+			});
+	}
+
+	app.get(base, promised(function(req, res) {
+		var offset = parseInt(req.query.offset || '0');
+		var limit = parseInt(req.query.limit || options.default_limit || '20');
+
+		var where;
+		if (options.where) where = options.where(req);
+		return q.all([
+			listQuery(req, limit, offset),
+			countQuery(req)
 		]).spread(function(instances, count) {
 			return {
 				body: {
