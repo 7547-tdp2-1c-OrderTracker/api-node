@@ -1,6 +1,7 @@
 var sequelize_endpoint = require("./sequelize_endpoint");
 var Visit = require("./models/visit");
 var ScheduleEntry = require("./models/schedule_entry");
+var moment = require("moment");
 
 module.exports = sequelize_endpoint(Visit, {
 	beforePost: function(req) {
@@ -19,6 +20,7 @@ module.exports = sequelize_endpoint(Visit, {
 							};
 						}
 
+						req.body.date = req.body.date || moment().toISOString();
 						req.body.schedule_entry_id = se.get('id');
 					});
 			} else {
