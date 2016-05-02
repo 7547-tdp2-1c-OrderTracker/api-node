@@ -94,7 +94,7 @@ schedules.get("/week", promised(function(req, res) {
 
 	var isRed = function(schedule_entry) {
 		// los schedule_entry del dia actual nunca son rojos
-		if (schedule_entry.day_of_week === day_of_week) return false;
+		if (schedule_entry.day_of_week >= day_of_week) return false;
 
 		if (schedule_entry.visits && schedule_entry.visits.length) {
 			// si el schedule_entry tiene visitas, entonces no es rojo
