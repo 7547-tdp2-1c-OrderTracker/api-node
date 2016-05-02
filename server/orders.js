@@ -8,7 +8,7 @@ var OrderItem = require("./models/order_item");
 var Client = require("./models/client");
 
 
-var filter_fields = ["status","client_id","vendor_id"];
+var filter_fields = ["status","client_id","seller_id"];
 var where = function(req) {
 	var filters = filter_fields.filter(function(fieldName) {
 		return req.query[fieldName];
