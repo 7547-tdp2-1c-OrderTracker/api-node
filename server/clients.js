@@ -24,7 +24,7 @@ module.exports = sequelize_endpoint(Client, {
 					replacements: [offset, limit]
 				});
 			} else {
-				return sequelize.query(clientListQuery, {
+				return sequelize.query(clientListQuery(parseInt(req.query.lat||1), parseInt(req.query.lon||1), {
 					model: Client,
 					replacements: [req.query.seller_id, offset, limit]
 				});
