@@ -1,5 +1,38 @@
 var sequelize_endpoint = require("./sequelize_endpoint");
 var Visit = require("./models/visit");
+var ScheduleEntry = require("./models/schedule_entry");
 
-module.exports = sequelize_endpoint(Visit);
+module.exports = sequelize_endpoint(Visit, {
+	beforePost: function(req) {
+		if (!req.body.schedule_entry_id) {
+			if (req.body.client_id && req.body.day_of_week) {
+				var where = {client_id: req.body.client_id, day_of_week: req.body.day_of_week};
+				return ScheduleEntry.findOne({where: where})
+					.then(function(se) {
+						if (!se) {
+							throw {
+								error: {
+									key: "SCHEDULE_ENTRY_NOT_FOUND",
+									value: "no se encuentra un schedule_entry de ese cliente y ese dia"
+								},
+								status: 400
+							};
+						}
+
+						req.body.schedule_entry_id = se.get('id');
+					});
+			} else {
+				throw {
+					error: {
+						key: "CANT_ASSOC_SCHEDULE_ENTRY", 
+						value: 'no hay suficientes datos para asociar la visita a un schedule_entry'
+					},
+					status: 400
+				};
+			}
+		}
+
+		return {};
+	}
+});
 

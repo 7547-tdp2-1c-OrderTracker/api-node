@@ -11,7 +11,7 @@ var Visit = sequelize.define('visits', {
 }, {
   freezeTableName: true,
   updatedAt: 'last_modified',
-  createdAt: 'date_created',
+  createdAt: 'date_created'
 });
 
 Visit.belongsTo(ScheduleEntry, {foreignKey: 'schedule_entry_id'});

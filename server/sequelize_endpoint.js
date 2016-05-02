@@ -37,18 +37,25 @@ module.exports = function(model, options) {
 
 	var postErrorHandler = options.postErrorHandler || function(err){ throw err; };
 
+	if (!options.beforePost) {
+		options.beforePost = function() {};
+	}
+
 	// Create
 	app.post(base, promised(function(req, res) {
-		var newObj = {};
-		for (var k in req.body) {
-			newObj[k] = req.body[k];
-		};
+		return q.fcall(options.beforePost.bind(options, req))
+			.then(function() {
+				var newObj = {};
+				for (var k in req.body) {
+					newObj[k] = req.body[k];
+				};
 
-		for (var field in extra_fields) {
-			newObj[field] = extra_fields[field](req);
-		};
+				for (var field in extra_fields) {
+					newObj[field] = extra_fields[field](req);
+				};
 
-		return model.create(newObj)
+				return model.create(newObj)
+			})
 			.catch(function(err) {
 				return postErrorHandler(err, req);
 			})
