@@ -6,8 +6,16 @@ var moment = require("moment");
 module.exports = sequelize_endpoint(Visit, {
 	beforePost: function(req) {
 		if (!req.body.schedule_entry_id) {
-			if (req.body.client_id && req.body.day_of_week) {
-				var where = {client_id: req.body.client_id, day_of_week: req.body.day_of_week};
+			if (req.body.client_id && (req.body.day_of_week || req.body.seller_id)) {
+				var where = {client_id: req.body.client_id};
+
+				if (req.body.day_of_week) {
+					where.day_of_week = req.body.day_of_week;
+				}
+				if (req.body.seller_id) {
+					where.seller_id = req.body.seller_id;
+				}
+
 				return ScheduleEntry.findOne({where: where})
 					.then(function(se) {
 						if (!se) {
