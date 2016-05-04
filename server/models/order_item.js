@@ -47,7 +47,7 @@ var updateOrderTotalPrice = function(instance, options) {
 };
 
 var validateConfirmed = function(order_id, errormsg) {
-	return Order.findOne({where: {id: order_id, status: {$ne: 'confirmed'}}})
+	return Order.findOne({where: {id: order_id, status: 'draft'}})
 		.then(function(result) {
 			// si no devuelve resultados, es porque el pedido no esta confirmado y no 
 			// se permite modificar el item
@@ -77,7 +77,7 @@ var beforeUpdate = function(instance, options) {
 	sequelize.checkAllowed(["quantity"], options);
 
 	var order_id = instance.get('order_id');
-	return validateConfirmed(order_id, "no se puede modificar un item de un pedido que ya fue confirmado")
+	return validateConfirmed(order_id, "solo se puede modificar un pedido que este en borrador")
 		.then(function() {
 			return stockControl(instance.get('product_id'), instance.get('quantity'), order_id, instance.get('id'));
 		});
@@ -85,7 +85,7 @@ var beforeUpdate = function(instance, options) {
 
 var beforeCreate = function(instance, options) {
 	var order_id = instance.get('order_id');
-	return validateConfirmed(order_id, "no se puede crear un item para un pedido que ya fue confirmado")
+	return validateConfirmed(order_id, "solo se puede modificar un pedido que este en borrador")
 		.then(function() {
 			return stockControl(instance.get('product_id'), instance.get('quantity'), order_id)
 		});
@@ -124,8 +124,8 @@ OrderItem.belongsTo(Product, {foreignKey: 'product_id'});
 Order.empty = function(order_id) {
   return Order.findOne({where: {id: order_id}})
     .then(function(order) {
-      if (order.get('status') === 'confirmed') {
-        throw {error: {key: 'ALREADY_CONFIRMED', value: "no se puede vaciar un pedido que ya esta confirmado"}, status: 400}
+      if (order.get('status') !== 'draft') {
+        throw {error: {key: 'ALREADY_CONFIRMED', value: "no se puede vaciar un pedido que no esta en borrador"}, status: 400}
       }
 
       // TODO: ponerlo en una transaccion
