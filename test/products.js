@@ -179,7 +179,17 @@ describe("products", function() {
 			});
 
 			expectations.responseShouldBe({
-				status:204
+				status:200,
+				body: {
+					name: "Zapatilla",
+					description: "X",
+					retailPrice: 10,
+					wholesalePrice: 20,
+					stock: 60,
+					currency: "ARS",
+					thumbnail: "thumbnail",
+					picture: "picture"
+				}
 			}, function() {return this.deleteReturned; });
 
 			describe("when get list of products (GET /v1/products)", function() {

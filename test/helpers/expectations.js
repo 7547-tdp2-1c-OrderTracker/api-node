@@ -27,6 +27,17 @@ var responseShouldBe = function(options, element) {
 
 };
 
+var hasKeys = function(value, expected) {
+	Object.keys(expected).forEach(function(key) {
+		if (expected[key] && typeof expected[key] === "object") {
+			hasKeys(value[key], expected[key]);
+		} else {
+			assert.equal(JSON.stringify(value[key]), JSON.stringify(expected[key]));
+		}
+	});
+
+};
+
 var shouldBe = function(obj, element, name) {
 	describe(name || "obj", function() {
 		beforeEach(function() {
@@ -37,10 +48,7 @@ var shouldBe = function(obj, element, name) {
 		});
 
 		it("should have " + JSON.stringify(obj), function() {
-			var self = this;
-			Object.keys(obj).forEach(function(key) {
-				assert.equal(JSON.stringify(self.obj[key]), JSON.stringify(obj[key]));
-			});
+			hasKeys(this.obj, obj);
 		});
 	});
 

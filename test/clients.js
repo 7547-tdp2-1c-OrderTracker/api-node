@@ -161,7 +161,18 @@ describe("clients", function() {
 			});
 
 			expectations.responseShouldBe({
-				status:204
+				status:200,
+				body: {
+					name: "Dario",
+					lastname: "Seminara",
+					sellerType: "retail",
+					cuil: "20-XXXXXXXX-3",
+					address: "Fake Street 123",
+					phone_number: "1512345678",
+					email: "user@domain.com",
+					lat: 13,
+					lon: 32					
+				}
 			}, function() {return this.deleteReturned; });
 
 			describe("when get list of clients (GET /v1/clients)", function() {

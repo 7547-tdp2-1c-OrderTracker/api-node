@@ -108,7 +108,11 @@ describe("Brands", function() {
 			});
 
 			expectations.responseShouldBe({
-				status:204
+				status:200,
+				body: {
+					name: "Nike",
+					picture: "http://showsport.vteximg.com.br/arquivos/ids/165247/nike-brand-icon.png"
+				}
 			}, function() {return this.deleteReturned; });
 
 			describe("when get list of brands (GET /v1/brands)", function() {
