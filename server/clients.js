@@ -9,8 +9,14 @@ var clientListNullQuery = 'select clients.id, "name", "lastname", "avatar", "thu
 var	clientCountNullQuery = "select count(*) from clients left join schedule_entries as se on clients.id = se.client_id where se.id ISNULL;";
 
 var clientListQuery = function(lat, lon) {
-	var distance = "ST_Distance(location, ST_GeographyFromText('SRID=4326;POINT("+lat+" "+lon+")'))";
-	return 'select ' + distance + '/1000 as distance, clients.location as location, clients.id, "name", "lastname", "avatar", "thumbnail", "cuil", "address", "phone_number", "email", "lat", "lon", "seller_type" AS "sellerType", clients.created_at AS "date_created", clients.updated_at AS "last_modified" from clients left join schedule_entries as se on clients.id = se.client_id where se.seller_id = ? ORDER BY ' + distance + ' OFFSET ? LIMIT ?;';
+	if (lat && lon) {
+		lat = parseFloat(lat);
+		lon = parseFloat(lon);
+		var distance = "ST_Distance(location, ST_GeographyFromText('SRID=4326;POINT("+lat+" "+lon+")'))";
+		return 'select ' + distance + '/1000 as distance, clients.location as location, clients.id, "name", "lastname", "avatar", "thumbnail", "cuil", "address", "phone_number", "email", "lat", "lon", "seller_type" AS "sellerType", clients.created_at AS "date_created", clients.updated_at AS "last_modified" from clients left join schedule_entries as se on clients.id = se.client_id where se.seller_id = ? ORDER BY ' + distance + ' OFFSET ? LIMIT ?;';
+	} else {
+		return 'select clients.location as location, clients.id, "name", "lastname", "avatar", "thumbnail", "cuil", "address", "phone_number", "email", "lat", "lon", "seller_type" AS "sellerType", clients.created_at AS "date_created", clients.updated_at AS "last_modified" from clients left join schedule_entries as se on clients.id = se.client_id where se.seller_id = ? OFFSET ? LIMIT ?;';
+	}
 }
 var clientCountQuery = 'select count(*) from clients left join schedule_entries as se on clients.id = se.client_id where se.seller_id = ?;'
 
@@ -24,7 +30,7 @@ module.exports = sequelize_endpoint(Client, {
 					replacements: [offset, limit]
 				});
 			} else {
-				return sequelize.query(clientListQuery(parseFloat(req.query.lat||1), parseFloat(req.query.lon||1)), {
+				return sequelize.query(clientListQuery(req.query.lat, req.query.lon), {
 					model: Client,
 					replacements: [req.query.seller_id, offset, limit]
 				});
