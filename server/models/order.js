@@ -26,42 +26,50 @@ var beforeCreate = function(instance, options) {
   });
 };
 
+
+var toConfirmed = function(order, instance, options) {
+    var decrementStock = "UPDATE products as p SET stock=stock-oe.quantity FROM order_entries as oe WHERE p.id = oe.product_id AND oe.order_id = ?;";
+    var OrderItem = require("./order_item");
+    return OrderItem.findAll({where: {order_id: instance.id}, include:{model: Product}})
+      .then(function(order_items) {
+        if (order_items.length) {
+          // si no todos tienen stock
+          var hasStock = function(order_item) {
+            return order_item.get('product').get('stock') - order_item.get('quantity') >= 0;
+          };
+
+          if (!order_items.every(hasStock)) {
+            var order_item_ids = order_items.filter(function(order_item) {
+                return !hasStock(order_item);
+              }).map(function(order_item){ return order_item.get("id"); });
+
+            throw {error: {key: 'NO_STOCK', value: 'no se puede confirmar el pedido porque no alcanza el stock, order_item_ids: ' + JSON.stringify(order_item_ids)}, status: 400};
+          } else {
+            // decrementar el stock de todos los productos
+            return sequelize.query(decrementStock, {replacements: [instance.id]})
+              .then(function() {
+                return order.update(instance);
+              });
+          }
+        }
+      })
+      .then(function() {
+        return instance;
+      })
+      .catch(function(err) {
+        console.error(err);
+        throw err;
+      });
+};
+
+var toCancelled = function(order, instance, options) {
+  var returnStock = "UPDATE products as p SET stock=stock+oe.quantity FROM order_entries as oe WHERE p.id = oe.product_id AND oe.order_id = ?;";
+  return sequelize.query(returnStock, {replacements: [instance.id]});
+};
+
 var transition = {
   draft: {
-    confirmed: function(order, instance, options) {
-        var decrementStock = "UPDATE products as p SET stock=stock-oe.quantity FROM order_entries as oe WHERE p.id = oe.product_id AND oe.order_id = ?;";
-        var OrderItem = require("./order_item");
-        return OrderItem.findAll({where: {order_id: instance.id}, include:{model: Product}})
-          .then(function(order_items) {
-            if (order_items.length) {
-              // si no todos tienen stock
-              var hasStock = function(order_item) {
-                return order_item.get('product').get('stock') - order_item.get('quantity') >= 0;
-              };
-
-              if (!order_items.every(hasStock)) {
-                var order_item_ids = order_items.filter(function(order_item) {
-                    return !hasStock(order_item);
-                  }).map(function(order_item){ return order_item.get("id"); });
-
-                throw {error: {key: 'NO_STOCK', value: 'no se puede confirmar el pedido porque no alcanza el stock, order_item_ids: ' + JSON.stringify(order_item_ids)}, status: 400};
-              } else {
-                // decrementar el stock de todos los productos
-                return sequelize.query(decrementStock, {replacements: [instance.id]})
-                  .then(function() {
-                    return order.update(instance);
-                  });
-              }
-            }
-          })
-          .then(function() {
-            return instance;
-          })
-          .catch(function(err) {
-            console.error(err);
-            throw err;
-          });
-    },
+    confirmed: toConfirmed,
     cancelled: function(order, instance, options) {
       // pasar el order de draft a cancelled no implica ninguna validacion
     }
@@ -70,15 +78,26 @@ var transition = {
   confirmed: {
     delivered: function(){},
     intransit: function(){},
-    prepared: function(){}
+    prepared: function(){},
+    cancelled: toCancelled
   },
   prepared: {
+    confirmed: function(){},
     delivered: function(){},
-    intransit: function(){}
+    intransit: function(){},
+    cancelled: toCancelled
   },
   intransit: {
+    confirmed: function(){},
     delivered: function(){},
-    prepared: function(){}
+    prepared: function(){},
+    cancelled: toCancelled
+  },
+  delivered: {
+    confirmed: function(){},
+    prepared: function(){},
+    intransit: function(){},
+    cancelled: toCancelled
   }
 };
 
