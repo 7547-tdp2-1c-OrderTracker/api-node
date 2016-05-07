@@ -56,6 +56,7 @@ var clientDefinition = {
     type: Sequelize.STRING,
     field: 'seller_type'
   },
+  company: Sequelize.STRING,
   date_created: {field: 'created_at', type: Sequelize.DATE},
   last_modified: {field: 'updated_at', type: Sequelize.DATE}
 };
