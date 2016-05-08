@@ -1,11 +1,13 @@
 var Sequelize = require("sequelize");
 var sequelize = require("../domain/sequelize");
 var q = require("q");
+var moment = require("moment");
 
 var Order = require("./order");
 var Product = require("./product");
 var Client = require("./client");
 var Brand = require("./brand")
+var Promotion = require("./promotion");
 
 var updateOrderTotalPrice = function(instance, options) {
 	var order_id = instance.order_id;
@@ -25,12 +27,47 @@ var updateOrderTotalPrice = function(instance, options) {
 				return;
 			}
 
-			return Product.findOne({where: {id: instance.product_id}, include: [{model: Brand}]})
+			var now = moment();
+			var include = [{
+				model: Brand,
+				attributes: ['id'],
+				include: [{
+					model: Promotion,
+					where: {begin_date: {$lte: now.toDate()}, end_date: {$gte: now.toDate()}},
+					required: false,
+					attributes: ['percent']
+				}]
+			}, {
+				model: Promotion,
+				where: {begin_date: {$lte: now.toDate()}, end_date: {$gte: now.toDate()}},
+				required: false,
+				attributes: ['percent']
+			}];
+
+			var order = [
+				[Promotion, "percent", "DESC"],
+				[Brand, Promotion, "percent", "DESC"]
+			];
+
+			return Product.findOne({order: order, where: {id: instance.product_id}, include: include})
 				.then(function(product) {
 					if (!product) return;
 
+					var brand_promotions = product.get('brand').get('promotions');
+					var product_promotions = product.get('promotions');
+
+					var percent_discount = 0;
+					if (brand_promotions.length > 0) {
+						percent_discount = brand_promotions[0].get('percent');
+					}
+					if (product_promotions.length > 0) {
+						if (product_promotions[0].get('percent') > percent_discount) {
+							percent_discount = product_promotions[0].get('percent');
+						}
+					}
+
 					return instance.update({
-						unit_price: product.get(price_column),
+						unit_price: product.get(price_column) * (100-percent_discount)/100,
 						currency: product.get("currency"),
 						thumbnail: product.get("thumbnail"),
 						name: product.get("name"),
