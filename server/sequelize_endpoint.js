@@ -19,6 +19,13 @@ var promised = function(f) {
 	};
 };
 
+var to_function = function(x) {
+	if (typeof x === "function") return x;
+	return function(req) {
+		return x;
+	};
+};
+
 module.exports = function(model, options) {
 	var app = express();
 	var base;
@@ -28,7 +35,7 @@ module.exports = function(model, options) {
 	options = options || {};
 	base = options.base||"";
 	extra_fields = options.extra_fields ||{};
-	include = options.include || [];
+	include = to_function(options.include || []);
 
 	if (!options.map) options.map = function(x){return x;};
 
@@ -72,7 +79,7 @@ module.exports = function(model, options) {
 
 	// Read
 	app.get(base + "/:id", promised(function(req, res) {
-		return model.findOne({where: {id: req.params.id}, include: include}).then(function(instance) {
+		return model.findOne({where: {id: req.params.id}, include: include(req)}).then(function(instance) {
 			if (!instance) {
 				throw {error: {key: 'NOT_FOUND', value: 'el recurso que se intento leer no se encuentra'}, status: 404};
 			}
@@ -96,7 +103,7 @@ module.exports = function(model, options) {
 		if (options.where) where = options.where(req);
 		if (options.order) order = options.order(req);
 
-		return options.customListQuery(req, limit, offset) || model.findAll({limit: limit, offset: offset, where: where, order: order, include: include,
+		return options.customListQuery(req, limit, offset) || model.findAll({limit: limit, offset: offset, where: where, order: order, include: include(req),
 				attributes: {
 					include: options.extraAttributes ? options.extraAttributes(req) : []
 				}});

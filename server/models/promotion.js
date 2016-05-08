@@ -20,4 +20,7 @@ var Promotion = sequelize.define('promotions', {
 Promotion.belongsTo(Brand, {foreignKey: 'brand_id'});
 Promotion.belongsTo(Product, {foreignKey: 'product_id'});
 
+Brand.hasMany(Promotion, {foreignKey: 'brand_id'});
+Product.hasMany(Promotion, {foreignKey: 'product_id'});
+
 module.exports = Promotion;
