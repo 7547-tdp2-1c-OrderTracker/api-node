@@ -6,7 +6,7 @@ var sequelize_endpoint = require("./sequelize_endpoint");
 var Order = require("./models/order");
 var OrderItem = require("./models/order_item");
 var Client = require("./models/client");
-
+var Promotion = require("./models/promotion");
 
 var filter_fields = ["status","client_id","seller_id"];
 var where = function(req) {
@@ -48,6 +48,9 @@ var order_entries = sequelize_endpoint(OrderItem, {
 			return req.params.order_id;
 		}
 	},
+	include: [
+		{model: Promotion, required: false, attributes: ["name", "percent", "begin_date", "end_date"]}
+	],
 	map: function(entity) {
 		entity.brand = entity.brand_name;
 		return entity;

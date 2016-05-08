@@ -35,13 +35,13 @@ var updateOrderTotalPrice = function(instance, options) {
 					model: Promotion,
 					where: {begin_date: {$lte: now.toDate()}, end_date: {$gte: now.toDate()}},
 					required: false,
-					attributes: ['percent']
+					attributes: ['id', 'percent']
 				}]
 			}, {
 				model: Promotion,
 				where: {begin_date: {$lte: now.toDate()}, end_date: {$gte: now.toDate()}},
 				required: false,
-				attributes: ['percent']
+				attributes: ['id', 'percent']
 			}];
 
 			var order = [
@@ -55,18 +55,22 @@ var updateOrderTotalPrice = function(instance, options) {
 
 					var brand_promotions = product.get('brand').get('promotions');
 					var product_promotions = product.get('promotions');
+					var promotion_id = null;
 
 					var percent_discount = 0;
 					if (brand_promotions.length > 0) {
 						percent_discount = brand_promotions[0].get('percent');
+						promotion_id = brand_promotions[0].get('id');
 					}
 					if (product_promotions.length > 0) {
 						if (product_promotions[0].get('percent') > percent_discount) {
 							percent_discount = product_promotions[0].get('percent');
+							promotion_id = product_promotions[0].get('id');
 						}
 					}
 
 					return instance.update({
+						promotion_id: promotion_id,
 						unit_price: product.get(price_column) * (100-percent_discount)/100,
 						currency: product.get("currency"),
 						thumbnail: product.get("thumbnail"),
@@ -157,6 +161,7 @@ OrderItem.belongsTo(Order, {foreignKey: 'order_id'});
 Order.hasMany(OrderItem, {foreignKey: 'order_id'});
 
 OrderItem.belongsTo(Product, {foreignKey: 'product_id'});
+OrderItem.belongsTo(Promotion, {foreignKey: 'promotion_id'});
 
 Order.empty = function(order_id) {
   return Order.findOne({where: {id: order_id}})
