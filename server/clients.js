@@ -5,7 +5,7 @@ var sequelize = require("./domain/sequelize");
 var Client = require("./models/client");
 var Seller = require("./models/seller");
 
-var clientListNullQuery = 'select clients.id, "name", "lastname", "avatar", "thumbnail", "cuil", "address", "phone_number", "email", "lat", "lon", "seller_type" AS "sellerType", clients.created_at AS "date_created", clients.updated_at AS "last_modified" from clients left join schedule_entries as se on clients.id = se.client_id where se.id ISNULL OFFSET ? LIMIT ?;'
+var clientListNullQuery = 'select clients.company as company, clients.id, "name", "lastname", "avatar", "thumbnail", "cuil", "address", "phone_number", "email", "lat", "lon", "seller_type" AS "sellerType", clients.created_at AS "date_created", clients.updated_at AS "last_modified" from clients left join schedule_entries as se on clients.id = se.client_id where se.id ISNULL OFFSET ? LIMIT ?;'
 var	clientCountNullQuery = "select count(*) from clients left join schedule_entries as se on clients.id = se.client_id where se.id ISNULL;";
 
 var clientListQuery = function(lat, lon) {
@@ -15,7 +15,7 @@ var clientListQuery = function(lat, lon) {
 		var distance = "ST_Distance(location, ST_GeographyFromText('SRID=4326;POINT("+lat+" "+lon+")'))";
 		return 'select ' + distance + '/1000 as distance, clients.location as location, clients.id, "name", "lastname", "avatar", "thumbnail", "cuil", "address", "phone_number", "email", "lat", "lon", "seller_type" AS "sellerType", clients.created_at AS "date_created", clients.updated_at AS "last_modified" from clients left join schedule_entries as se on clients.id = se.client_id where se.seller_id = ? ORDER BY ' + distance + ' OFFSET ? LIMIT ?;';
 	} else {
-		return 'select clients.location as location, clients.id, "name", "lastname", "avatar", "thumbnail", "cuil", "address", "phone_number", "email", "lat", "lon", "seller_type" AS "sellerType", clients.created_at AS "date_created", clients.updated_at AS "last_modified" from clients left join schedule_entries as se on clients.id = se.client_id where se.seller_id = ? OFFSET ? LIMIT ?;';
+		return 'select clients.company as company, clients.location as location, clients.id, "name", "lastname", "avatar", "thumbnail", "cuil", "address", "phone_number", "email", "lat", "lon", "seller_type" AS "sellerType", clients.created_at AS "date_created", clients.updated_at AS "last_modified" from clients left join schedule_entries as se on clients.id = se.client_id where se.seller_id = ? OFFSET ? LIMIT ?;';
 	}
 }
 var clientCountQuery = 'select count(*) from clients left join schedule_entries as se on clients.id = se.client_id where se.seller_id = ?;'
