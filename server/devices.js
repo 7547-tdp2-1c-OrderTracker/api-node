@@ -26,7 +26,7 @@ app.put("/:device_id", promised(function(req) {
 	});
 }));
 
-app.put("", promised(function(req) {
+app.post("", promised(function(req) {
 	return Device.register(req.body.seller_id, {
 		device_id: req.body.device_id,
 		registration_id: req.body.registration_id
