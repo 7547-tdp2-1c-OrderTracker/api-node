@@ -19,23 +19,19 @@ Device.register = function(seller_id, data) {
 	})
 		.then(function(instance) {
 			if (instance) {
-				return instance.update({seller_id: seller_id})
-					.then(function() {
-						return {
-							body: instance.dataValues,
-							status: 200
-						};
-					});
+				return instance.update({seller_id: seller_id});
 			} else {
+				data.seller_id = seller_id;
 				return Device.create(data)
-					.then(function(instance) {
-						return {
-							body: instance.dataValues,
-							status: 200
-						};
-					});
+					
 			}
-		});
+		})
+		.then(function(instance) {
+			return {
+				body: instance.dataValues,
+				status: 200
+			};
+		});;
 };
 
 
