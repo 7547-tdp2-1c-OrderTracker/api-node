@@ -49,33 +49,35 @@ module.exports = function(model, options) {
 	}
 
 	// Create
-	app.post(base, promised(function(req, res) {
-		return q.fcall(options.beforePost.bind(options, req))
-			.then(function() {
-				var newObj = {};
-				for (var k in req.body) {
-					newObj[k] = req.body[k];
-				};
+	if (!options.readonly) {
+		app.post(base, promised(function(req, res) {
+			return q.fcall(options.beforePost.bind(options, req))
+				.then(function() {
+					var newObj = {};
+					for (var k in req.body) {
+						newObj[k] = req.body[k];
+					};
 
-				for (var field in extra_fields) {
-					newObj[field] = extra_fields[field](req);
-				};
+					for (var field in extra_fields) {
+						newObj[field] = extra_fields[field](req);
+					};
 
-				return model.create(newObj)
-			})
-			.catch(function(err) {
-				return postErrorHandler(err, req);
-			})
-			.then(function(instance) {
-				return model.findOne({where: {id: instance.id}})
-			})
-			.then(function(instance) {
-				return {
-					body: options.map(instance.dataValues),
-					status: 200
-				};
-			});
-	}));	
+					return model.create(newObj)
+				})
+				.catch(function(err) {
+					return postErrorHandler(err, req);
+				})
+				.then(function(instance) {
+					return model.findOne({where: {id: instance.id}})
+				})
+				.then(function(instance) {
+					return {
+						body: options.map(instance.dataValues),
+						status: 200
+					};
+				});
+		}));	
+	}
 
 	// Read
 	app.get(base + "/:id", promised(function(req, res) {
@@ -144,41 +146,43 @@ module.exports = function(model, options) {
 	}));
 
 	// Update
-	app.put(base + "/:id", promised(function(req, res) {
-		return model.findOne({where: {id: req.params.id}})
-			.then(function(instance) {
+	if (!options.readonly) {
+		app.put(base + "/:id", promised(function(req, res) {
+			return model.findOne({where: {id: req.params.id}})
+				.then(function(instance) {
+					if (!instance) {
+						throw {error: {key: 'NOT_FOUND', value: 'el recurso que se intento modificar no se encuentra'}, status: 404};
+					}
+
+					return instance.update(req.body);
+				})
+				.then(function() {
+					return model.findOne({where: {id: req.params.id}})
+				})
+				.then(function(instance) {
+					return {
+						body: options.map(instance.dataValues),
+						status: 200
+					};
+				});
+		}));
+
+		// Destroy
+		app.del(base + "/:id", promised(function(req, res) {
+			return model.findOne({where: {id: req.params.id}}).then(function(instance) {
 				if (!instance) {
-					throw {error: {key: 'NOT_FOUND', value: 'el recurso que se intento modificar no se encuentra'}, status: 404};
+					throw {error: {key: 'NOT_FOUND', value: 'el recurso que se intento eliminar no se encuentra'}, status: 404};
 				}
 
-				return instance.update(req.body);
-			})
-			.then(function() {
-				return model.findOne({where: {id: req.params.id}})
-			})
-			.then(function(instance) {
-				return {
-					body: options.map(instance.dataValues),
-					status: 200
-				};
+				return instance.destroy().then(function() {
+					return {
+						body: options.map(instance.dataValues),
+						status: 200
+					};
+				});
 			});
-	}));
-
-	// Destroy
-	app.del(base + "/:id", promised(function(req, res) {
-		return model.findOne({where: {id: req.params.id}}).then(function(instance) {
-			if (!instance) {
-				throw {error: {key: 'NOT_FOUND', value: 'el recurso que se intento eliminar no se encuentra'}, status: 404};
-			}
-
-			return instance.destroy().then(function() {
-				return {
-					body: options.map(instance.dataValues),
-					status: 200
-				};
-			});
-		});
-	}));
+		}));
+	}
 
 	return app;
 };
