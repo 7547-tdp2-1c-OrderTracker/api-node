@@ -40,8 +40,8 @@ var getRegToken = function(device) {
   return device.get("registration_id");
 };
 
-var getRegTokenArray = function(seller) {
-  return seller.get("devices").map(getRegToken);
+var getDevicesArray = function(seller) {
+  return seller.get("devices");
 };
 
 var concat = function(a1,a2) { return a1.concat(a2); };
@@ -56,11 +56,10 @@ Seller.push_notification = function(message, where) {
 
 	return query
 		.then(function(instances) {
-			return instances.map(getRegTokenArray).reduce(concat,[]);
+			return instances.map(getDevicesArray).reduce(concat,[]);
 		})
-		.then(function(regTokens) {
-			console.log(regTokens);
-			return Push.send(message, regTokens);
+		.then(function(devices) {
+			return Push.send(message, devices);
 		});
 };
 
