@@ -70,7 +70,7 @@ app.get("/:seller_id/reports", promised(function(req) {
 					end: end
 				},
 				totals: {
-					visits: visits[0][0].count,
+					visits: parseInt(visits[0][0].count),
 					amount: total_price[0].map(function(x) {
 						return {currency: x.currency, count: parseInt(x.count)};
 					})
