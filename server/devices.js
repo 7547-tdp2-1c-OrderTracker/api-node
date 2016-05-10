@@ -19,8 +19,18 @@ var promised = function(f) {
 };
 
 var app = express();
-app.put("/register", promised(function(req) {
-	return Device.register(req.body.seller_id, req.body);
+app.put("/:device_id", promised(function(req) {
+	return Device.register(req.body.seller_id, {
+		device_id: req.params.device_id,
+		registration_id: req.body.registration_id
+	});
+}));
+
+app.put("", promised(function(req) {
+	return Device.register(req.body.seller_id, {
+		device_id: req.body.device_id,
+		registration_id: req.body.registration_id
+	});
 }));
 module.exports = app;
 

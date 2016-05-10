@@ -4,8 +4,8 @@ var Seller = require("./seller");
 var Push = require("../domain/push");
 
 var Device  = sequelize.define('devices', {
-  device_id: Sequelize.STRING(1024),
-  registration_token: Sequelize.STRING(1024),
+  device_id: {type: Sequelize.STRING(1024), primaryKey: true, field: 'device_id'},
+  registration_id: Sequelize.STRING(1024),
   date_created: {field: 'created_at', type: Sequelize.DATE},
   last_modified: {field: 'updated_at', type: Sequelize.DATE}
 }, {
@@ -20,7 +20,7 @@ Device.register = function(seller_id, data) {
 	})
 		.then(function(instance) {
 			if (instance) {
-				return instance.update({seller_id: seller_id});
+				return instance.update({seller_id: seller_id, registration_id: data.registration_id});
 			} else {
 				data.seller_id = seller_id;
 				return Device.create(data)
@@ -37,7 +37,7 @@ Device.register = function(seller_id, data) {
 
 
 var getRegToken = function(device) {
-  return device.get("registration_token");
+  return device.get("registration_id");
 };
 
 var getRegTokenArray = function(seller) {
