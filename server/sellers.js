@@ -58,11 +58,14 @@ app.get("/:seller_id/reports", promised(function(req) {
 		sequelize.query("SELECT COUNT(*) as count FROM visits as v JOIN schedule_entries as s ON v.schedule_entry_id = s.id WHERE s.seller_id = ? AND v.date >= ? AND v.date <= ?", {
 			replacements: [seller_id, start.toISOString(), end.toISOString()]
 		}),
-		sequelize.query("SELECT COUNT(*) as count, o.currency as currency FROM orders as o WHERE o.status = 'confirmed' AND o.seller_id = ? AND o.updated_at >= ? AND o.updated_at <= ? GROUP BY currency", {
+		sequelize.query("SELECT SUM(total_price) as total, o.currency as currency FROM orders as o WHERE o.status = 'confirmed' AND o.seller_id = ? AND o.updated_at >= ? AND o.updated_at <= ? GROUP BY currency", {
+			replacements: [seller_id, start.toISOString(), end.toISOString()]
+		}),
+		sequelize.query("SELECT COUNT(*) as count FROM orders as o WHERE o.status = 'confirmed' AND o.seller_id = ? AND o.updated_at >= ? AND o.updated_at <= ?", {
 			replacements: [seller_id, start.toISOString(), end.toISOString()]
 		})
 
-	]).spread(function(visits, total_price) {
+	]).spread(function(visits, total_price, orders) {
 		return {
 			body: {
 				range: {
@@ -72,8 +75,9 @@ app.get("/:seller_id/reports", promised(function(req) {
 				totals: {
 					visits: parseInt(visits[0][0].count),
 					amount: total_price[0].map(function(x) {
-						return {currency: x.currency, count: parseInt(x.count)};
-					})
+						return {currency: x.currency, total: parseInt(x.total)};
+					}),
+					confirmed_orders: parseInt(orders[0][0].count)
 				}
 			},
 			status: 200
