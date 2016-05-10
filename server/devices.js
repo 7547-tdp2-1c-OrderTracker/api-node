@@ -1,7 +1,5 @@
-var sequelize_endpoint = require("./sequelize_endpoint");
-var Seller = require("./models/seller");
-var express = require("express");
 var Device = require("./models/device");
+var express = require("express");
 
 var promised = function(f) {
 	return function(req, res) {
@@ -20,14 +18,9 @@ var promised = function(f) {
 	};
 };
 
-var sellers = sequelize_endpoint(Seller);
-
 var app = express();
-
-app.put("/:seller_id/devices/register", promised(function(req) {
-	return Device.register(req.params.seller_id, req.body);
+app.put("/register", promised(function(req) {
+	return Device.register(req.body.seller_id, req.body);
 }));
-
-app.use(sellers);
-
 module.exports = app;
+

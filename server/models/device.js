@@ -4,6 +4,7 @@ var Seller = require("./seller");
 var Push = require("../domain/push");
 
 var Device  = sequelize.define('devices', {
+  device_id: Sequelize.STRING(1024),
   registration_token: Sequelize.STRING(1024),
   date_created: {field: 'created_at', type: Sequelize.DATE},
   last_modified: {field: 'updated_at', type: Sequelize.DATE}
@@ -15,7 +16,7 @@ var Device  = sequelize.define('devices', {
 
 Device.register = function(seller_id, data) {
 	return Device.findOne({
-		where: {registration_token: data.registration_token}
+		where: {device_id: data.device_id}
 	})
 		.then(function(instance) {
 			if (instance) {
