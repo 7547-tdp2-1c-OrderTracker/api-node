@@ -20,14 +20,6 @@ var promised = function(f) {
 	};
 };
 
-var devices = sequelize_endpoint(Device, {
-	base: "/:seller_id/devices",
-	readonly: true,
-	where: function(req) {
-		return {seller_id: req.params.seller_id};
-	}
-});
-
 var sellers = sequelize_endpoint(Seller);
 
 var app = express();
@@ -37,6 +29,5 @@ app.post("/:seller_id/devices/register", promised(function(req) {
 }));
 
 app.use(sellers);
-app.use(devices);
 
 module.exports = app;
