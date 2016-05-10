@@ -1,6 +1,20 @@
 var Sequelize = require("sequelize");
 var sequelize = require("../domain/sequelize");
 var Brand = require("./brand");
+var Seller = require("./seller")
+var Device = require("./device");
+
+var afterUpdate = function(instance, options) {
+  if (options.fields.indexOf("stock") !== -1) {
+    // si se esta modificando el stock
+    return Seller.push_notification({
+      title: "Agregado stock", 
+      body: instance.get("name"), 
+      product_id: instance.get("id"), 
+      stock: instance.get("stock") 
+    }).catch(console.error.bind(console));
+  }
+};
 
 var Product = sequelize.define('products', {
   name: Sequelize.STRING,
@@ -26,6 +40,9 @@ var Product = sequelize.define('products', {
   freezeTableName: true,
   updatedAt: 'last_modified',
   createdAt: 'date_created',
+  hooks: {
+    afterUpdate: afterUpdate
+  }
 });
 
 Product.belongsTo(Brand, {foreignKey: 'brand_id'});
