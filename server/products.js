@@ -1,3 +1,4 @@
+var Sequelize = require("sequelize");
 var sequelize_endpoint = require("./sequelize_endpoint");
 var Product = require("./models/product");
 var Brand = require("./models/brand");
@@ -20,9 +21,8 @@ module.exports = sequelize_endpoint(Product, {
 	where: where,
 	order: function() {
 		return [
-			["name", "ASC"],
-			[Promotion, "percent", "DESC"],
-			[Brand, Promotion, "percent", "DESC"]
+			Sequelize.literal('GREATEST(COALESCE("promotions"."percent",0),COALESCE("brand.promotions"."percent",0)) DESC'),
+			["name", "ASC"]
 		];
 	},
 	include: function(req) {
