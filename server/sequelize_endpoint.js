@@ -102,7 +102,12 @@ module.exports = function(model, options) {
 	var listQuery = function(req, limit, offset) {
 		var where = {};
 		var order = null;
-		if (options.where) where = options.where(req);
+		if (req.query.where) {
+			where = JSON.parse(req.query.where);
+		} else {
+			if (options.where) where = options.where(req);
+		}
+
 		if (options.order) order = options.order(req);
 
 		return options.customListQuery(req, limit, offset) || model.findAll({limit: limit, offset: offset, where: where, order: order, include: include(req),
@@ -113,7 +118,11 @@ module.exports = function(model, options) {
 
 	var countQuery = function(req) {
 		var where = {};
-		if (options.where) where = options.where(req);
+		if (req.query.where) {
+			where = JSON.parse(req.query.where);
+		} else {
+			if (options.where) where = options.where(req);
+		}
 
 		return options.customCountQuery(req) || model.findOne({
 				attributes: [[sequelize.fn('COUNT', sequelize.col("*")), "count"]],
