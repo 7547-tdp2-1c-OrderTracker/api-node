@@ -81,7 +81,11 @@ module.exports = function(model, options) {
 
 	// Read
 	app.get(base + "/:id", promised(function(req, res) {
-		return model.findOne({where: {id: req.params.id}, include: include(req)}).then(function(instance) {
+		var where = {};
+		var primaryKey = options.primaryKey || "id";
+		where[primaryKey] = req.params.id;
+
+		return model.findOne({where: where, include: include(req)}).then(function(instance) {
 			if (!instance) {
 				throw {error: {key: 'NOT_FOUND', value: 'el recurso que se intento leer no se encuentra'}, status: 404};
 			}

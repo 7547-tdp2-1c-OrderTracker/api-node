@@ -1,5 +1,6 @@
 var Device = require("./models/device");
 var express = require("express");
+var sequelize_endpoint = require("./sequelize_endpoint")
 
 var promised = function(f) {
 	return function(req, res) {
@@ -19,6 +20,10 @@ var promised = function(f) {
 };
 
 var app = express();
+var devices_crud = sequelize_endpoint(Device, {readonly: true, primaryKey: 'device_id'});
+
+app.use("", devices_crud);
+
 app.put("/:device_id", promised(function(req) {
 	return Device.register(req.body.seller_id, {
 		device_id: req.params.device_id,
