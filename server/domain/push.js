@@ -36,10 +36,11 @@ function pushClientUpdatedNotification(client_id,client_name,pictureURL,tokens,c
 	});
 }
 
-function pushNewPromotionNotification(promotion,callback){
+function pushNewPromotionNotification(promotion_id,promotion_name,callback){
 	var message = new gcm.Message();
 	message.addData('type', 'NEW_PROMOTION');
-	message.addData('message',promotion);
+	message.addData('identifier',promotion_id);
+	message.addData('message',promotion_name);
 	
 	sender.sendNoRetry(message, { topic: '/topics/promotions' }, function (err, response) {
      if(err)
