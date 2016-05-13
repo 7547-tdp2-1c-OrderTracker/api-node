@@ -1,6 +1,10 @@
 var Sequelize = require("sequelize");
 var sequelize = require("../domain/sequelize");
 var md5 = require("md5");
+var q = require("q");
+var _ = require("underscore");
+
+var push = q.denodeify(require("../domain/push").pushClientUpdatedNotification);
 
 var gravatarBaseUrl = "http://www.gravatar.com/avatar/";
 var getGravatar = function(instance, size) {
@@ -41,6 +45,25 @@ var beforeCreate = function(instance, options) {
   instance.location = {type: 'Point', coordinates: [instance.get('lat'), instance.get('lon')]};
 };
 
+var afterUpdate = function(instance, options) {
+  if (
+      options.fields.indexOf("lat") !== -1 ||
+      options.fields.indexOf("lon") !== -1 ||
+      options.fields.indexOf("location") !== -1 ||
+      options.fields.indexOf("cuil") !== -1) {
+
+    // esta query obtiene los registration_ids de todos los devices correspondientes a todos los vendedores 
+    // asociados al cliente que se esta modificando
+    var devicesQuery = "select distinct d.registration_id from devices as d join sellers as s on d.seller_id = s.id join schedule_entries as se on s.id = se.seller_id where se.client_id = ?";
+    return sequelize.query(devicesQuery, {replacements: [instance.get("id")]})
+      .then(function(result) {
+        var tokens = result[0].map(_.property("registration_id"));
+        return push(instance.get("id"), instance.get("name"), instance.get("thumbnail"), tokens);
+      })
+      .catch(console.error.bind(console));
+  }
+};
+
 var clientDefinition = {
   name: Sequelize.STRING,
   lastname: Sequelize.STRING,
@@ -71,7 +94,8 @@ var Client = sequelize.define('clients', clientDefinition, {
   createdAt: 'date_created',
   hooks: {
     beforeUpdate: beforeUpdate,
-    beforeCreate: beforeCreate
+    beforeCreate: beforeCreate,
+    afterUpdate: afterUpdate
   }
 });
 
