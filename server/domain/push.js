@@ -1,23 +1,74 @@
-var gcm = require("node-gcm");
-var q = require("q");
+var gcm = require('node-gcm');
 var push_notification_config = require("../../config/push_notification.json");
-var _ = require("underscore");
+var sender = new gcm.Sender(push_notification_config.api_key);
 
-var send = function(data, devices) {
+function pushNewClientNotification(client_id,client_name,pictureURL,tokens,callback){
 	var message = new gcm.Message();
-	for (var k in data) {
-		message.addData(k, data[k]);
-	}
+	message.addData('type', 'NEW_CLIENT');
+	message.addData('identifier',client_id);
+	message.addData('message',client_name);
+	message.addData('picture',pictureURL);
+	
+	sender.send(message, { registrationTokens: tokens }, function (err, response) {
+	    if(err)
+	    	console.error(err);
+	    else
+	    	console.log(response);
 
-	var sender = new gcm.Sender(push_notification_config.api_key);
-	var senderSend = q.denodeify(sender.send.bind(sender));
-	var device_ids = devices.map(_.property("device_id"));
+	    callback(err);
+	});
+}
 
-	// TODO
-	console.log("TODO: enviar push a " + device_ids);
-	//return senderSend(message, {registrationTokens: registrationTokens});
-};
+function pushClientUpdatedNotification(client_id,client_name,pictureURL,tokens,callback){
+	var message = new gcm.Message();
+	message.addData('type', 'CLIENT_UPDATED');
+	message.addData('identifier',client_id);
+	message.addData('message',client_name);
+	message.addData('picture',pictureURL);
+	
+	sender.send(message, { registrationTokens: tokens }, function (err, response) {
+	    if(err)
+	    	console.error(err);
+	    else
+	    	console.log(response);
 
-module.exports = {
-	send: send
-};
+	    callback(err);
+	});
+}
+
+function pushNewPromotionNotification(promotion,callback){
+	var message = new gcm.Message();
+	message.addData('type', 'NEW_PROMOTION');
+	message.addData('message',promotion);
+	
+	sender.sendNoRetry(message, { topic: '/topics/promotions' }, function (err, response) {
+     if(err)
+	    	console.error(err);
+	 else
+	    	console.log(response);
+
+	 callback(err);
+	});
+}
+
+function pushProductStockedNotification(product_id,product_name,pictureURL,callback){
+	var message = new gcm.Message();
+	message.addData('type', 'PRODUCT_STOCKED');
+	message.addData('identifier',product_id);
+	message.addData('message',product_name);
+	message.addData('picture',pictureURL);
+
+	sender.sendNoRetry(message, { topic: '/topics/promotions' }, function (err, response) {
+     if(err)
+	    	console.error(err);
+	 else
+	    	console.log(response);
+
+	 callback(err);
+	});
+}
+
+module.exports.pushNewClientNotification= pushNewClientNotification;
+module.exports.pushClientUpdatedNotification= pushClientUpdatedNotification;
+module.exports.pushNewPromotionNotification= pushNewPromotionNotification;
+module.exports.pushProductStockedNotification= pushProductStockedNotification;

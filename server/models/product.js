@@ -3,16 +3,15 @@ var sequelize = require("../domain/sequelize");
 var Brand = require("./brand");
 var Seller = require("./seller")
 var Device = require("./device");
+var q = require("q");
+
+var push = q.denodeify(require("../domain/push").pushProductStockedNotification);
 
 var afterUpdate = function(instance, options) {
   if (options.fields.indexOf("stock") !== -1) {
     // si se esta modificando el stock
-    return Seller.push_notification({
-      title: "Agregado stock", 
-      body: instance.get("name"), 
-      product_id: instance.get("id"), 
-      stock: instance.get("stock") 
-    }).catch(console.error.bind(console));
+    return push(instance.get("id"), instance.get("name"), instance.get("thumbnail"))
+        .catch(console.error.bind(console)); /* los errores de push no afectan al update del registro */
   }
 };
 
