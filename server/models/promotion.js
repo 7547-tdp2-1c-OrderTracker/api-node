@@ -14,6 +14,7 @@ var afterCreate = function(instance, options) {
 
 var Promotion = sequelize.define('promotions', {
   name: Sequelize.STRING,
+  min_quantity: {type: Sequelize.INTEGER, defaultValue: 0},
   percent: Sequelize.INTEGER,
   begin_date: Sequelize.DATE,
   end_date: Sequelize.DATE,
