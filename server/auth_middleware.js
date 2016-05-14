@@ -3,6 +3,8 @@ var jwt = require("jsonwebtoken");
 
 module.exports = function(secret, disabled) {
 	return function(req, res, next) {
+		if (req.path === "/v1/auth/login") return next();
+
 		if (!disabled || req.query.auth) {
 			if (req.headers.authorization) {
 				jwt.verify(req.headers.authorization, secret, function(err, decoded) {
