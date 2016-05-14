@@ -33,13 +33,13 @@ var updateOrderTotalPrice = function(instance, options) {
 				attributes: ['id'],
 				include: [{
 					model: Promotion,
-					where: {begin_date: {$lte: now.toDate()}, end_date: {$gte: now.toDate()}},
+					where: {begin_date: {$lte: now.toDate()}, end_date: {$gte: now.toDate()}, min_quantity: {$lte: instance.quantity}},
 					required: false,
 					attributes: ['id', 'percent']
 				}]
 			}, {
 				model: Promotion,
-				where: {begin_date: {$lte: now.toDate()}, end_date: {$gte: now.toDate()}},
+				where: {begin_date: {$lte: now.toDate()}, end_date: {$gte: now.toDate()}, min_quantity: {$lte: instance.quantity}},
 				required: false,
 				attributes: ['id', 'percent']
 			}];

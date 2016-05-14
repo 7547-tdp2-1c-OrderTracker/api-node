@@ -117,13 +117,13 @@ var beforeUpdate = function(instance, options) {
         if (newStatus !== currentStatus) {
           var t = transition[currentStatus];
           if (!t) {
-            throw {error: {key: "INVALID_STATE_CHANGE", value: "no se cambiar desde el status " + currentStatus}, status: 400};
+            throw {error: {key: "INVALID_STATE_CHANGE", value: "no se puede cambiar desde el status " + currentStatus}, status: 400};
           }
 
           var transitionFunc = t[newStatus];
 
           if (!transitionFunc) {
-            throw {error: {key: "INVALID_STATE_CHANGE", value: "no se cambiar el status desde " + currentStatus + " a " + newStatus}, status: 400};
+            throw {error: {key: "INVALID_STATE_CHANGE", value: "no se puede cambiar el status desde " + currentStatus + " a " + newStatus}, status: 400};
           }
 
           return transitionFunc(order, instance, options);
