@@ -49,7 +49,7 @@ var order_entries = sequelize_endpoint(OrderItem, {
 		}
 	},
 	include: [
-		{model: Promotion, required: false, attributes: ["name", "percent", "begin_date", "end_date"]}
+		{model: Promotion, required: false, attributes: ["name", "percent", "min_quantity", "begin_date", "end_date"]}
 	],
 	map: function(entity) {
 		entity.brand = entity.brand_name;
