@@ -8,6 +8,17 @@ var Seller = require("./models/seller");
 var clientListNullQuery = 'select clients.company as company, clients.id, "name", "lastname", "avatar", "thumbnail", "cuil", "address", "phone_number", "email", "lat", "lon", "seller_type" AS "sellerType", clients.created_at AS "date_created", clients.updated_at AS "last_modified" from clients left join schedule_entries as se on clients.id = se.client_id where se.id ISNULL OFFSET ? LIMIT ?;'
 var	clientCountNullQuery = "select count(*) from clients left join schedule_entries as se on clients.id = se.client_id where se.id ISNULL;";
 
+var md5 = require("md5");
+var gravatarBaseUrl = "http://www.gravatar.com/avatar/";
+var getGravatar = function(email, size) {
+  var url = gravatarBaseUrl + md5(email) + "?d=identicon"
+  if (size) {
+    url = url + "&size=" + size;
+  }
+  return url;
+};
+
+
 var clientListQuery = function(lat, lon) {
 	if (lat && lon) {
 		lat = parseFloat(lat);
@@ -22,6 +33,13 @@ var clientCountQuery = 'select count(*) from clients left join schedule_entries 
 
 
 module.exports = sequelize_endpoint(Client, {
+	map: function(client) {
+		if (!client.avatar || !client.thumbnail) {
+			client.avatar = getGravatar(client.email);
+			client.thumbnail = getGravatar(client.email, 32);
+		}
+		return client;
+	},
 	customListQuery: function(req, limit, offset) {
 		if(typeof req.query.seller_id !== "undefined") {
 			if (req.query.seller_id === "null") {
