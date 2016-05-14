@@ -2,11 +2,11 @@ var gcm = require('node-gcm');
 var push_notification_config = require("../../config/push_notification.json");
 var sender = new gcm.Sender(push_notification_config.api_key);
 
-function pushNewClientNotification(client_id,client_name,pictureURL,tokens,callback){
+function pushNewClientNotification(client_id,client_name,client_lastname,pictureURL,tokens,callback){
 	var message = new gcm.Message();
 	message.addData('type', 'NEW_CLIENT');
 	message.addData('identifier',client_id);
-	message.addData('message',client_name);
+	message.addData('message',client_lastname + ", " + client_name);
 	message.addData('picture',pictureURL);
 	
 	sender.send(message, { registrationTokens: tokens }, function (err, response) {
@@ -19,11 +19,11 @@ function pushNewClientNotification(client_id,client_name,pictureURL,tokens,callb
 	});
 }
 
-function pushClientUpdatedNotification(client_id,client_name,pictureURL,tokens,callback){
+function pushClientUpdatedNotification(client_id,client_name,client_lastname,pictureURL,tokens,callback){
 	var message = new gcm.Message();
 	message.addData('type', 'CLIENT_UPDATED');
 	message.addData('identifier',client_id);
-	message.addData('message',client_name);
+	message.addData('message',client_lastname + ", " + client_name);
 	message.addData('picture',pictureURL);
 	
 	sender.send(message, { registrationTokens: tokens }, function (err, response) {

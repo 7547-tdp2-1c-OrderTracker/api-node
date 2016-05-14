@@ -62,7 +62,7 @@ var afterUpdate = function(instance, options) {
     return sequelize.query(devicesQuery, {replacements: [instance.get("id")]})
       .then(function(result) {
         var tokens = result[0].map(_.property("registration_id"));
-        return push(instance.get("id"), instance.get("name"), instance.get("thumbnail"), tokens);
+        return push(instance.get("id"), instance.get("name"), instance.get("lastname"), instance.get("thumbnail"), tokens);
       })
       .catch(console.error.bind(console));
   }
