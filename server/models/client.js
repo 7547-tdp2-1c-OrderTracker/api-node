@@ -33,6 +33,10 @@ var beforeUpdate = function(instance, options) {
     }
   }
 
+  if (options.fields.indexOf("avatar") != -1) {
+    instance.thumbnail = instance.avatar;
+  }
+
   instance.location = {type: 'Point', coordinates: [instance.get('lat'), instance.get('lon')]};
 };
 
