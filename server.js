@@ -2,8 +2,8 @@ var express = require("express");
 var argv = require("yargs").argv;
 var fs = require("fs");
 var cors = require("cors");
-
-var bodyParser = require('body-parser')
+var authConfig = require("./config/auth.json");
+var bodyParser = require('body-parser');
 
 var clients = require("./server/clients");
 var products = require("./server/products");
@@ -15,6 +15,8 @@ var schedule_entries = require("./server/schedule_entries");
 var schedules = require("./server/schedules");
 var promotions = require("./server/promotions");
 var devices = require("./server/devices");
+var auth = require("./server/auth");
+var auth_middleware = require("./server/auth_middleware");
 
 var app = express();
 
@@ -27,6 +29,8 @@ app.use(bodyParser.urlencoded({
 var port = process.env.PORT || 5000;
 var resourcePath = argv.path || "default";
 
+app.use(auth_middleware(authConfig.jwt.secret, authConfig.disabled));
+
 app.use("/v1/clients", clients);
 app.use("/v1/products", products);
 app.use("/v1/brands", brands);
@@ -38,6 +42,8 @@ app.use("/v1/schedules", schedules);
 app.use("/v1/schedule", schedules);
 app.use("/v1/promotions", promotions);
 app.use("/v1/devices", devices);
+
+app.use("/v1/auth", auth(authConfig.jwt.secret));
 
 if (require.main === module) {
 	app.listen(port, function() {
