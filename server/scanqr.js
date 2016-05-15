@@ -77,7 +77,7 @@ app.post("/validate", promised(function(req) {
 		return Visit.create({
 			schedule_entry_id: schedule_entry.id,
 			date: now.toDate(),
-			comment: req.query.comment||''
+			comment: req.body.comment||''
 		}).then(function() {
 			if (orders.length) {
 				return orders[0];
