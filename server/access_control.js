@@ -32,6 +32,10 @@ module.exports = function(disabled) {
 
 				// y puede editar visitas
 				if (req.method === "PUT" && req.path.startsWith("/v1/visits/")) return next();
+
+				// y puede enviar scans de qr
+				if (req.method === "POST" && req.path.startsWith("/v1/scanqr/")) return next();
+
 			}
 		}
 

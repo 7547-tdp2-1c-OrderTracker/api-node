@@ -5,6 +5,7 @@ var cors = require("cors");
 var authConfig = require("./config/auth.json");
 var bodyParser = require('body-parser');
 
+var scanqr = require("./server/scanqr");
 var clients = require("./server/clients");
 var products = require("./server/products");
 var brands = require("./server/brands");
@@ -44,6 +45,7 @@ app.use("/v1/schedules", schedules);
 app.use("/v1/schedule", schedules);
 app.use("/v1/promotions", promotions);
 app.use("/v1/devices", devices);
+app.use("/v1/scanqr", scanqr);
 
 app.use("/v1/auth", auth(authConfig.jwt.secret));
 
