@@ -14,7 +14,10 @@ var moment = require("moment");
 
 var promised = function(f) {
 	return function(req, res) {
-		f(req, res)
+		q()
+			.then(function() {
+				return f(req, res);
+			})
 			.then(function(value) {
 				res.status(value.status).send(value.body);
 			})
@@ -67,7 +70,28 @@ app.post("/validate", promised(function(req) {
 	]).spread(function(schedule_entries, orders) {
 		// si no tiene ningun schedule_entries, no lo tiene en la agenda y no puede marcarlo
 		if (schedule_entries.length === 0){
-			throw {error: {key: 'QR_ERROR'}, value: "No existe ese client id:" + client_id + " o ese seller id:" + seller_id + " asociados por agenda"};
+
+			return q.all([
+					Client.findOne({where: {id: client_id}}),
+					Seller.findOne({where: {id: seller_id}}),
+					ScheduleEntry.findOne({where: {seller_id: seller_id, client_id: client_id}})
+				]).spread(function(client, seller, schedule_entry) {
+					if (!seller) {
+						throw {error: {key: 'QR_ERROR'}, value: "No existe seller con id " + seller_id};
+					}					
+					if (!client) {
+						throw {error: {key: 'QR_ERROR'}, value: "No existe client con id " + client_id};
+					}
+
+					console.log(schedule_entry);
+
+					if (!schedule_entry) {
+						throw {error: {key: 'QR_ERROR'}, value: "client id:" + client_id + " y seller id: " + seller_id + " no estan asociados por agenda"};
+					}					
+
+					throw {error: {key: 'QR_ERROR'}, value: "client id:" + client_id + " se encuentra a distancia mayor que la permitida: " + distance};
+				});
+
 		}
 
 		var schedule_entry = schedule_entries.sort(function(se1, se2) {
