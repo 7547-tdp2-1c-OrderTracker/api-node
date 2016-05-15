@@ -46,9 +46,6 @@ app.post("/validate", promised(function(req) {
 	var where = {};
 	var attributes = null;
 
-	console.log(req.body);
-	console.log(distance);
-
 	if (!process.env.POSTGIS_DISABLED) {
 		where = Sequelize.literal("ST_Distance(location, ST_GeographyFromText('SRID=4326;POINT("+lat+" "+lon+")')) < " + distance);
 		attributes = {
