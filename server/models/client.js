@@ -48,7 +48,10 @@ var clientDefinition = {
   lon: Sequelize.REAL,
   sellerType: {
     type: Sequelize.STRING,
-    field: 'seller_type'
+    field: 'seller_type',
+    validate: {
+      isIn: [['wholesale', 'retail']]
+    }
   },
   company: Sequelize.STRING,
   date_created: {field: 'created_at', type: Sequelize.DATE},
