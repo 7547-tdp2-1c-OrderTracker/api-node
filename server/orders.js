@@ -8,6 +8,8 @@ var OrderItem = require("./models/order_item");
 var Client = require("./models/client");
 var Promotion = require("./models/promotion");
 
+var default_product_picture = "http://www.higieneplus.com.ar/wp-content/themes/higieneplus/images/producto-sin-foto.jpg";
+
 var filter_fields = ["status","client_id","seller_id"];
 var where = function(req) {
 	var filters = filter_fields.filter(function(fieldName) {
@@ -26,6 +28,15 @@ var where = function(req) {
 	}
 };
 
+var mapOrderItem = function(entity) {
+	if (!entity.thumbnail) {
+		entity.thumbnail = default_product_picture;
+	}
+
+	entity.brand = entity.brand_name;
+	return entity;
+};
+
 var orders = sequelize_endpoint(Order, {
 	where: where,
 	include: [{
@@ -35,6 +46,10 @@ var orders = sequelize_endpoint(Order, {
 	}],
 	order: function() {
 		return "status DESC";
+	},
+	map: function(order) {
+		order.order_items = order.order_items.map(mapOrderItem);
+		return order;	
 	}
 });
 
@@ -51,10 +66,7 @@ var order_entries = sequelize_endpoint(OrderItem, {
 	include: [
 		{model: Promotion, required: false, attributes: ["name", "percent", "min_quantity", "begin_date", "end_date"]}
 	],
-	map: function(entity) {
-		entity.brand = entity.brand_name;
-		return entity;
-	},
+	map: mapOrderItem,
 	postErrorHandler: function(err, req) {
 		if (err.name !== 'SequelizeUniqueConstraintError') {
 			throw err;

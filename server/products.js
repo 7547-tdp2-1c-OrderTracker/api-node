@@ -4,6 +4,7 @@ var Product = require("./models/product");
 var Brand = require("./models/brand");
 var Promotion = require("./models/promotion");
 
+var default_product_picture = "http://www.higieneplus.com.ar/wp-content/themes/higieneplus/images/producto-sin-foto.jpg";
 var moment = require("moment");
 
 var where = function(req, res) {
@@ -48,6 +49,11 @@ module.exports = sequelize_endpoint(Product, {
 		if (product.brand) {
 			product.brand_name = product.brand.name;
 		}
+
+		if (!product.picture || !product.thumbnail) {
+			product.picture = default_product_picture;
+		}
+
 		return product;
 	}
 });
