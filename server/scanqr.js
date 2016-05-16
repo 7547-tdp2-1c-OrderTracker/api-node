@@ -77,19 +77,19 @@ app.post("/validate", promised(function(req) {
 					ScheduleEntry.findOne({where: {seller_id: seller_id, client_id: client_id}})
 				]).spread(function(client, seller, schedule_entry) {
 					if (!seller) {
-						throw {error: {key: 'QR_ERROR'}, value: "No existe seller con id " + seller_id};
+						throw {error: {key: 'QR_ERROR', value: "No existe seller con id " + seller_id}};
 					}					
 					if (!client) {
-						throw {error: {key: 'QR_ERROR'}, value: "No existe client con id " + client_id};
+						throw {error: {key: 'QR_ERROR', value: "No existe client con id " + client_id}};
 					}
 
 					console.log(schedule_entry);
 
 					if (!schedule_entry) {
-						throw {error: {key: 'QR_ERROR'}, value: "client id:" + client_id + " y seller id: " + seller_id + " no estan asociados por agenda"};
+						throw {error: {key: 'QR_ERROR', value: "client id:" + client_id + " y seller id: " + seller_id + " no estan asociados por agenda"}};
 					}					
 
-					throw {error: {key: 'QR_ERROR'}, value: "client id:" + client_id + " se encuentra a distancia mayor que la permitida: " + distance};
+					throw {error: {key: 'QR_ERROR', value: "client id:" + client_id + " se encuentra a distancia mayor que la permitida: " + distance}};
 				});
 
 		}
