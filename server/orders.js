@@ -48,7 +48,7 @@ var orders = sequelize_endpoint(Order, {
 		return "status DESC";
 	},
 	map: function(order) {
-		order.order_items = order.order_items.map(mapOrderItem);
+		if (order.order_items) order.order_items = order.order_items.map(mapOrderItem);
 		return order;	
 	}
 });
