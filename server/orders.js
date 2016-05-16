@@ -40,13 +40,18 @@ var mapOrderItem = function(entity) {
 
 var orders = sequelize_endpoint(Order, {
 	where: where,
-	include: [{
-		model: Client
-	},{
-		model: OrderItem
-	},{
-		model: Seller
-	}],
+	include: function(req) {
+		return [{
+			model: Client,
+			where: req.query.clients_where ? JSON.parse(req.query.clients_where) : undefined
+		},{
+			model: OrderItem,
+			where: req.query.order_items_where ? JSON.parse(req.query.order_items_where) : undefined
+		},{
+			model: Seller,
+			where: req.query.sellers_where ? JSON.parse(req.query.sellers_where) : undefined
+		}]
+	},
 	order: function() {
 		return "status DESC";
 	},
