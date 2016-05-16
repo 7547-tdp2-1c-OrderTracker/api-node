@@ -18,7 +18,7 @@ var afterCreate = function(instance, options) {
     ])
     	.spread(function(devices, client) {
     		var tokens = devices.map(_.property('dataValues')).map(_.property("registration_id"));
-    		return push(client.get("id"), client.get("name"), instance.get("lastname"), client.get("thumbnail"), tokens);
+    		return push(client.get("id"), client.get("name"), client.get("lastname"), client.get("thumbnail"), tokens);
     	})
     	.catch(console.error.bind(console));
 };
