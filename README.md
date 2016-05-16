@@ -48,6 +48,14 @@ sequelize db:seed:all
 
 NOTA: hay que instalar sequelize-cli globalmente con npm install -g
 
+## Dump/restore de la DB
+
+Hacer el backup
+heroku pg:backups capture --remote powerful
+curl -o ldump/20160516.dump `heroku pg:backups public-url --remote powerful`
+
+Restaurar el backup
+heroku pg:backups restore --remote heroku 'http://7547-tdp2-1c-ordertracker.github.io/api-node/dump/20160516.dump' DATABASE_URL
 
 ## Endpoints implementados
 
