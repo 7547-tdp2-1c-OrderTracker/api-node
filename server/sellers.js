@@ -57,10 +57,10 @@ app.get("/:seller_id/reports", promised(function(req) {
 
 	var seller_id = req.params.seller_id;
 	return q.all([
-		sequelize.query("SELECT COUNT(*) as count FROM visits as v JOIN schedule_entries as s ON v.schedule_entry_id = s.id WHERE s.seller_id = ? AND v.date >= ? AND v.date <= ? AND day_of_week = ?", {
+		sequelize.query("SELECT COUNT(*) as count FROM (SELECT client_id FROM visits as v JOIN schedule_entries as s ON v.schedule_entry_id = s.id WHERE s.seller_id = ? AND v.date >= ? AND v.date <= ? AND day_of_week = ?) as clients", {
 			replacements: [seller_id, start.toISOString(), end.toISOString(), day_of_week]
 		}),
-		sequelize.query("SELECT COUNT(*) as count FROM visits as v JOIN schedule_entries as s ON v.schedule_entry_id = s.id WHERE s.seller_id = ? AND v.date >= ? AND v.date <= ? AND day_of_week != ?", {
+		sequelize.query("SELECT COUNT(*) as count FROM (SELECT client_id FROM visits as v JOIN schedule_entries as s ON v.schedule_entry_id = s.id WHERE s.seller_id = ? AND v.date >= ? AND v.date <= ? AND day_of_week != ?) as clients", {
 			replacements: [seller_id, start.toISOString(), end.toISOString(), day_of_week]
 		}),
 		sequelize.query("SELECT SUM(total_price) as total, o.currency as currency FROM orders as o WHERE o.status = 'confirmed' AND o.seller_id = ? AND o.updated_at >= ? AND o.updated_at <= ? GROUP BY currency", {
