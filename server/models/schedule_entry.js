@@ -23,6 +23,8 @@ var afterCreate = function(instance, options) {
     	.catch(console.error.bind(console));
 };
 
+var afterUpdate = afterCreate;
+
 var ScheduleEntry = sequelize.define('schedule_entries', {
   day_of_week: Sequelize.INTEGER,
   date_created: {field: 'created_at', type: Sequelize.DATE},
@@ -32,7 +34,8 @@ var ScheduleEntry = sequelize.define('schedule_entries', {
   updatedAt: 'last_modified',
   createdAt: 'date_created',
   hooks: {
-  	afterCreate: afterCreate
+  	afterCreate: afterCreate,
+  	afterUpdate: afterUpdate
   }
 });
 
