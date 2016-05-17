@@ -16,6 +16,7 @@ var schedule_entries = require("./server/schedule_entries");
 var schedules = require("./server/schedules");
 var promotions = require("./server/promotions");
 var devices = require("./server/devices");
+var config = require("./server/config");
 var auth = require("./server/auth");
 var auth_middleware = require("./server/auth_middleware");
 var access_control = require("./server/access_control");
@@ -45,6 +46,7 @@ app.use("/v1/schedules", schedules);
 app.use("/v1/schedule", schedules);
 app.use("/v1/promotions", promotions);
 app.use("/v1/devices", devices);
+app.use("/v1/config", config);
 app.use("/v1/scanqr", scanqr);
 
 app.use("/v1/auth", auth(authConfig.jwt.secret));

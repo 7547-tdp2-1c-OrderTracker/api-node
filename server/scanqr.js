@@ -9,6 +9,7 @@ var ScheduleEntry = require("./models/schedule_entry");
 var Order = require("./models/order");
 var Visit = require("./models/visit");
 
+var Config = require("./models/config");
 
 var moment = require("moment");
 
@@ -49,78 +50,85 @@ app.post("/validate", promised(function(req) {
 	var where = {};
 	var attributes = null;
 
-	if (!process.env.POSTGIS_DISABLED) {
-		where = Sequelize.literal("ST_Distance(location, ST_GeographyFromText('SRID=4326;POINT("+lat+" "+lon+")')) < " + distance);
-		attributes = {
-			include: [[Sequelize.literal("ST_Distance(location, ST_GeographyFromText('SRID=4326;POINT(" + lat + " " + lon + ")'))/1000"), "distance"]]
-		}
-	}
+	return Config.get()
+		.then(function(config) {
 
-	return q.all([
-		ScheduleEntry.findAll({
-			where: {seller_id: seller_id, client_id: client_id},
-			include: [
-				{model: Seller},
-				{model: Client, where: where, attributes: attributes}
-			]
-		}),
-		Order.findAll({
-			where: {seller_id: seller_id, client_id: client_id, status: 'draft'}
-		})
-	]).spread(function(schedule_entries, orders) {
-		// si no tiene ningun schedule_entries, no lo tiene en la agenda y no puede marcarlo
-		if (schedule_entries.length === 0){
+		console.log(config);
 
-			return q.all([
-					Client.findOne({where: {id: client_id}}),
-					Seller.findOne({where: {id: seller_id}}),
-					ScheduleEntry.findOne({where: {seller_id: seller_id, client_id: client_id}})
-				]).spread(function(client, seller, schedule_entry) {
-					if (!seller) {
-						throw {error: {key: 'QR_ERROR', value: "No existe seller con id " + seller_id}};
-					}					
-					if (!client) {
-						throw {error: {key: 'QR_ERROR', value: "No existe client con id " + client_id}};
-					}
-
-					console.log(schedule_entry);
-
-					if (!schedule_entry) {
-						throw {error: {key: 'QR_ERROR', value: "client id:" + client_id + " y seller id: " + seller_id + " no estan asociados por agenda"}};
-					}					
-
-					throw {error: {key: 'QR_ERROR', value: "client id:" + client_id + " se encuentra a distancia mayor que la permitida: " + distance}};
-				});
-
-		}
-
-		var schedule_entry = schedule_entries.sort(function(se1, se2) {
-			return Math.abs(se1.day_of_week-day_of_week) - Math.abs(se2.day_of_week-day_of_week);
-		})[0];
-
-		return Visit.create({
-			schedule_entry_id: schedule_entry.id,
-			date: now.toDate(),
-			comment: req.body.comment||''
-		}).then(function() {
-			if (orders.length) {
-				return orders[0];
-			} else {
-				return Order.create({status: 'draft', seller_id: seller_id, client_id: client_id})
-					.then(function(instance) {
-						return instance.dataValues;
-					});
+		if (!process.env.POSTGIS_DISABLED) {
+			where = Sequelize.literal("ST_Distance(location, ST_GeographyFromText('SRID=4326;POINT("+lat+" "+lon+")')) < " + config.client_max_distance);
+			attributes = {
+				include: [[Sequelize.literal("ST_Distance(location, ST_GeographyFromText('SRID=4326;POINT(" + lat + " " + lon + ")'))/1000"), "distance"]]
 			}
-		}).then(function(order) {
-			return {
-				status: 200,
-				body: {
-					client: schedule_entry.client,
-					order: order
-				}
-			};
-		});
+		}
 
+		return q.all([
+			ScheduleEntry.findAll({
+				where: {seller_id: seller_id, client_id: client_id},
+				include: [
+					{model: Seller},
+					{model: Client, where: where, attributes: attributes}
+				]
+			}),
+			Order.findAll({
+				where: {seller_id: seller_id, client_id: client_id, status: 'draft'}
+			})
+		]).spread(function(schedule_entries, orders) {
+			// si no tiene ningun schedule_entries, no lo tiene en la agenda y no puede marcarlo
+			if (schedule_entries.length === 0){
+
+				return q.all([
+						Client.findOne({where: {id: client_id}}),
+						Seller.findOne({where: {id: seller_id}}),
+						ScheduleEntry.findOne({where: {seller_id: seller_id, client_id: client_id}})
+					]).spread(function(client, seller, schedule_entry) {
+						if (!seller) {
+							throw {error: {key: 'QR_ERROR', value: "No existe seller con id " + seller_id}};
+						}					
+						if (!client) {
+							throw {error: {key: 'QR_ERROR', value: "No existe client con id " + client_id}};
+						}
+
+						console.log(schedule_entry);
+
+						if (!schedule_entry) {
+							throw {error: {key: 'QR_ERROR', value: "client id:" + client_id + " y seller id: " + seller_id + " no estan asociados por agenda"}};
+						}					
+
+						throw {error: {key: 'QR_ERROR', value: "client id:" + client_id + " se encuentra a distancia mayor que la permitida: " + distance}};
+					});
+
+			}
+
+			var schedule_entry = schedule_entries.sort(function(se1, se2) {
+				return Math.abs(se1.day_of_week-day_of_week) - Math.abs(se2.day_of_week-day_of_week);
+			})[0];
+
+			return Visit.create({
+				schedule_entry_id: schedule_entry.id,
+				date: now.toDate(),
+				comment: req.body.comment||''
+			}).then(function() {
+				if (orders.length) {
+					return orders[0];
+				} else {
+					return Order.create({status: 'draft', seller_id: seller_id, client_id: client_id})
+						.then(function(instance) {
+							return instance.dataValues;
+						});
+				}
+			}).then(function(order) {
+				return {
+					status: 200,
+					body: {
+						client: schedule_entry.client,
+						order: order
+					}
+				};
+			});
+
+		});
+	
 	});
 
 }));
