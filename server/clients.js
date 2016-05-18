@@ -4,6 +4,7 @@ var sequelize = require("./domain/sequelize");
 
 var Client = require("./models/client");
 var Seller = require("./models/seller");
+var ScheduleEntry = require("./models/schedule_entry");
 
 var clientListNullQuery = 'select clients.company as company, clients.id, "name", "lastname", "avatar", "thumbnail", "cuil", "address", "phone_number", "email", "lat", "lon", "seller_type" AS "sellerType", clients.created_at AS "date_created", clients.updated_at AS "last_modified" from clients left join schedule_entries as se on clients.id = se.client_id where se.id ISNULL OFFSET ? LIMIT ?;'
 var	clientCountNullQuery = "select count(*) from clients left join schedule_entries as se on clients.id = se.client_id where se.id ISNULL;";
@@ -20,13 +21,14 @@ var getGravatar = function(email, size) {
 
 
 var clientListQuery = function(lat, lon) {
+	var locationColumn = process.env.POSTGIS_DISABLED ? "" : "clients.location as location,";
 	if (lat && lon) {
 		lat = parseFloat(lat);
 		lon = parseFloat(lon);
 		var distance = "ST_Distance(location, ST_GeographyFromText('SRID=4326;POINT("+lat+" "+lon+")'))";
 		return 'select clients.company as company, ' + distance + '/1000 as distance, clients.location as location, clients.id, "name", "lastname", "avatar", "thumbnail", "cuil", "address", "phone_number", "email", "lat", "lon", "seller_type" AS "sellerType", clients.created_at AS "date_created", clients.updated_at AS "last_modified" from clients left join schedule_entries as se on clients.id = se.client_id where se.seller_id = ? ORDER BY ' + distance + ' OFFSET ? LIMIT ?;';
 	} else {
-		return 'select clients.company as company, clients.location as location, clients.id, "name", "lastname", "avatar", "thumbnail", "cuil", "address", "phone_number", "email", "lat", "lon", "seller_type" AS "sellerType", clients.created_at AS "date_created", clients.updated_at AS "last_modified" from clients left join schedule_entries as se on clients.id = se.client_id where se.seller_id = ? OFFSET ? LIMIT ?;';
+		return 'select clients.company as company, '+ locationColumn + ' clients.id, "name", "lastname", "avatar", "thumbnail", "cuil", "address", "phone_number", "email", "lat", "lon", "seller_type" AS "sellerType", clients.created_at AS "date_created", clients.updated_at AS "last_modified" from clients left join schedule_entries as se on clients.id = se.client_id where se.seller_id = ? OFFSET ? LIMIT ?;';
 	}
 }
 var clientCountQuery = 'select count(*) from clients left join schedule_entries as se on clients.id = se.client_id where se.seller_id = ?;'
@@ -43,11 +45,24 @@ module.exports = sequelize_endpoint(Client, {
 	customListQuery: function(req, limit, offset) {
 		if(typeof req.query.seller_id !== "undefined") {
 			if (req.query.seller_id === "null") {
-				return sequelize.query(clientListNullQuery, {
-					model: Client,
-					replacements: [offset, limit]
-				});
+				if (req.authInfo.admin) {
+					return sequelize.query(clientListNullQuery, {
+						model: Client,
+						replacements: [offset, limit]
+					});
+				} else {
+					return sequelize.query(clientListQuery(req.query.lat, req.query.lon), {
+						model: Client,
+						replacements: [-1, offset, limit]
+					});
+				}
 			} else {
+				if (!req.authInfo.admin) {
+					if (req.query.seller_id !== req.authInfo.seller_id) {
+						req.query.seller_id = -1;
+					}
+				}
+
 				return sequelize.query(clientListQuery(req.query.lat, req.query.lon), {
 					model: Client,
 					replacements: [req.query.seller_id, offset, limit]
@@ -57,26 +72,51 @@ module.exports = sequelize_endpoint(Client, {
 	},
 
 	customCountQuery: function(req) {
+		var returnCount = function(count) {
+			return {
+				get: function() {
+					return count[0][0].count;
+				}
+			};
+		};
+
 		if(typeof req.query.seller_id !== "undefined") {
 			if (req.query.seller_id === "null") {
-				return sequelize.query(clientCountNullQuery).then(function(count) {
-					return {
-						get: function() {
-							return count[0][0].count;
-						}
-					};
-				});
+				if (req.authInfo.admin) {
+					return sequelize.query(clientCountNullQuery).then(returnCount);
+				} else {
+					return sequelize.query(clientCountQuery, {
+						replacements: [-1]
+					}).then(returnCount);
+				}
 			} else {
+				if (!req.authInfo.admin) {
+					if (req.query.seller_id !== req.authInfo.seller_id) {
+						req.query.seller_id = -1;
+					}
+				}
+
 				return sequelize.query(clientCountQuery, {
 					replacements: [req.query.seller_id]
-				}).then(function(count) {
-					return {
-						get: function() {
-							return count[0][0].count;
-						}
-					};
-				});
+				}).then(returnCount);
 			}
+		}
+	},
+
+	include: function(req) {
+		if (!req.authInfo) throw {error: {key: 'MISSING_AUTH', value: 'no se autentico'}, status: 401};
+
+		if (req.authInfo.admin) {
+			return [{
+				model: ScheduleEntry,
+				required: false
+			}];
+		} else {
+			var where = {seller_id: req.authInfo.seller_id};
+			return [{
+				model: ScheduleEntry,
+				where: where
+			}];
 		}
 	},
 

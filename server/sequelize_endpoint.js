@@ -4,11 +4,15 @@ var q = require("q");
 
 var promised = function(f) {
 	return function(req, res) {
-		f(req, res)
+		q().then(function() {
+				return f(req, res);
+			})
 			.then(function(value) {
 				res.status(value.status).send(value.body);
 			})
 			.catch(function(err) {
+				console.error(err);
+				
 				if (typeof err !== "object") {
 					err = {error: {key: 'UNKNOWN', value: err.toString()}};
 				} else if (!err.error) {
@@ -81,9 +85,13 @@ module.exports = function(model, options) {
 
 	// Read
 	app.get(base + "/:id", promised(function(req, res) {
-		var where = {};
+		var where = {$and: [{}]};
 		var primaryKey = options.primaryKey || "id";
-		where[primaryKey] = req.params.id;
+		where.$and[0][primaryKey] = req.params.id;
+
+		if (model.listRestriction) {
+			where.$and.push(model.listRestriction(req.authInfo));
+		}
 
 		return model.findOne({where: where, include: include(req)}).then(function(instance) {
 			if (!instance) {
@@ -104,14 +112,18 @@ module.exports = function(model, options) {
 	};
 
 	var listQuery = function(req, limit, offset) {
-		var where = {};
+		var where = {$and: []};
 		var order = null;
 
-		if (options.where) where = options.where(req);
+		if (options.where) where.$and.push(options.where(req));
 		if (options.order) order = options.order(req);
 
 		if (req.query.where) {
-			where = {$and: [JSON.parse(req.query.where), where]};
+			where.$and.push(JSON.parse(req.query.where));
+		}
+
+		if (model.listRestriction) {
+			where.$and.push(model.listRestriction(req.authInfo));
 		}
 
 		return options.customListQuery(req, limit, offset) || model.findAll({limit: limit, offset: offset, where: where, order: order, include: include(req),
@@ -121,10 +133,14 @@ module.exports = function(model, options) {
 	};
 
 	var countQuery = function(req) {
-		var where = {};
-		if (options.where) where = options.where(req);
+		var where = {$and: []};
+		if (options.where) where.$and.push(options.where(req));
 		if (req.query.where) {
-			where = {$and: [JSON.parse(req.query.where), where]};
+			where.$and.push(JSON.parse(req.query.where));
+		}
+
+		if (model.listRestriction) {
+			where.$and.push(model.listRestriction(req.authInfo));
 		}
 
 		return options.customCountQuery(req) || model.findOne({
@@ -166,7 +182,7 @@ module.exports = function(model, options) {
 						throw {error: {key: 'NOT_FOUND', value: 'el recurso que se intento modificar no se encuentra'}, status: 404};
 					}
 
-					return instance.update(req.body);
+					return instance.update(req.body, {authInfo: req.authInfo});
 				})
 				.then(function() {
 					return model.findOne({where: {id: req.params.id}})
@@ -186,7 +202,7 @@ module.exports = function(model, options) {
 					throw {error: {key: 'NOT_FOUND', value: 'el recurso que se intento eliminar no se encuentra'}, status: 404};
 				}
 
-				return instance.destroy().then(function() {
+				return instance.destroy({authInfo: req.authInfo}).then(function() {
 					return {
 						body: options.map(instance.dataValues),
 						status: 200

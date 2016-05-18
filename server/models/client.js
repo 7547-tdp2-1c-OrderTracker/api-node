@@ -5,15 +5,54 @@ var _ = require("underscore");
 
 var push = q.denodeify(require("../domain/push").pushClientUpdatedNotification);
 
+var ScheduleEntry;
 var beforeUpdate = function(instance, options) {
-  if (options.fields.indexOf("avatar") != -1) {
-    instance.thumbnail = instance.avatar;
-  }
-  instance.location = {type: 'Point', coordinates: [instance.get('lat'), instance.get('lon')]};
+  // sequelize no acepta los require circulares y schedule entry hace require client.js
+  if (!ScheduleEntry) ScheduleEntry = require("./schedule_entry");
+  if (!options.authInfo) throw {error: {key: 'MISSING_AUTH', value: 'no se autentico'}, status: 401};
+
+  return q()
+    .then(function() {
+      if (!options.authInfo.admin) {
+        if (!options.authInfo.seller_id) throw {error: {key: 'MISSING_AUTH', value: 'no se autentico'}, status: 401};
+        
+        return ScheduleEntry.findOne({where: {client_id: instance.get("id"), seller_id: options.authInfo.seller_id}})
+          .then(function(se) {
+            if (!se) {
+              throw {error: {key: 'FORBIDDEN', value: 'el vendedor no esta asociado a ese cliente'}, status: 401};
+            }
+          });
+      }
+    })
+    .then(function() {
+      if (options.fields.indexOf("avatar") != -1) {
+        instance.thumbnail = instance.avatar;
+      }
+      instance.location = {type: 'Point', coordinates: [instance.get('lat'), instance.get('lon')]};
+    });
 };
 
 var beforeCreate = function(instance, options) {
-  instance.location = {type: 'Point', coordinates: [instance.get('lat'), instance.get('lon')]};
+  // sequelize no acepta los require circulares y schedule entry hace require client.js
+  if (!ScheduleEntry) ScheduleEntry = require("./schedule_entry");
+  if (!options.authInfo) throw {error: {key: 'MISSING_AUTH', value: 'no se autentico'}, status: 401};
+
+  return q()
+    .then(function() {
+      if (!options.authInfo.admin) {
+        if (!options.authInfo.seller_id) throw {error: {key: 'MISSING_AUTH', value: 'no se autentico'}, status: 401};
+        
+        return ScheduleEntry.findOne({where: {client_id: instance.get("id"), seller_id: options.authInfo.seller_id}})
+          .then(function(se) {
+            if (!se) {
+              throw {error: {key: 'FORBIDDEN', value: 'el vendedor no esta asociado a ese cliente'}, status: 401};
+            }
+          });
+      }
+    })
+    .then(function() {
+      instance.location = {type: 'Point', coordinates: [instance.get('lat'), instance.get('lon')]};
+    });
 };
 
 var afterUpdate = function(instance, options) {

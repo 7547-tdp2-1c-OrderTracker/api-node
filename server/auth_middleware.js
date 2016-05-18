@@ -3,6 +3,15 @@ var jwt = require("jsonwebtoken");
 
 module.exports = function(secret, disabled) {
 	return function(req, res, next) {
+		if (disabled) {
+			if (req.query.authinfo_seller_id) {
+				req.authInfo = {seller_id: req.query.authinfo_seller_id};
+			} else {
+				req.authInfo = {admin: true};
+			}
+			return next();
+		}
+
 		if (req.path === "/v1/auth/login") return next();
 
 		if (!disabled || req.query.auth) {

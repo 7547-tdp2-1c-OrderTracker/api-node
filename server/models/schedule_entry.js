@@ -42,4 +42,7 @@ var ScheduleEntry = sequelize.define('schedule_entries', {
 ScheduleEntry.belongsTo(Client, {foreignKey: 'client_id'});
 ScheduleEntry.belongsTo(Seller, {foreignKey: 'seller_id'});
 
+Client.hasMany(ScheduleEntry, {foreignKey: 'client_id'});
+Seller.hasMany(ScheduleEntry, {foreignKey: 'seller_id'});
+
 module.exports = ScheduleEntry;
