@@ -19,7 +19,6 @@ var devices = require("./server/devices");
 var config = require("./server/config");
 var auth = require("./server/auth");
 var auth_middleware = require("./server/auth_middleware");
-var access_control = require("./server/access_control");
 
 var app = express();
 
@@ -33,7 +32,6 @@ var port = process.env.PORT || 5000;
 var resourcePath = argv.path || "default";
 
 app.use(auth_middleware(authConfig.jwt.secret, authConfig.disabled));
-app.use(access_control(authConfig.disabled));
 
 app.use("/v1/clients", clients);
 app.use("/v1/products", products);
