@@ -1,5 +1,6 @@
 var Sequelize = require("sequelize");
 var seq = new Sequelize(process.env.DATABASE_URL);
+var q = require("q");
 
 seq.checkAllowed = function(allowedFields, options) {
 	allowedFields.push("date_created");
@@ -14,18 +15,18 @@ seq.checkAllowed = function(allowedFields, options) {
 	}
 };
 
-seq.onlyAdmin = function(instance, options, msg) {
+seq.onlyAdmin = function(instance, options) {
 	if (!options.authInfo) throw {error: {key: 'MISSING_AUTH', value: 'no se autentico'}, status: 401};
 	if (!options.authInfo.admin) {
-       	throw {error: {key: 'FORBIDDEN', value: msg||'solo el administrador puede actualizar esto'}, status: 403};
+       	throw {error: {key: 'FORBIDDEN', value: 'solo el administrador puede actualizar esto'}, status: 403};
 	}
 };
 
-seq.onlySeller = function(instance, options, msg) {
+seq.onlySeller = function(instance, options) {
 	if (!options.authInfo) throw {error: {key: 'MISSING_AUTH', value: 'no se autentico'}, status: 401};
 	if (!options.authInfo.admin) {
 		if (options.authInfo.seller_id != instance.get("seller_id")) {
-	       	throw {error: {key: 'FORBIDDEN', value: msg||'solo el administrador o el vendedor asociado puede actualizar esto'}, status: 403};
+	       	throw {error: {key: 'FORBIDDEN', value: 'solo el administrador o el vendedor asociado puede actualizar esto'}, status: 403};
 		}
 	}
 };

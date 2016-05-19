@@ -43,6 +43,10 @@ module.exports = sequelize_endpoint(Client, {
 		return client;
 	},
 	customListQuery: function(req, limit, offset) {
+
+		console.log("XXXX");
+		console.log(req.authInfo);
+
 		if(typeof req.query.seller_id !== "undefined") {
 			if (req.query.seller_id === "null") {
 				if (req.authInfo.admin) {
@@ -58,7 +62,7 @@ module.exports = sequelize_endpoint(Client, {
 				}
 			} else {
 				if (!req.authInfo.admin) {
-					if (req.query.seller_id !== req.authInfo.seller_id) {
+					if (req.query.seller_id != req.authInfo.seller_id) {
 						req.query.seller_id = -1;
 					}
 				}
@@ -91,7 +95,7 @@ module.exports = sequelize_endpoint(Client, {
 				}
 			} else {
 				if (!req.authInfo.admin) {
-					if (req.query.seller_id !== req.authInfo.seller_id) {
+					if (req.query.seller_id != req.authInfo.seller_id) {
 						req.query.seller_id = -1;
 					}
 				}

@@ -31,7 +31,7 @@ app.use(bodyParser.urlencoded({
 var port = process.env.PORT || 5000;
 var resourcePath = argv.path || "default";
 
-app.use(auth_middleware(authConfig.jwt.secret, authConfig.disabled));
+app.use(auth_middleware(authConfig.jwt.secret));
 
 app.use("/v1/clients", clients);
 app.use("/v1/products", products);

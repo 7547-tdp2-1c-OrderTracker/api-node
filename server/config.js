@@ -37,15 +37,23 @@ app.get("", promised(function(req) {
 }));
 
 app.delete("", promised(function(req) {
-	return Config.destroy({where: {}})
+	return Config.destroy({where: {}}, {authInfo: req.authInfo})
 		.then(returnConfig);
 }));
 
 app.put("", promised(function(req) {
 	var values = req.body;
 	values.id = 1;
-	return Config.findOrCreate({where: values})
-		.then(returnConfig)
+
+	return Config.findOne({where: {id: 1}})
+		.then(function(config) {
+			if (config) {
+				return config.update(req.body, {authInfo: req.authInfo});
+			} else {
+				return Config.create(values, {authInfo: req.authInfo});
+			}
+		})
+		.then(returnConfig);
 }));
 
 module.exports = app;
