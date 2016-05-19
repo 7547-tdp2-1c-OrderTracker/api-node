@@ -12,7 +12,8 @@ var push = q.denodeify(require("../domain/push").pushNewClientNotification);
 var afterCreate = function(instance, options) {
 	var seller_id = instance.get("seller_id");
 	var client_id = instance.get("client_id");
-    return q.all([
+
+	return q.all([
     	Device.findAll({where: {seller_id: seller_id}, group: ['registration_id'], attributes: ['registration_id']}),
     	Client.findOne({where: {id: client_id}})
     ])
@@ -35,7 +36,9 @@ var ScheduleEntry = sequelize.define('schedule_entries', {
   createdAt: 'date_created',
   hooks: {
   	afterCreate: afterCreate,
-  	afterUpdate: afterUpdate
+  	afterUpdate: afterUpdate,
+  	beforeUpdate: sequelize.onlyAdmin,
+  	beforeCreate: sequelize.onlyAdmin
   }
 });
 
@@ -44,5 +47,8 @@ ScheduleEntry.belongsTo(Seller, {foreignKey: 'seller_id'});
 
 Client.hasMany(ScheduleEntry, {foreignKey: 'client_id'});
 Seller.hasMany(ScheduleEntry, {foreignKey: 'seller_id'});
+
+ScheduleEntry.listRestriction = sequelize.sellerListRestriction;
+
 
 module.exports = ScheduleEntry;

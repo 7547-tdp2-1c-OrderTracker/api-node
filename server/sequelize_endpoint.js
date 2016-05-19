@@ -12,7 +12,7 @@ var promised = function(f) {
 			})
 			.catch(function(err) {
 				console.error(err);
-				
+
 				if (typeof err !== "object") {
 					err = {error: {key: 'UNKNOWN', value: err.toString()}};
 				} else if (!err.error) {
@@ -66,7 +66,7 @@ module.exports = function(model, options) {
 						newObj[field] = extra_fields[field](req);
 					};
 
-					return model.create(newObj)
+					return model.create(newObj, {authInfo: req.authInfo});
 				})
 				.catch(function(err) {
 					return postErrorHandler(err, req);
@@ -143,8 +143,8 @@ module.exports = function(model, options) {
 			where.$and.push(model.listRestriction(req.authInfo));
 		}
 
-		return options.customCountQuery(req) || model.findOne({
-				attributes: [[sequelize.fn('COUNT', sequelize.col("*")), "count"]],
+		return options.customCountQuery(req) || model.count({
+				include: include(req),
 				where: where
 			});
 	}
@@ -164,7 +164,7 @@ module.exports = function(model, options) {
 					paging: {
 						limit: limit,
 						offset: offset,
-						total: parseInt(count.get("count"))
+						total: count
 					},
 					results: instances.map(getDataValues).map(options.map)
 				},

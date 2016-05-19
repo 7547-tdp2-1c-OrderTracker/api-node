@@ -6,6 +6,7 @@ var Product = require("./product");
 var Seller = require("./seller");
 
 var beforeCreate = function(instance, options) {
+  sequelize.onlySeller(instance, options);
   // no permitir crear el pedido nuevo, si ya existen orders del mismo cliente y vendedor
   return Order.findOne({
     attributes: [[sequelize.fn('COUNT', sequelize.col("*")), "count"]],
@@ -102,6 +103,8 @@ var transition = {
 };
 
 var beforeUpdate = function(instance, options) {
+  sequelize.onlySeller(instance, options);
+
   sequelize.checkAllowed(["status", "delivery_date"], options);
 
   return Order.findOne({where: {id: instance.id}})
@@ -167,5 +170,7 @@ var Order = sequelize.define('orders', {
 
 Order.belongsTo(Client, {foreignKey: 'client_id'});
 Order.belongsTo(Seller, {foreignKey: 'seller_id'});
+
+Order.listRestriction = sequelize.sellerListRestriction;
 
 module.exports = Order;

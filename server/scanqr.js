@@ -108,11 +108,11 @@ app.post("/validate", promised(function(req) {
 				schedule_entry_id: schedule_entry.id,
 				date: now.toDate(),
 				comment: req.body.comment||''
-			}).then(function() {
+			}, {authInfo: req.authInfo}).then(function() {
 				if (orders.length) {
 					return orders[0];
 				} else {
-					return Order.create({status: 'draft', seller_id: seller_id, client_id: client_id})
+					return Order.create({status: 'draft', seller_id: seller_id, client_id: client_id}, {authInfo: req.authInfo})
 						.then(function(instance) {
 							return instance.dataValues;
 						});

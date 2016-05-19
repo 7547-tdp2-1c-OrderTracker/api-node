@@ -118,17 +118,28 @@ var beforeUpdate = function(instance, options) {
 	sequelize.checkAllowed(["quantity"], options);
 
 	var order_id = instance.get('order_id');
-	return validateConfirmed(order_id, "solo se puede modificar un pedido que este en borrador")
-		.then(function() {
-			return stockControl(instance.get('product_id'), instance.get('quantity'), order_id, instance.get('id'));
+
+	return Order.findOne({where: {id: order_id}})
+		.then(function(order) {
+			sequelize.onlySeller(order, options);
+
+			return validateConfirmed(order_id, "solo se puede modificar un pedido que este en borrador")
+				.then(function() {
+					return stockControl(instance.get('product_id'), instance.get('quantity'), order_id, instance.get('id'));
+				});
 		});
 };
 
 var beforeCreate = function(instance, options) {
 	var order_id = instance.get('order_id');
-	return validateConfirmed(order_id, "solo se puede modificar un pedido que este en borrador")
-		.then(function() {
-			return stockControl(instance.get('product_id'), instance.get('quantity'), order_id)
+	return Order.findOne({where: {id: order_id}})
+		.then(function(order) {
+			sequelize.onlySeller(order, options);
+
+			return validateConfirmed(order_id, "solo se puede modificar un pedido que este en borrador")
+				.then(function() {
+					return stockControl(instance.get('product_id'), instance.get('quantity'), order_id)
+				});
 		});
 };
 

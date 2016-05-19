@@ -13,12 +13,16 @@ var afterCreate = function(instance, options) {
 };
 
 var beforeCreate = function(instance, options) {
+	sequelize.onlyAdmin(instance, options);
+
 	if (instance.product_id && instance.brand_id) {
 		throw {error: {key: 'BAD_PROMOTION', value: "una promocion no puede se de un producto y una marca a la vez"}, status: 400};
 	}
 };
 
 var beforeUpdate = function(instance, options) {
+	sequelize.onlyAdmin(instance, options);
+
 	if (options.fields.indexOf("product_id") !== -1 && options.fields.indexOf("brand_id") !== -1) {
 		throw {error: {key: 'BAD_PROMOTION', value: "una promocion no puede se de un producto y una marca a la vez"}, status: 400};
 	}

@@ -29,6 +29,12 @@ var promised = function(f) {
 };
 
 schedules.get("/day", promised(function(req, res) {
+	if (!req.authInfo.admin) {
+		if (req.authInfo.seller_id != req.query.seller_id) {
+			throw {error: {key: 'FORBIDDEN', value: 'no se puede obtener reportes para ese vendedor'}, status: 403};
+		}
+	}
+
 	var now = req.query.date ? moment(req.query.date) : moment();
 	var init_of_week = now.clone().subtract(moment(now).day(),'days');
 
@@ -78,6 +84,12 @@ schedules.get("/day", promised(function(req, res) {
 
 
 schedules.get("/week", promised(function(req, res) {
+	if (!req.authInfo.admin) {
+		if (req.authInfo.seller_id != req.query.seller_id) {
+			throw {error: {key: 'FORBIDDEN', value: 'no se puede obtener reportes para ese vendedor'}, status: 403};
+		}
+	}
+
 	var now = req.query.date ? moment(req.query.date) : moment();
 
 	var where = {seller_id: req.query.seller_id};

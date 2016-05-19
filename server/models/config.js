@@ -6,6 +6,10 @@ var Config = sequelize.define('configs', {
   date_created: {field: 'created_at', type: Sequelize.DATE},
   last_modified: {field: 'updated_at', type: Sequelize.DATE}
 }, {
+  hooks: {
+    beforeUpdate: sequelize.onlyAdmin,
+    beforeCreate: sequelize.onlyAdmin
+  },
   freezeTableName: true,
   updatedAt: 'last_modified',
   createdAt: 'date_created',

@@ -40,6 +40,8 @@ var Product = sequelize.define('products', {
   updatedAt: 'last_modified',
   createdAt: 'date_created',
   hooks: {
+    beforeUpdate: sequelize.onlyAdmin,
+    beforeCreate: sequelize.onlyAdmin,
     afterUpdate: afterUpdate
   }
 });

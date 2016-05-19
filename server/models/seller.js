@@ -1,7 +1,7 @@
 var Sequelize = require("sequelize");
 var sequelize = require("../domain/sequelize");
 
-module.exports = sequelize.define('sellers', {
+var Seller = sequelize.define('sellers', {
 	name: {type: Sequelize.STRING},
 	lastname: {type: Sequelize.STRING},
 	avatar: {type: Sequelize.STRING},
@@ -10,8 +10,15 @@ module.exports = sequelize.define('sellers', {
 	date_created: {field: 'created_at', type: Sequelize.DATE},
 	last_modified: {field: 'updated_at', type: Sequelize.DATE}
 }, {
+	hooks: {
+	    beforeUpdate: sequelize.onlyAdmin,
+	    beforeCreate: sequelize.onlyAdmin
+	},
 	freezeTableName: true,
 	updatedAt: 'last_modified',
 	createdAt: 'date_created',
 });
 
+Seller.listRestriction = sequelize.sellerOwnRestriction;
+
+module.exports = Seller;

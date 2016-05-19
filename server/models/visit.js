@@ -3,6 +3,21 @@ var sequelize = require("../domain/sequelize");
 
 var ScheduleEntry = require("./schedule_entry");
 
+var beforeCreate = function(instance, options) {
+	if (options.authInfo.admin) return;
+
+	return ScheduleEntry.findOne({where: {id: instance.get("schedule_entry_id")}})
+		.then(function(se) {
+			if (!se) {
+				throw {error: {key: 'FORBIDDEN', value: 'no se puede crear una visita para ese vendedor'}, status: 403};
+			} else {
+				sequelize.onlySeller(se, options, 'no se puede crear una visita para ese vendedor');
+			}
+		});
+};
+
+var beforeUpdate = beforeCreate;
+
 var Visit = sequelize.define('visits', {
   date: Sequelize.DATE,
   comment: Sequelize.STRING,
@@ -10,6 +25,10 @@ var Visit = sequelize.define('visits', {
   last_modified: {field: 'updated_at', type: Sequelize.DATE}
 }, {
   freezeTableName: true,
+  hooks: {
+  	beforeCreate: beforeCreate,
+  	beforeUpdate: beforeUpdate
+  },
   updatedAt: 'last_modified',
   createdAt: 'date_created'
 });
