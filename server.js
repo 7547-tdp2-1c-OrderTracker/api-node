@@ -11,6 +11,7 @@ var products = require("./server/products");
 var brands = require("./server/brands");
 var orders = require("./server/orders")
 var sellers = require("./server/sellers")
+var report = require("./server/report")
 var visits = require("./server/visits")
 var schedule_entries = require("./server/schedule_entries");
 var schedules = require("./server/schedules");
@@ -48,6 +49,7 @@ app.use("/v1/devices", devices);
 app.use("/v1/config", config);
 app.use("/v1/scanqr", scanqr);
 app.use("/v1/admins", admins);
+app.use("/v1/report", report);
 
 app.use("/v1/auth", auth(authConfig.jwt.secret));
 
