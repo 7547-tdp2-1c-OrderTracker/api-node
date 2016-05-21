@@ -43,10 +43,6 @@ module.exports = sequelize_endpoint(Client, {
 		return client;
 	},
 	customListQuery: function(req, limit, offset) {
-
-		console.log("XXXX");
-		console.log(req.authInfo);
-
 		if(typeof req.query.seller_id !== "undefined") {
 			if (req.query.seller_id === "null") {
 				if (req.authInfo.admin) {
