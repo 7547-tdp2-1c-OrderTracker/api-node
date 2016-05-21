@@ -77,11 +77,7 @@ module.exports = sequelize_endpoint(Client, {
 
 	customCountQuery: function(req) {
 		var returnCount = function(count) {
-			return {
-				get: function() {
-					return count[0][0].count;
-				}
-			};
+			return parseInt(count[0][0].count);
 		};
 
 		if(typeof req.query.seller_id !== "undefined") {
