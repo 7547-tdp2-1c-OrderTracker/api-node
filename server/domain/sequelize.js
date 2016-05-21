@@ -31,6 +31,12 @@ seq.onlySeller = function(instance, options) {
 	}
 };
 
+seq.onlyAdminListRestriction = function(authInfo) {
+  if (!authInfo.admin) {
+  	throw {error: {key: 'FORBIDDEN', value: 'solo el administrador puede leer esto'}, status: 403};
+  }
+};
+
 seq.sellerListRestriction = function(authInfo) {
   if (authInfo.admin) return {};
   return {seller_id: authInfo.seller_id};

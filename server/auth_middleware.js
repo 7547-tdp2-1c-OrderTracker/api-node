@@ -10,8 +10,9 @@ module.exports = function(secret) {
 		Config.get()
 			.then(function(config) {
 				if (config.auth_admin) {
-					if (req.headers.authorization) {
-						jwt.verify(req.headers.authorization, secret, function(err, decoded) {
+					var authToken = req.headers.authorization || req.query.authorization;
+					if (authToken) {
+						jwt.verify(authToken, secret, function(err, decoded) {
 							if (err) {
 								res.status(403).send({error: {key: 'FORBIDDEN', value: err.toString()}});
 							} else {

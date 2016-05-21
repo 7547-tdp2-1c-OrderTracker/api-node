@@ -1,7 +1,7 @@
 var Sequelize = require("sequelize");
 var sequelize = require("../domain/sequelize");
 
-var Seller = sequelize.define('sellers', {
+var Admin = sequelize.define('admins', {
 	name: {type: Sequelize.STRING},
 	lastname: {type: Sequelize.STRING},
 	avatar: {type: Sequelize.STRING},
@@ -20,6 +20,6 @@ var Seller = sequelize.define('sellers', {
 	createdAt: 'date_created',
 });
 
-Seller.listRestriction = sequelize.sellerOwnRestriction;
+Admin.listRestriction = sequelize.onlyAdminListRestriction;
 
-module.exports = Seller;
+module.exports = Admin;

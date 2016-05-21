@@ -26,7 +26,12 @@ var promised = function(f) {
 	};
 };
 
-var sellers = sequelize_endpoint(Seller);
+var hidePassword = function(entity) {
+	delete entity.password;
+	return entity;
+};
+
+var sellers = sequelize_endpoint(Seller, {map: hidePassword});
 
 var app = express();
 
