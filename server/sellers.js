@@ -88,10 +88,10 @@ app.get("/:seller_id/reports", promised(function(req) {
 		sequelize.query("SELECT COUNT(*) as count FROM (SELECT client_id FROM visits as v JOIN schedule_entries as s ON v.schedule_entry_id = s.id WHERE s.seller_id = ? AND day_of_week != ? AND " + date_condition + " GROUP BY client_id) as clients", {
 			replacements: [seller_id, day_of_week].concat(extra_params)
 		}),
-		sequelize.query("SELECT SUM(total_price) as total, o.currency as currency FROM orders as o WHERE o.status = 'confirmed' AND o.seller_id = ? AND " + updated_at_condition + " GROUP BY currency", {
+		sequelize.query("SELECT SUM(total_price) as total, o.currency as currency FROM orders as o WHERE (o.status='confirmed' or o.status='prepared' or o.status='intransit' or o.status='delivered') AND o.seller_id = ? AND " + updated_at_condition + " GROUP BY currency", {
 			replacements: [seller_id].concat(extra_params)
 		}),
-		sequelize.query("SELECT COUNT(*) as count FROM orders as o WHERE o.status = 'confirmed' AND o.seller_id = ? AND " + updated_at_condition, {
+		sequelize.query("SELECT COUNT(*) as count FROM orders as o WHERE (o.status='confirmed' or o.status='prepared' or o.status='intransit' or o.status='delivered') AND o.seller_id = ? AND " + updated_at_condition, {
 			replacements: [seller_id].concat(extra_params)
 		})
 
