@@ -26,6 +26,63 @@ var promised = function(f) {
 	};
 };
 
+
+var monthSalesQuery = ["select count(*) as orders_amount, coalesce(sum(coalesce(total_price, 0)),0) as amount",
+"from orders as o join sellers as s on o.seller_id = s.id",
+"where o.currency = ? and s.id = ? and o.updated_at > ? and o.updated_at < ?"].join(" ");
+
+
+app.get("/monthSales", promised(function(req) {
+
+	var now = moment();
+	var date = req.query.date || now.format("MM-YYYY");
+	var years = req.query.years ? JSON.parse(req.query.years) : [now.year(), now.year()-1];
+	var seller_id = req.query.seller_id;
+	var currency = req.query.currency || "ARS";
+
+	var queryAmount = function(range) {
+		return sequelize.query(monthSalesQuery, {replacements: [currency, seller_id, range.begin, range.end]})
+			.then(function(d) {
+				return {data: d, range: range}
+			});
+	};
+
+	var processReport = function(report) {
+		return {
+			year: report.range.year,
+			amount: parseInt(report.data[0][0].amount),
+			orders_amount: parseInt(report.data[0][0].orders_amount)
+		};
+	};
+
+
+	var ranges = years.map(function(year) {
+		var beginDate = moment(date, "MM-YYYY");
+		beginDate.year(year);
+		var endDate = beginDate.clone().add(1, 'month');
+
+		return {
+			begin: beginDate.toISOString(),
+			end: endDate.toISOString(),
+			year: year
+		};
+	})
+
+	return q.all(ranges.map(queryAmount))
+		.then(function(report) {
+			return {
+				body: {
+					currency: currency,
+					month: date,
+					report: report.map(processReport)
+				},
+				status: 200
+			};
+		});
+
+}));
+
+
 var brandsSalesQuery = [
 "select b.id, b.name, b.picture, b.code, sum(o.unit_price * o.quantity) as total_amount, count(*) as items_amount",
 "from order_entries as o join products as p on o.product_id = p.id join brands as b on p.brand_id = b.id",
