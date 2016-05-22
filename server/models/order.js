@@ -49,7 +49,7 @@ var toConfirmed = function(order, instance, options) {
             // decrementar el stock de todos los productos
             return sequelize.query(decrementStock, {replacements: [instance.id]})
               .then(function() {
-                return order.update(instance);
+                return order.update(instance, {authInfo: options.authInfo});
               });
           }
         }
