@@ -35,7 +35,7 @@ app.get("/sellers/top10", promised(function(req) {
 		return seller;
 	};
 
-	var year = req.body.year || moment().year().toString();
+	var year = req.query.year || moment().year().toString();
 
 	var beginOfYear = moment(year + "0101");
 	var endOfYear = beginOfYear.clone().add(1,'year');
