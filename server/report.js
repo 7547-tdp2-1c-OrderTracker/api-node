@@ -50,11 +50,13 @@ app.get("/brandsSales", promised(function(req) {
 	var date = req.query.date || moment().format("MM-YYYY");
 	var beginDate = moment(date, "MM-YYYY");
 	var endDate = beginDate.clone().add(1, 'month');
+	var currency = req.query.currency || "ARS";
 
 	return sequelize.query(brandsSalesQuery, {replacements: [req.query.currency || "ARS", beginDate.toISOString(), endDate.toISOString()]})
 		.then(function(results) {
 			return {
 				body: {
+					currency: currency,
 					date: date,
 					report: results[0].map(processBrand)
 				},
@@ -73,16 +75,18 @@ app.get("/sellers/top10", promised(function(req) {
 	};
 
 	var year = req.query.year || moment().year().toString();
+	var currency = req.query.currency || "ARS";
 
 	var beginOfYear = moment(year + "0101");
 	var endOfYear = beginOfYear.clone().add(1,'year');
 
 	return sequelize.query("select id, name, lastname, total from (" + totalsQuery + ") as totals order by total DESC limit 10", {
-		replacements: [req.query.currency || "ARS", beginOfYear.toISOString(), endOfYear.toISOString()]
+		replacements: [currency, beginOfYear.toISOString(), endOfYear.toISOString()]
 	})
 		.then(function(results) {
 			return {
 				body: {
+					currency: currency,
 					year: parseInt(year),
 					top10: results[0].map(processSeller),
 				},
