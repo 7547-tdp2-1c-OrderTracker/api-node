@@ -36,7 +36,7 @@ app.get("/monthSales", promised(function(req) {
 
 	var now = moment();
 	var date = req.query.date || now.format("MM-YYYY");
-	var years = req.query.years ? JSON.parse(req.query.years) : [now.year(), now.year()-1];
+	var years = req.query.years ? JSON.parse(req.query.years) : [moment(date, "MM-YYYY").year(), moment(date, "MM-YYYY").year()-1];
 	var seller_id = parseInt(req.query.seller_id);
 	var currency = req.query.currency || "ARS";
 
