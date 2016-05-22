@@ -84,9 +84,9 @@ app.get("/monthSales", promised(function(req) {
 
 
 var brandsSalesQuery = [
-"select b.id, b.name, b.picture, b.code, sum(o.unit_price * o.quantity) as total_amount, count(*) as items_amount",
-"from order_entries as o join products as p on o.product_id = p.id join brands as b on p.brand_id = b.id",
-"where o.currency = ? and o.updated_at > ? and o.updated_at < ?",
+"select b.id, b.name, b.picture, b.code, sum(oe.unit_price * oe.quantity) as total_amount, count(*) as items_amount",
+"from order_entries as oe join products as p on oe.product_id = p.id join brands as b on p.brand_id = b.id join orders as o on oe.order_id = o.id",
+"where oe.currency = ? and oe.updated_at > ? and oe.updated_at < ?",
 "group by b.id"
 ].join(" ");
 
