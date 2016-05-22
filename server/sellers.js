@@ -61,22 +61,22 @@ app.get("/:seller_id/reports", promised(function(req) {
 	}
 
 	day_of_week = moment(now).day();
-	var date_condition, updated_at_condition, extra_params;
+	var date_condition, date_confirmed_condition, extra_params;
 
 	// siempre va a haber o start, o end, o ambos (si no llega ni start_date ni end_date, toma la fecha de hoy)
 	if (end) {
 		if (start) {
 			date_condition = "v.date >= ? AND v.date <= ?";
-			updated_at_condition = "o.updated_at >= ? AND o.updated_at <= ?";
+			date_confirmed_condition = "o.date_confirmed >= ? AND o.date_confirmed <= ?";
 			extra_params = [start.toISOString(), end.toISOString()];
 		} else {
 			date_condition = "v.date <= ?";
-			updated_at_condition = "o.updated_at <= ?";
+			date_confirmed_condition = "o.date_confirmed <= ?";
 			extra_params = [end.toISOString()];
 		}
 	} else {
 		date_condition = "v.date >= ?";
-		updated_at_condition = "o.updated_at >= ?";
+		date_confirmed_condition = "o.date_confirmed >= ?";
 		extra_params = [start.toISOString()];
 	}
 
@@ -88,10 +88,10 @@ app.get("/:seller_id/reports", promised(function(req) {
 		sequelize.query("SELECT COUNT(*) as count FROM (SELECT client_id FROM visits as v JOIN schedule_entries as s ON v.schedule_entry_id = s.id WHERE s.seller_id = ? AND day_of_week != ? AND " + date_condition + " GROUP BY client_id) as clients", {
 			replacements: [seller_id, day_of_week].concat(extra_params)
 		}),
-		sequelize.query("SELECT SUM(total_price) as total, o.currency as currency FROM orders as o WHERE (o.status='confirmed' or o.status='prepared' or o.status='intransit' or o.status='delivered') AND o.seller_id = ? AND " + updated_at_condition + " GROUP BY currency", {
+		sequelize.query("SELECT SUM(total_price) as total, o.currency as currency FROM orders as o WHERE (o.status='confirmed' or o.status='prepared' or o.status='intransit' or o.status='delivered') AND o.seller_id = ? AND " + date_confirmed_condition + " GROUP BY currency", {
 			replacements: [seller_id].concat(extra_params)
 		}),
-		sequelize.query("SELECT COUNT(*) as count FROM orders as o WHERE (o.status='confirmed' or o.status='prepared' or o.status='intransit' or o.status='delivered') AND o.seller_id = ? AND " + updated_at_condition, {
+		sequelize.query("SELECT COUNT(*) as count FROM orders as o WHERE (o.status='confirmed' or o.status='prepared' or o.status='intransit' or o.status='delivered') AND o.seller_id = ? AND " + date_confirmed_condition, {
 			replacements: [seller_id].concat(extra_params)
 		})
 

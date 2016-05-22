@@ -29,7 +29,7 @@ var promised = function(f) {
 
 var monthSalesQuery = ["select count(*) as orders_amount, coalesce(sum(coalesce(total_price, 0)),0) as amount",
 "from orders as o join sellers as s on o.seller_id = s.id",
-"where o.currency = ? and o.updated_at > ? and o.updated_at < ? and (o.status='confirmed' or o.status='prepared' or o.status='intransit' or o.status='delivered')"].join(" ");
+"where o.currency = ? and o.date_confirmed > ? and o.date_confirmed < ? and (o.status='confirmed' or o.status='prepared' or o.status='intransit' or o.status='delivered')"].join(" ");
 
 
 app.get("/monthSales", promised(function(req) {
@@ -92,14 +92,14 @@ app.get("/monthSales", promised(function(req) {
 var brandsSalesQuery = [
 "select b.id, b.name, b.picture, b.code, sum(oe.unit_price * oe.quantity) as total_amount, count(*) as items_amount",
 "from order_entries as oe join products as p on oe.product_id = p.id join brands as b on p.brand_id = b.id join orders as o on oe.order_id = o.id",
-"where oe.currency = ? and o.updated_at > ? and o.updated_at < ? and (o.status='confirmed' or o.status='prepared' or o.status='intransit' or o.status='delivered')",
+"where oe.currency = ? and o.date_confirmed > ? and o.date_confirmed < ? and (o.status='confirmed' or o.status='prepared' or o.status='intransit' or o.status='delivered')",
 "group by b.id"
 ].join(" ");
 
 var brandsSalesQuerySeller = [
 "select b.id, b.name, b.picture, b.code, sum(oe.unit_price * oe.quantity) as total_amount, count(*) as items_amount",
 "from order_entries as oe join products as p on oe.product_id = p.id join brands as b on p.brand_id = b.id join orders as o on oe.order_id = o.id",
-"where oe.currency = ? and o.updated_at > ? and o.updated_at < ? and (o.status='confirmed' or o.status='prepared' or o.status='intransit' or o.status='delivered') and o.seller_id = ?",
+"where oe.currency = ? and o.date_confirmed > ? and o.date_confirmed < ? and (o.status='confirmed' or o.status='prepared' or o.status='intransit' or o.status='delivered') and o.seller_id = ?",
 "group by b.id"
 ].join(" ");
 
@@ -142,7 +142,7 @@ app.get("/brandsSales", promised(function(req) {
 		});
 }));
 
-var totalsQuery = "select s.id as id, s.name as name, s.lastname as lastname, SUM(o.total_price) as total from sellers as s join orders as o on o.seller_id = s.id where currency = ? and o.updated_at > ? and o.updated_at < ? and (o.status='confirmed' or o.status='prepared' or o.status='intransit' or o.status='delivered') group by s.id"
+var totalsQuery = "select s.id as id, s.name as name, s.lastname as lastname, SUM(o.total_price) as total from sellers as s join orders as o on o.seller_id = s.id where currency = ? and o.date_confirmed > ? and o.date_confirmed < ? and (o.status='confirmed' or o.status='prepared' or o.status='intransit' or o.status='delivered') group by s.id"
 
 app.get("/sellers/top10", promised(function(req) {
 
