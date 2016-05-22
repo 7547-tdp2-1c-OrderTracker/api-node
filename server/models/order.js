@@ -55,6 +55,7 @@ var toConfirmed = function(order, instance, options) {
         }
       })
       .then(function() {
+        instance.date_confirmed = new Date();
         return instance;
       })
       .catch(function(err) {
@@ -157,7 +158,8 @@ var Order = sequelize.define('orders', {
   },
   currency: Sequelize.STRING(4),
   date_created: {field: 'created_at', type: Sequelize.DATE},
-  last_modified: {field: 'updated_at', type: Sequelize.DATE}
+  last_modified: {field: 'updated_at', type: Sequelize.DATE},
+  date_confirmed: Sequelize.DATE
 }, {
   freezeTableName: true,
   hooks: {
