@@ -150,8 +150,17 @@ module.exports = function(model, options) {
 	}
 
 	app.get(base, promised(function(req, res) {
-		var offset = parseInt(req.query.offset || '0');
-		var limit = parseInt(req.query.limit || options.default_limit || '20');
+
+		var offset = 0;
+		var limit = 20;
+
+		if (req.query.rows || req.query.page) {
+			limit = parseInt(req.query.rows || '20');
+			offset = ((parseInt(req.query.page||'1'))-1)*limit;
+		} else {
+			offset = parseInt(req.query.offset || '0');
+			limit = parseInt(req.query.limit || options.default_limit || '20');
+		}
 
 		var where;
 		if (options.where) where = options.where(req);
@@ -159,15 +168,24 @@ module.exports = function(model, options) {
 			listQuery(req, limit, offset),
 			countQuery(req)
 		]).spread(function(instances, count) {
-			return {
-				body: {
+			var body;
+			if (req.query.rows || req.query.page) {
+				body = {
+					total: count,
+					rows: instances.map(getDataValues).map(options.map)
+				};
+			} else {
+				body = {
 					paging: {
 						limit: limit,
 						offset: offset,
 						total: count
 					},
 					results: instances.map(getDataValues).map(options.map)
-				},
+				};
+			}
+			return {
+				body: body,
 				status: 200
 			};
 		});
