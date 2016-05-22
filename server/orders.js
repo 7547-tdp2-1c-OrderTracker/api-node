@@ -40,16 +40,23 @@ var mapOrderItem = function(entity) {
 
 var orders = sequelize_endpoint(Order, {
 	where: where,
+	customCountQuery: function(req) {
+		return Order.count({where: where(req)});
+	},
+
 	include: function(req) {
 		return [{
 			model: Client,
-			where: req.query.clients_where ? JSON.parse(req.query.clients_where) : undefined
+			where: req.query.clients_where ? JSON.parse(req.query.clients_where) : undefined,
+			required: false
 		},{
 			model: OrderItem,
-			where: req.query.order_items_where ? JSON.parse(req.query.order_items_where) : undefined
+			where: req.query.order_items_where ? JSON.parse(req.query.order_items_where) : undefined,
+			required: false
 		},{
 			model: Seller,
-			where: req.query.sellers_where ? JSON.parse(req.query.sellers_where) : undefined
+			where: req.query.sellers_where ? JSON.parse(req.query.sellers_where) : undefined,
+			required: false
 		}]
 	},
 	order: function() {
