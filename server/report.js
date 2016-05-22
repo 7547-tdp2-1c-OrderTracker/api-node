@@ -96,6 +96,13 @@ var brandsSalesQuery = [
 "group by b.id"
 ].join(" ");
 
+var brandsSalesQuerySeller = [
+"select b.id, b.name, b.picture, b.code, sum(oe.unit_price * oe.quantity) as total_amount, count(*) as items_amount",
+"from order_entries as oe join products as p on oe.product_id = p.id join brands as b on p.brand_id = b.id join orders as o on oe.order_id = o.id",
+"where oe.currency = ? and o.updated_at > ? and o.updated_at < ? and (o.status='confirmed' or o.status='prepared' or o.status='intransit' or o.status='delivered') and o.seller_id = ?",
+"group by b.id"
+].join(" ");
+
 app.get("/brandsSales", promised(function(req) {
 	var processBrand = function(brand) {
 		return {
@@ -114,9 +121,16 @@ app.get("/brandsSales", promised(function(req) {
 	var beginDate = moment(date, "MM-YYYY");
 	var endDate = beginDate.clone().add(1, 'month');
 	var currency = req.query.currency || "ARS";
+	var seller_id = parseInt(req.query.seller_id);
 
-	return sequelize.query(brandsSalesQuery, {replacements: [req.query.currency || "ARS", beginDate.toISOString(), endDate.toISOString()]})
-		.then(function(results) {
+	return sequelize.query(
+		seller_id ? brandsSalesQuerySeller : brandsSalesQuery, 
+		{
+			replacements: 
+				seller_id ? 
+					[req.query.currency || "ARS", beginDate.toISOString(), endDate.toISOString(), seller_id] :
+					[req.query.currency || "ARS", beginDate.toISOString(), endDate.toISOString()]
+		}).then(function(results) {
 			return {
 				body: {
 					currency: currency,
