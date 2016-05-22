@@ -29,7 +29,7 @@ var promised = function(f) {
 
 var monthSalesQuery = ["select count(*) as orders_amount, coalesce(sum(coalesce(total_price, 0)),0) as amount",
 "from orders as o join sellers as s on o.seller_id = s.id",
-"where o.currency = ? and s.id = ? and o.updated_at > ? and o.updated_at < ?"].join(" ");
+"where o.currency = ? and o.updated_at > ? and o.updated_at < ?"].join(" ");
 
 
 app.get("/monthSales", promised(function(req) {
@@ -37,11 +37,13 @@ app.get("/monthSales", promised(function(req) {
 	var now = moment();
 	var date = req.query.date || now.format("MM-YYYY");
 	var years = req.query.years ? JSON.parse(req.query.years) : [now.year(), now.year()-1];
-	var seller_id = req.query.seller_id;
+	var seller_id = parseInt(req.query.seller_id);
 	var currency = req.query.currency || "ARS";
 
 	var queryAmount = function(range) {
-		return sequelize.query(monthSalesQuery, {replacements: [currency, seller_id, range.begin, range.end]})
+		return sequelize.query(monthSalesQuery +  (seller_id ? "and s.id = ?": ""), {
+			replacements: seller_id ? [currency, range.begin, range.end, seller_id] : [currency, range.begin, range.end]
+		})
 			.then(function(d) {
 				return {data: d, range: range}
 			});
@@ -70,12 +72,16 @@ app.get("/monthSales", promised(function(req) {
 
 	return q.all(ranges.map(queryAmount))
 		.then(function(report) {
+			var body = {
+				currency: currency,
+				month: date,
+				report: report.map(processReport)
+			};
+
+			if (seller_id) body.seller_id = seller_id;
+
 			return {
-				body: {
-					currency: currency,
-					month: date,
-					report: report.map(processReport)
-				},
+				body: body,
 				status: 200
 			};
 		});
@@ -86,7 +92,7 @@ app.get("/monthSales", promised(function(req) {
 var brandsSalesQuery = [
 "select b.id, b.name, b.picture, b.code, sum(oe.unit_price * oe.quantity) as total_amount, count(*) as items_amount",
 "from order_entries as oe join products as p on oe.product_id = p.id join brands as b on p.brand_id = b.id join orders as o on oe.order_id = o.id",
-"where oe.currency = ? and oe.updated_at > ? and oe.updated_at < ?",
+"where oe.currency = ? and o.updated_at > ? and o.updated_at < ?",
 "group by b.id"
 ].join(" ");
 
