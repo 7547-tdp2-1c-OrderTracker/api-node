@@ -9,7 +9,22 @@ var _ = require("underscore");
 var push = q.denodeify(require("../domain/push").pushNewPromotionNotification);
 
 var afterCreate = function(instance, options) {
-	return push(instance.get("id"), instance.get("name")).catch(console.error.bind(console));
+	var brand_id = instance.get('brand_id');
+	var product_id = instance.get('product_id');
+
+	if(brand_id){
+		return Brand.findOne({where: {id: brand_id}})
+			.then(function(brand) {
+				return push(instance.get("id"), instance.get("name"),instance.get('percent'),brand.name);
+			})
+			.catch(console.error.bind(console));
+	} else {
+		return Product.findOne({where: {id: product_id}})
+			.then(function(product) {
+				return push(instance.get("id"), instance.get("name"),instance.get('percent'),product.name);
+			})
+			.catch(console.error.bind(console));
+	}
 };
 
 var beforeCreate = function(instance, options) {
