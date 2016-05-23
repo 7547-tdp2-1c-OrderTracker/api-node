@@ -26,6 +26,10 @@ module.exports = sequelize_endpoint(Product, {
 			["name", "ASC"]
 		];
 	},
+	customCountQuery: function(req) {
+		return Product.count({where: where(req)});
+	},
+
 	include: function(req) {
 		var now = req.query.date ? moment(req.query.date) : moment();
 
