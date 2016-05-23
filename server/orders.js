@@ -97,7 +97,7 @@ var order_entries = sequelize_endpoint(OrderItem, {
 									if (order_item) {
 										return order_item.update({
 											quantity: parseInt(order_item.get('quantity')) + parseInt(req.body.quantity)
-										});
+										}, {authInfo: req.authInfo});
 									}
 								});
 						} else {

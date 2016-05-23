@@ -16,6 +16,11 @@ var updateOrderTotalPrice = function(instance, options) {
 	var updateTotals = "UPDATE orders SET currency=?, total_price=(SELECT coalesce(sum(unit_price * quantity),0) FROM order_entries WHERE order_id=?) WHERE id=?"
 	return Order.find({where: {id: order_id}, include: [{model: Client}]})
 		.then(function(order) {
+
+			if (!order.get("client")) {
+				throw {error: {key: 'BAD_REQUEST', value: "no se pùede modificar un pedido sin cliente asociado"}, status: 400};
+			}
+
 			var seller_type = order.get("client").get('sellerType');
 			var price_column;
 
