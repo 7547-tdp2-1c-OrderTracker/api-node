@@ -36,11 +36,14 @@ function pushClientUpdatedNotification(client_id,client_name,client_lastname,pic
 	});
 }
 
-function pushNewPromotionNotification(promotion_id,promotion_name,callback){
+function pushNewPromotionNotification(promotion_id,promotion_name,percent,product_name,callback){
 	var message = new gcm.Message();
 	message.addData('type', 'NEW_PROMOTION');
 	message.addData('identifier',promotion_id);
+	message.addData('picture','http://sibsmiami.com/wp-content/uploads/2015/06/icono-precio.png');
 	message.addData('message',promotion_name);
+	message.addData('percent',percent);
+	message.addData('product',product_name);
 	
 	sender.sendNoRetry(message, { topic: '/topics/promotions' }, function (err, response) {
      if(err)

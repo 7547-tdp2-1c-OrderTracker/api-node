@@ -9,7 +9,11 @@ var _ = require("underscore");
 var push = q.denodeify(require("../domain/push").pushNewPromotionNotification);
 
 var afterCreate = function(instance, options) {
-	return push(instance.get("id"), instance.get("name")).catch(console.error.bind(console));
+	if(instance.get(brand)){
+		return push(instance.get("id"), instance.get("name"),instance.get('percent'),instance.get('brand').get('name')).catch(console.error.bind(console));
+	}else{
+		return push(instance.get("id"), instance.get("name"),instance.get('percent'),instance.get('product').get('name')).catch(console.error.bind(console));		
+	}
 };
 
 var beforeCreate = function(instance, options) {
