@@ -35,7 +35,7 @@ var updateOrderTotalPrice = function(instance, options) {
 			var now = moment();
 			var include = [{
 				model: Brand,
-				attributes: ['id'],
+				attributes: ['id', 'name'],
 				include: [{
 					model: Promotion,
 					where: {begin_date: {$lte: now.toDate()}, end_date: {$gte: now.toDate()}, min_quantity: {$lte: instance.quantity}},
