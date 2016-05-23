@@ -152,7 +152,13 @@ var OrderItem = sequelize.define('order_items', {
   name: Sequelize.STRING,
   brand_name: Sequelize.STRING,
   thumbnail: Sequelize.STRING,
-  quantity: Sequelize.INTEGER,
+  quantity: {
+  	type: Sequelize.INTEGER,
+  	validate: {
+  		isInt: true,
+  		min: 1
+  	}
+  },
   unit_price: Sequelize.INTEGER,
   order_id: Sequelize.INTEGER,
   product_id: Sequelize.INTEGER,

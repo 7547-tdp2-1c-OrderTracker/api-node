@@ -87,6 +87,10 @@ var order_entries = sequelize_endpoint(OrderItem, {
 			throw err;
 		}
 
+		if (!req.body.quantity) throw {"error": {"key": "BAD_REQUEST", "value": "Falta parametro quantity"}, "status": 400};
+		if (!req.body.product_id) throw {"error": {"key": "BAD_REQUEST", "value": "Falta parametro product_id"}, "status": 400};
+		if (isNaN(parseInt(req.body.quantity))) throw {"error": {"key": "BAD_REQUEST", "value": "Parametro quantity no es un numero"}, "status": 400};
+
 		return sequelize.query("SELECT stock FROM order_entries as oe JOIN products as p ON oe.product_id = p.id WHERE p.stock >= ? + oe.quantity AND oe.order_id = ?",
 				{replacements: [req.body.quantity, req.params.order_id], type: sequelize.QueryTypes.SELECT})
 					.then(function(products) {
