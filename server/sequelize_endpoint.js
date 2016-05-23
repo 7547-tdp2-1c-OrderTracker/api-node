@@ -14,9 +14,9 @@ var promised = function(f) {
 				console.error(err);
 
 				if (typeof err !== "object") {
-					err = {error: {key: 'UNKNOWN', value: err.toString()}};
+					err = {error: {key: 'UNKNOWN', value: err.toString(), stack: err.stack}};
 				} else if (!err.error) {
-					err = {error: {key: 'UNKNOWN', value: err.toString()}};
+					err = {error: {key: 'UNKNOWN', value: err.toString(), stack: err.stack}};
 				}
 				res.status(err.status||500).send(err);
 			});
