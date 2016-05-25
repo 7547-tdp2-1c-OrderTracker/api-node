@@ -3,9 +3,12 @@ var sequelize_endpoint = require("./sequelize_endpoint");
 var Product = require("./models/product");
 var Brand = require("./models/brand");
 var Promotion = require("./models/promotion");
+var Category = require("./models/category");
 
 var default_product_picture = "http://www.higieneplus.com.ar/wp-content/themes/higieneplus/images/producto-sin-foto.jpg";
 var moment = require("moment");
+var _ = require("underscore");
+var q = require("q");
 
 var where = function(req, res) {
 	if (req.query.brand_id) {
@@ -18,8 +21,35 @@ var where = function(req, res) {
 	}
 };
 
+var saveCategories = function(req) {
+	req.strcategories = req.body.categories;
+	delete req.body.categories;
+};
+
+var upsertCategories = function(req, product) {
+	var upsertCategory = function(category_name) {
+		return Category.findOne({where: {name: category_name}})
+			.then(function(category) {
+				if (category) {
+					return category;
+				} else {
+					return Category.create({name: category_name}, {authInfo: req.authInfo});
+				}
+			})
+			.then(function(category) {
+				product.addCategory(category);
+			})
+	};
+
+	return q.all(req.strcategories.split(",").map(upsertCategory));
+};
+
 module.exports = sequelize_endpoint(Product, {
 	where: where,
+	beforePut: saveCategories,
+	beforePost: saveCategories,
+	afterPut: upsertCategories,
+	afterPost: upsertCategories,
 	order: function() {
 		return [
 			Sequelize.literal('GREATEST(COALESCE("promotions"."percent",0),COALESCE("brand.promotions"."percent",0)) DESC'),
@@ -47,6 +77,8 @@ module.exports = sequelize_endpoint(Product, {
 			where: {begin_date: {$lte: now.toDate()}, end_date: {$gte: now.toDate()}},
 			required: false,
 			attributes: ['id', 'name', 'percent', 'begin_date', 'end_date']
+		}, {
+			model: Category
 		}];
 	},
 	map: function(product) {
@@ -56,6 +88,10 @@ module.exports = sequelize_endpoint(Product, {
 
 		if (!product.picture || !product.thumbnail) {
 			product.picture = default_product_picture;
+		}
+
+		if (product.categories) {
+			product.categories = product.categories.map(_.property("name")).join(",");
 		}
 
 		return product;

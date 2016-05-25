@@ -52,6 +52,18 @@ module.exports = function(model, options) {
 		options.beforePost = function() {};
 	}
 
+	if (!options.beforePut) {
+		options.beforePut = function() {};
+	}
+
+	if (!options.afterPost) {
+		options.afterPost = function() {};
+	}
+
+	if (!options.afterPut) {
+		options.afterPut = function() {};
+	}
+
 	// Create
 	if (!options.readonly) {
 		app.post(base, promised(function(req, res) {
@@ -73,6 +85,9 @@ module.exports = function(model, options) {
 				})
 				.then(function(instance) {
 					return model.findOne({where: {id: instance.id}})
+				})
+				.tap(function(instance) {
+					return options.afterPost(req, instance);
 				})
 				.then(function(instance) {
 					return {
@@ -194,7 +209,11 @@ module.exports = function(model, options) {
 	// Update
 	if (!options.readonly) {
 		app.put(base + "/:id", promised(function(req, res) {
-			return model.findOne({where: {id: req.params.id}})
+
+			return q.fcall(options.beforePut.bind(options, req))
+				.then(function() {
+					return model.findOne({where: {id: req.params.id}})
+				})
 				.then(function(instance) {
 					if (!instance) {
 						throw {error: {key: 'NOT_FOUND', value: 'el recurso que se intento modificar no se encuentra'}, status: 404};
@@ -205,7 +224,11 @@ module.exports = function(model, options) {
 				.then(function() {
 					return model.findOne({where: {id: req.params.id}})
 				})
+				.tap(function(instance) {
+					return options.afterPut(req, instance);
+				})
 				.then(function(instance) {
+					if (options.afterPut) {}
 					return {
 						body: options.map(instance.dataValues),
 						status: 200
