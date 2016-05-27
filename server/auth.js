@@ -43,5 +43,14 @@ module.exports = function(secret) {
 			});
 
 	});
+
+	app.get("/check", function(req, res) {
+		if (req.authInfo && req.authInfo.admin) {
+			res.status(200).send({ok: true});
+		} else {
+			res.status(403).send({error: {key: 'FORBIDDEN', value: "Chequeo fallado"}});
+		}
+	});
+
 	return app;
 };
