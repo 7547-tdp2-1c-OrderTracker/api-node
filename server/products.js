@@ -28,6 +28,8 @@ var saveCategories = function(req) {
 
 var upsertCategories = function(req, product) {
 	var upsertCategory = function(category_name) {
+		if (category_name === "") return;
+
 		return Category.findOne({where: {name: category_name}})
 			.then(function(category) {
 				if (category) {
