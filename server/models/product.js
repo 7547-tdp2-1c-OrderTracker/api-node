@@ -9,9 +9,12 @@ var push = q.denodeify(require("../domain/push").pushProductStockedNotification)
 
 var afterUpdate = function(instance, options) {
   if (options.fields.indexOf("stock") !== -1) {
-    // si se esta modificando el stock
-    return push(instance.get("id"), instance.get("name"), instance.get("thumbnail"))
-        .catch(console.error.bind(console)); /* los errores de push no afectan al update del registro */
+    if (instance._previousDataValues.stock == 0 && instance.dataValues.stock > 0) {
+      // si se esta modificando el stock desde cero Y ademas se le asinga un valor mayor que cero
+      return push(instance.get("id"), instance.get("name"), instance.get("thumbnail"))
+          .catch(console.error.bind(console)); /* los errores de push no afectan al update del registro */
+
+    }
   }
 };
 
