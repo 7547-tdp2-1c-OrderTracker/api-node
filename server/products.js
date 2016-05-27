@@ -37,14 +37,14 @@ var upsertCategories = function(req, product) {
 				} else {
 					return Category.create({name: category_name}, {authInfo: req.authInfo});
 				}
-			})
-			.then(function(category) {
-				product.addCategory(category);
-			})
+			});
 	};
 
 	if (req.strcategories) {
-		return q.all(req.strcategories.split(",").map(upsertCategory));
+		return q.all(req.strcategories.split(",").map(upsertCategory))
+			.then(function(categories) {
+				product.setCategories(categories);
+			});
 	}
 };
 
