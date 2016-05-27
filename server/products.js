@@ -41,7 +41,9 @@ var upsertCategories = function(req, product) {
 			})
 	};
 
-	return q.all(req.strcategories.split(",").map(upsertCategory));
+	if (req.strcategories) {
+		return q.all(req.strcategories.split(",").map(upsertCategory));
+	}
 };
 
 module.exports = sequelize_endpoint(Product, {
