@@ -21,16 +21,15 @@ var Product = sequelize.define('products', {
   description: Sequelize.STRING,
   thumbnail: Sequelize.STRING,
   picture: Sequelize.STRING,
-  stock: Sequelize.STRING,
   currency: Sequelize.STRING(4),
   stock: Sequelize.INTEGER,
   status: Sequelize.INTEGER,
   wholesalePrice: {
-  	type: Sequelize.STRING,
+  	type: Sequelize.INTEGER,
   	field: 'wholesale_price'
   },
   retailPrice: {
-  	type: Sequelize.STRING,
+  	type: Sequelize.INTEGER,
   	field: 'retail_price'
   },
   date_created: {field: 'created_at', type: Sequelize.DATE},
