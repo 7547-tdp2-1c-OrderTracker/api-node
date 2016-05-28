@@ -27,7 +27,9 @@ module.exports = function(secret) {
 
 					var token = jwt.sign(payload, secret, {noTimestamp: true});
 					res.status(200).send({
-						token: token
+						token: token,
+						seller: seller && seller.dataValues,
+						admin: admin && admin.dataValues
 					});
 				} else {
 					throw {error: {key: 'LOGFAILED', value: 'email o password incorrecto'}, status: 401};
