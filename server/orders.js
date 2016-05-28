@@ -59,7 +59,10 @@ var orders = sequelize_endpoint(Order, {
 			required: false
 		}]
 	},
-	order: function() {
+	order: function(req) {
+		if (req.query.order === "date_created") {
+			return 'date_created DESC';
+		}
 		return "status DESC";
 	},
 	map: function(order) {
