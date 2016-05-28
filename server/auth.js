@@ -20,7 +20,7 @@ module.exports = function(secret) {
 				if (admin || seller) {
 					var payload = {};
 					if (admin) {
-						payload.a = true;
+						payload.a = admin.get('id');
 					} else {
 						payload.s = seller.get('id');
 					}
@@ -44,6 +44,43 @@ module.exports = function(secret) {
 				res.status(err.status||500).send(err);
 			});
 
+	});
+
+	app.get("/me", function(req, res) {
+		if (req.authInfo) {
+			if (req.authInfo.admin) {
+				if (req.authInfo.admin_id) {
+					Admin.findOne({where: {id: req.authInfo.admin_id}})
+						.then(function(admin) {
+							if (admin) {
+								res.status(200).send({admin: admin});
+							} else {
+								res.status(403).send({error: {key: 'FORBIDDEN', value: "No logueado"}});
+							}
+						})
+						.catch(function(err){
+							res.status(500).send({error: {key: 'UNKNOWN', value: err.toString()}});
+						})
+
+				} else {
+					res.status(200).send({admin: {generic_admin: 1}});
+				}
+			} else if (req.authInfo.seller_id) {
+				Seller.findOne({where: {id: req.authInfo.seller_id}})
+					.then(function(seller) {
+						if (seller) {
+							res.status(200).send({seller: seller});
+						} else {
+							res.status(403).send({error: {key: 'FORBIDDEN', value: "No logueado"}});
+						}
+					})
+					.catch(function(err){
+						res.status(500).send({error: {key: 'UNKNOWN', value: err.toString()}});
+					})
+			}
+		} else {
+			res.status(403).send({error: {key: 'FORBIDDEN', value: "No logueado"}});
+		}
 	});
 
 	app.get("/check", function(req, res) {

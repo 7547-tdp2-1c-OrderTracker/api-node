@@ -16,7 +16,7 @@ module.exports = function(secret) {
 							if (err) {
 								res.status(403).send({error: {key: 'FORBIDDEN', value: err.toString()}});
 							} else {
-								req.authInfo = {admin: decoded.a, seller_id: decoded.s};
+								req.authInfo = {admin_id: decoded.a, admin: !!decoded.a, seller_id: decoded.s};
 								return next();
 							}
 						});
