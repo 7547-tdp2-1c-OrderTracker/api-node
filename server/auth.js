@@ -23,12 +23,12 @@ module.exports = function(secret) {
 
 					if (admin) {
 						// los tokens de admin expiran a las 24h
-						token = jwt.sign(payload, secret, {expiresIn: '24h'});
 						payload.a = admin.get('id');
+						token = jwt.sign(payload, secret, {expiresIn: '24h'});
 					} else {
 						// los tokens de vendedor no expiran
-						token = jwt.sign(payload, secret, {noTimestamp: true});
 						payload.s = seller.get('id');
+						token = jwt.sign(payload, secret, {noTimestamp: true});
 					}
 
 					res.status(200).send({
