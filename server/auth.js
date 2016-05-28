@@ -19,13 +19,18 @@ module.exports = function(secret) {
 			.spread(function(admin, seller) {
 				if (admin || seller) {
 					var payload = {};
+					var token;
+
 					if (admin) {
+						// los tokens de admin expiran a las 24h
+						token = jwt.sign(payload, secret, {expiresIn: '24h'});
 						payload.a = admin.get('id');
 					} else {
+						// los tokens de vendedor no expiran
+						token = jwt.sign(payload, secret, {noTimestamp: true});
 						payload.s = seller.get('id');
 					}
 
-					var token = jwt.sign(payload, secret, {noTimestamp: true});
 					res.status(200).send({
 						token: token,
 						seller: seller && seller.dataValues,
