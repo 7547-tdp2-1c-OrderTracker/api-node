@@ -1,5 +1,14 @@
 var Sequelize = require("sequelize");
 var sequelize = require("../domain/sequelize");
+var sha1 = require("sha1");
+
+var beforeCreateOrUpdate = function(instance, options) {
+	sequelize.onlyAdmin(instance, options);
+
+	if (options.fields.indexOf("password") !== -1) {
+		instance.password = sha1(instance.password);
+	}
+};
 
 var Admin = sequelize.define('admins', {
 	name: {type: Sequelize.STRING},
@@ -12,8 +21,8 @@ var Admin = sequelize.define('admins', {
 	last_modified: {field: 'updated_at', type: Sequelize.DATE}
 }, {
 	hooks: {
-	    beforeUpdate: sequelize.onlyAdmin,
-	    beforeCreate: sequelize.onlyAdmin
+	    beforeUpdate: beforeCreateOrUpdate,
+	    beforeCreate: beforeCreateOrUpdate
 	},
 	freezeTableName: true,
 	updatedAt: 'last_modified',
