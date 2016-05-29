@@ -9,6 +9,17 @@ var ScheduleEntry = require("./models/schedule_entry");
 var moment = require("moment");
 var q = require("q");
 
+var md5 = require("md5");
+var gravatarBaseUrl = "http://www.gravatar.com/avatar/";
+var getGravatar = function(email, size) {
+  var url = gravatarBaseUrl + md5(email) + "?d=identicon"
+  if (size) {
+    url = url + "&size=" + size;
+  }
+  return url;
+};
+
+
 var promised = function(f) {
 	return function(req, res) {
 		f(req, res)
@@ -26,12 +37,21 @@ var promised = function(f) {
 	};
 };
 
-var hidePassword = function(entity) {
-	delete entity.password;
-	return entity;
+var map = function(seller) {
+	if (!seller.avatar) {
+		seller.avatar = getGravatar(seller.email);
+		seller.thumbnail = getGravatar(seller.email, 32);
+	} else {
+		if (!seller.thumbnail) {
+			seller.thumbnail = seller.avatar;
+		}
+	}
+
+	delete seller.password;
+	return seller;
 };
 
-var sellers = sequelize_endpoint(Seller, {map: hidePassword});
+var sellers = sequelize_endpoint(Seller, {map: map});
 
 var app = express();
 
