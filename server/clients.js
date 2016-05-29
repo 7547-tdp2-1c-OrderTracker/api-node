@@ -36,9 +36,13 @@ var clientCountQuery = 'select count(*) from clients left join schedule_entries 
 
 module.exports = sequelize_endpoint(Client, {
 	map: function(client) {
-		if (!client.avatar || !client.thumbnail) {
+		if (!client.avatar) {
 			client.avatar = getGravatar(client.email||"");
 			client.thumbnail = getGravatar(client.email||"", 32);
+		} else {
+			if (!client.thumbnail) {
+				client.thumbnail = client.avatar;
+			}
 		}
 		return client;
 	},
