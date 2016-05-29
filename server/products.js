@@ -90,8 +90,12 @@ module.exports = sequelize_endpoint(Product, {
 			product.brand_name = product.brand.name;
 		}
 
-		if (!product.picture || !product.thumbnail) {
+		if (!product.picture) {
 			product.picture = default_product_picture;
+		}
+
+		if (!product.thumbnail) {
+			product.thumbnail = product.picture;
 		}
 
 		if (product.categories) {
