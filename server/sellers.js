@@ -39,8 +39,8 @@ var promised = function(f) {
 
 var map = function(seller) {
 	if (!seller.avatar) {
-		seller.avatar = getGravatar(seller.email);
-		seller.thumbnail = getGravatar(seller.email, 32);
+		seller.avatar = getGravatar(seller.email||"");
+		seller.thumbnail = getGravatar(seller.email||"", 32);
 	} else {
 		if (!seller.thumbnail) {
 			seller.thumbnail = seller.avatar;
