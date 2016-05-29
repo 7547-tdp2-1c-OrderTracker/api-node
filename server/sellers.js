@@ -51,7 +51,9 @@ var map = function(seller) {
 	return seller;
 };
 
-var sellers = sequelize_endpoint(Seller, {map: map});
+var sellers = sequelize_endpoint(Seller, {map: map, order: function(req) {
+	return "lastname ASC";
+}});
 
 var app = express();
 
