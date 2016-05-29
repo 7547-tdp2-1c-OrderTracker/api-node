@@ -11,7 +11,8 @@ module.exports = sequelize.define('brands', {
   freezeTableName: true,
   hooks: {
   	beforeUpdate: sequelize.onlyAdmin,
-  	beforeCreate: sequelize.onlyAdmin
+  	beforeCreate: sequelize.onlyAdmin,
+  	beforeDestroy: sequelize.onlyAdmin
   },
   updatedAt: 'last_modified',
   createdAt: 'date_created',

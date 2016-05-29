@@ -164,7 +164,8 @@ var Order = sequelize.define('orders', {
   freezeTableName: true,
   hooks: {
     beforeCreate: beforeCreate,
-    beforeUpdate: beforeUpdate
+    beforeUpdate: beforeUpdate,
+    beforeDestroy: sequelize.onlyAdmin
   },
   updatedAt: 'last_modified',
   createdAt: 'date_created',

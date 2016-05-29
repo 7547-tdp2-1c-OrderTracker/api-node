@@ -38,7 +38,8 @@ var ScheduleEntry = sequelize.define('schedule_entries', {
   	afterCreate: afterCreate,
   	afterUpdate: afterUpdate,
   	beforeUpdate: sequelize.onlyAdmin,
-  	beforeCreate: sequelize.onlyAdmin
+  	beforeCreate: sequelize.onlyAdmin,
+  	beforeDestroy: sequelize.onlyAdmin
   }
 });
 

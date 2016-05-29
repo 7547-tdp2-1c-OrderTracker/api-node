@@ -22,7 +22,8 @@ var Admin = sequelize.define('admins', {
 }, {
 	hooks: {
 	    beforeUpdate: beforeCreateOrUpdate,
-	    beforeCreate: beforeCreateOrUpdate
+	    beforeCreate: beforeCreateOrUpdate,
+  		beforeDestroy: sequelize.onlyAdmin
 	},
 	freezeTableName: true,
 	updatedAt: 'last_modified',

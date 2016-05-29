@@ -66,6 +66,7 @@ var Promotion = sequelize.define('promotions', {
   hooks: {
   	beforeCreate: beforeCreate,
   	beforeUpdate: beforeUpdate,
+  	beforeDestroy: sequelize.onlyAdmin,
   	afterCreate: afterCreate
   }
 });
