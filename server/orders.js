@@ -56,6 +56,7 @@ var orders = sequelize_endpoint(Order, {
 		},{
 			model: Seller,
 			where: req.query.sellers_where ? JSON.parse(req.query.sellers_where) : undefined,
+			attributes: ["id", "name", "lastname", "avatar", "email", "phone_number", "date_created", "last_modified"],
 			required: false
 		}]
 	},
