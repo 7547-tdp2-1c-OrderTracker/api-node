@@ -36,7 +36,6 @@ var ScheduleEntry = sequelize.define('schedule_entries', {
   createdAt: 'date_created',
   hooks: {
   	afterCreate: afterCreate,
-  	afterUpdate: afterUpdate,
   	beforeUpdate: sequelize.onlyAdmin,
   	beforeCreate: sequelize.onlyAdmin,
   	beforeDestroy: sequelize.onlyAdmin
