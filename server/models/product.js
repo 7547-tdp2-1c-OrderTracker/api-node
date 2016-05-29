@@ -18,6 +18,13 @@ var afterUpdate = function(instance, options) {
   }
 };
 
+var beforeDestroy = function(instance, options) {
+  sequelize.onlyAdmin(instance, options);
+
+  return sequelize.query("DELETE FROM products_categories WHERE product_id = ?", 
+    {replacements: [instance.id]});
+};
+
 var Product = sequelize.define('products', {
   name: Sequelize.STRING,
   code: Sequelize.STRING,
@@ -44,6 +51,7 @@ var Product = sequelize.define('products', {
   hooks: {
     beforeUpdate: sequelize.onlyAdmin,
     beforeCreate: sequelize.onlyAdmin,
+    beforeDestroy: beforeDestroy,
     afterUpdate: afterUpdate
   }
 });

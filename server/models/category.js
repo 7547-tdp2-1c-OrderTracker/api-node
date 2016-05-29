@@ -2,6 +2,15 @@ var Sequelize = require("sequelize");
 var sequelize = require("../domain/sequelize");
 
 var Product = require("./product");
+
+var beforeDestroy = function(instance, options) {
+  sequelize.onlyAdmin(instance, options);
+
+  return sequelize.query("DELETE FROM products_categories WHERE category_id = ?", 
+    {replacements: [instance.id]});
+};
+
+
 var Category = sequelize.define('categories', {
   name: Sequelize.STRING,
   description: Sequelize.STRING,
@@ -11,7 +20,8 @@ var Category = sequelize.define('categories', {
   freezeTableName: true,
   hooks: {
   	beforeUpdate: sequelize.onlyAdmin,
-  	beforeCreate: sequelize.onlyAdmin
+  	beforeCreate: sequelize.onlyAdmin,
+    beforeDestroy: beforeDestroy
   },
   updatedAt: 'last_modified',
   createdAt: 'date_created',
