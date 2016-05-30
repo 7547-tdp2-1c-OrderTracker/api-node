@@ -78,7 +78,7 @@ var updateOrderTotalPrice = function(instance, options) {
 						promotion_id: promotion_id,
 						unit_price: product.get(price_column) * (100-percent_discount)/100,
 						currency: product.get("currency"),
-						thumbnail: product.get("thumbnail"),
+						thumbnail: product.get("thumbnail")||product.get("picture"),
 						name: product.get("name"),
 						brand_name: product.get("brand").get("name")
 					}, {hooks: false})
