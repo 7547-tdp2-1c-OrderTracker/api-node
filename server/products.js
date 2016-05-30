@@ -74,13 +74,13 @@ module.exports = sequelize_endpoint(Product, {
 				model: Promotion,
 				where: {begin_date: {$lte: now.toDate()}, end_date: {$gte: now.toDate()}},
 				required: false,
-				attributes: ['id', 'name', 'percent', 'begin_date', 'end_date']
+				attributes: ['id', 'name', 'percent', 'begin_date', 'end_date', 'min_quantity']
 			}]
 		}, {
 			model: Promotion,
 			where: {begin_date: {$lte: now.toDate()}, end_date: {$gte: now.toDate()}},
 			required: false,
-			attributes: ['id', 'name', 'percent', 'begin_date', 'end_date']
+			attributes: ['id', 'name', 'percent', 'begin_date', 'end_date', 'min_quantity']
 		}, {
 			model: Category
 		}];
