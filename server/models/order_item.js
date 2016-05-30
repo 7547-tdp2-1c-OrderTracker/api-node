@@ -109,8 +109,8 @@ var stockControl = function(product_id, quantity, order_id, order_entry_id) {
 		throw {"error": {"key": "BAD_REQUEST", "value": "Parametro quantity no es un numero"}, "status": 400};
 	}
 
-	return sequelize.query("SELECT coalesce(SUM(oe.quantity),0) as total_quantity FROM order_entries as oe JOIN orders as o ON oe.order_id = o.id WHERE oe.id != ?",
-		{replacements: [order_entry_id]})
+	return sequelize.query("SELECT coalesce(SUM(oe.quantity),0) as total_quantity FROM order_entries as oe JOIN orders as o ON oe.order_id = o.id WHERE oe.id != ? AND oe.product_id = ? AND o.status = 'draft'",
+		{replacements: [order_entry_id, product_id]})
 		.then(function(total) {
 			var newTotal = parseInt(quantity) + parseInt(total[0][0].total_quantity);
 
