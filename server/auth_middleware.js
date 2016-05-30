@@ -23,6 +23,7 @@ module.exports = function(secret) {
 									return Seller.findOne({where: {version: version, id: decoded.s}})
 										.then(function(seller) {
 											if (seller) {
+												req.authInfo = {admin_id: decoded.a, admin: !!decoded.a, seller_id: decoded.s};
 												next();
 											} else {
 												res.status(403).send({error: {key: 'FORBIDDEN', value: "El token expiro"}});
