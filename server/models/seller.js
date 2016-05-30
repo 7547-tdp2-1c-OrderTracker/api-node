@@ -6,6 +6,7 @@ var beforeCreateOrUpdate = function(instance, options) {
 	sequelize.onlyAdmin(instance, options);
 
 	if (options.fields.indexOf("password") !== -1) {
+		instance.version = instance.version + 1;
 		instance.password = sha1(instance.password);
 	}
 };
@@ -17,6 +18,7 @@ var Seller = sequelize.define('sellers', {
 	email: {type: Sequelize.STRING},
 	phone_number: {type: Sequelize.STRING(32)},
 	password: {type: Sequelize.STRING(255)},
+	version: {type: Sequelize.INTEGER},
 	date_created: {field: 'created_at', type: Sequelize.DATE},
 	last_modified: {field: 'updated_at', type: Sequelize.DATE}
 }, {

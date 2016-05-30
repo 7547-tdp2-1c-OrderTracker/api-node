@@ -28,6 +28,7 @@ module.exports = function(secret) {
 					} else {
 						// los tokens de vendedor no expiran
 						payload.s = seller.get('id');
+						payload.v = seller.get('version');
 						token = jwt.sign(payload, secret, {noTimestamp: true});
 					}
 

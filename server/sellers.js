@@ -47,6 +47,7 @@ var map = function(seller) {
 		}
 	}
 
+	delete seller.version;
 	delete seller.password;
 	return seller;
 };

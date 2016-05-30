@@ -2,6 +2,7 @@ var express = require("express");
 var jwt = require("jsonwebtoken");
 var Config = require("./models/config");
 var Order = require("./models/order");
+var Seller = require("./models/seller");
 
 module.exports = function(secret) {
 	return function(req, res, next) {
@@ -16,7 +17,25 @@ module.exports = function(secret) {
 							if (err) {
 								res.status(403).send({error: {key: 'FORBIDDEN', value: err.toString()}});
 							} else {
-								req.authInfo = {admin_id: decoded.a, admin: !!decoded.a, seller_id: decoded.s};
+
+								if (decoded.s) {
+									var version = decoded.v||0;
+									return Seller.findOne({where: {version: version, id: decoded.s}})
+										.then(function(seller) {
+											if (seller) {
+												next();
+											} else {
+												res.status(403).send({error: {key: 'FORBIDDEN', value: "El token expiro"}});
+											}
+										})
+										.catch(function(err) {
+											console.error(err.stack);
+											res.status(500).send({error: {key: 'INTERNAL_SERVER_ERROR', value: err.toString()}});
+										});
+								} else {
+									req.authInfo = {admin_id: decoded.a, admin: !!decoded.a, seller_id: decoded.s};
+								}
+
 								return next();
 							}
 						});
