@@ -201,6 +201,9 @@ Order.empty = function(order_id) {
       return OrderItem.destroy({where: {order_id: order_id} })
       	.then(function() {
       		return order.update({total_price: 0, currency: null}, {hooks: false});
+      	})
+      	.then(function() {
+      		return Order.findOne({where: {id: order_id}, include: {model: Client}})
       	});
     });
   
