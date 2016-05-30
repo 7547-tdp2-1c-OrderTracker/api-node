@@ -7,7 +7,11 @@ var beforeCreateOrUpdate = function(instance, options) {
 
 	if (options.fields.indexOf("password") !== -1) {
 		instance.version = instance.version + 1;
-		instance.password = sha1(instance.password);
+		if (instance.password) {
+			instance.password = sha1(instance.password);
+		} else {
+			instance.password = null;
+		}
 	}
 };
 
