@@ -6,7 +6,7 @@ var beforeCreateOrUpdate = function(instance, options) {
 	sequelize.onlyAdmin(instance, options);
 
 	if (options.fields.indexOf("password") !== -1) {
-		instance.version = instance.version + 1;
+		instance.version = (instance.version||0) + 1;
 		if (instance.password) {
 			instance.password = sha1(instance.password);
 		} else {
